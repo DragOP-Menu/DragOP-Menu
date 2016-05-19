@@ -1,6 +1,6 @@
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var mods = new Array();
-var lc = {en_US:1};
+var lc = {en_US:1, de_DE:2};
 var l = new Array();
 l.push(new Array());//Codes
 l.push(new Array());//English
@@ -9,13 +9,17 @@ function addLString(code, lang, value){
 	l[0].forEach(function(entry, index, array){
 		if(entry+"".toLowerCase() == code+"".toLowerCase()){
 			l[lang][index] = value;
-			}
-	}
+		}
+	});
 }
 //addLString(code, lc.en_US, value);
 addLString("hacks.gamemode", lc.en_US, "Gamemode");
 addLString("gm.survival", lc.en_US, "Survival");
 addLString("gm.creative", lc.en_US, "Creative");
+//German
+addLString("hacks.gamemode", lc.de_DE, "Spielmodus");
+addLString("gm.survival", lc.de_DE, "Überleben");
+addLString("gm.creative", lc.de_DE, "Kreativ");
 function getL(){
 	//Todo
 	return l[1];
@@ -24,22 +28,28 @@ function getLString(code){
 	l[0].forEach(function(entry, index, array){
 		if(entry+"".toLowerCase().indexOf(code+"".toLowerCase())>-1){
 			try{
-			return getL()[index];
+			     return getL()[index];
 			}catch(e){
-				ctoast(e);
+				try{
+					return l[1][index];
+				}catch(e){
+					ctoast(e);
+					return code;
+				}
+				
+				
 			}
-			}
-	}
-}
+		}
+	});
 }
 mods.push({
 	name:"Gamemode",
 	isStateMode:function(){return false;},
 	extra:Level.getGameMode(),
-	onEnable:function(btn){},
-	onDisable:function(btn){},
-	onClick:function(btn){},
-	onRefresh:function(btn){btn.setText(getLString("hacks.gamemode")+": "+(this.extra==0?getLString("gm.survival"):getLString("gm.creative"));}
+	onEnable:function(btn){/*Not used*/},
+	onDisable:function(btn){/*Not used*/},
+	onClick:function(btn){if(this.extra==1) this.extra = 0; else this.extra = 1;},
+	onRefresh:function(btn){btn.setText(getLString("hacks.gamemode")+": "+(this.extra==0?getLString("gm.survival"):getLString("gm.creative"))); Level.setGameMode(this.extra);}
 });
 //Menu open Button
 var menuBtn;
@@ -48,6 +58,7 @@ var dx = 0;
 var dy = 0;
 var mPosX = ctx.getWindowManager().getDefaultDisplay().getWidth() / 16 * 5;
 //Main Menu
+var mwidth = ctx.getWindowManager().getDefaultDisplay().getWidth() / 100 * 70;
 var menu;
 var hackBtn = function(hack){
 var btn = new android.widget.Button(ctx);
@@ -58,10 +69,15 @@ function showMenu(){
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function() {
 			try {
+				var sbar = new android.widget.LinearLayout(ctx);
+				var mlist = new android.widget.LinearLayout(ctx);
 				
-				menu = new android.widget.PopupWindow(null, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				var toplayout = new android.widget.RelativeLayout(ctx);
+				toplayout.addView(sbar, new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
+				//toplayout.addView(mlist, 
+				menu = new android.widget.PopupWindow(mlg, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.MATCH_PARENT);
 				menu.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-				menu.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER | android.view.Gravity.TOP, ctx.getWindowManager().getDefaultDisplay().getWidth()/100*80, ctx.getWindowManager().getDefaultDisplay().getHeight());
+				menu.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0/*ctx.getWindowManager().getDefaultDisplay().getHeight()*/);
 			}catch(e){
 				ctoast(e);
 			}
@@ -73,17 +89,16 @@ function showMenuBtn(){
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function() {
 			try {
-				var layout = new android.widget.LinearLayout(ctx);
-				layout.setOrientation(1);
+				
 				/*if(ghost) {
 					menuBtn.setText('');
 					menuBtn.setBackgroundColor(android.graphics.Color.parseColor("#01ffff00"));
 				} else {
-					menuBtn.setText('[SH]');
+					menuBtn.setText('D');
 					menuBtn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(bg));
 				}
 				*/
-				menuBtn.setText('[SH]');
+				menuBtn.setText('D');
 				//menuBtn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(bg));
 				
 				menuBtn.setOnClickListener(new android.view.View.OnClickListener({
@@ -91,8 +106,9 @@ function showMenuBtn(){
 						//mainMenu();
 						//windowMenu();
 						/*exit();*/
-						//GUI.dismiss();
-						//GUI = null;
+						showMenu();
+						GUI.dismiss();
+						GUI = null;
 					}
 				}));
 				menuBtn.setOnTouchListener(new android.view.View.OnTouchListener() {
@@ -131,8 +147,8 @@ function showMenuBtn(){
 					}
 				});
 				menuBtn.getBackground().setAlpha(200);
-				layout.addView(menuBtn);
-				GUI = new android.widget.PopupWindow(layout, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				
+				GUI = new android.widget.PopupWindow(menuBtn, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				GUI.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 				GUI.showAtLocation(ctx.getWindow()
 					.getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, ctx.getWindowManager()
@@ -153,7 +169,7 @@ function ctoast(text, showprefix) {
 				var thetoast = android.widget.Toast.makeText(com.mojang.minecraftpe.MainActivity.currentMainActivity.get(), text, android.widget.Toast.LENGTH_LONG);
 				var layout = new android.widget.LinearLayout(ctx);
 				var msg = new android.widget.TextView(ctx);
-				if(prefix || prefix == null)text = "Servicehack: "+text;
+				if(prefix || prefix == null)text = "DragOP: "+text;
 				msg.setText(text);
 				msg.setGravity(android.view.Gravity.CENTER);
 				msg.setTextSize(20);
