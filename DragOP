@@ -36,8 +36,8 @@ function getLString(code){
 					ctoast(e);
 					return code;
 				}
-				
-				
+
+
 			}
 		}
 	});
@@ -69,14 +69,26 @@ function showMenu(){
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function() {
 			try {
-				var sbar = new android.widget.LinearLayout(ctx);
-				var mlist = new android.widget.LinearLayout(ctx);
 				
+				var sbar = new android.widget.LinearLayout(ctx);
+				sbar.setBackgroundColor(android.graphics.Color.RED);
+				var search = new android.widget.EditText(ctx);
+				search.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+				search.setHint("Search a mod");
+				sbar.addView(search);
+				var mlist = new android.widget.LinearLayout(ctx);
+				mlist.setBackgroundColor(android.graphics.Color.GREEN);
+				mlist.addView(new android.widget.Button(ctx));
 				var toplayout = new android.widget.RelativeLayout(ctx);
 				toplayout.addView(sbar, new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
-				//toplayout.addView(mlist, 
-				menu = new android.widget.PopupWindow(mlg, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.MATCH_PARENT);
-				menu.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				var lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				lparam.addRule(android.widget.RelativeLayout.BELOW, mlist.getId());
+				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				toplayout.addView(mlist, lparam);
+				//toplayout.setBackground(null);
+				toplayout.setGravity(android.view.Gravity.CENTER);
+				menu = new android.widget.PopupWindow(toplayout, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
+				//menu.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 				menu.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0/*ctx.getWindowManager().getDefaultDisplay().getHeight()*/);
 			}catch(e){
 				ctoast(e);
@@ -89,7 +101,7 @@ function showMenuBtn(){
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function() {
 			try {
-				
+
 				/*if(ghost) {
 					menuBtn.setText('');
 					menuBtn.setBackgroundColor(android.graphics.Color.parseColor("#01ffff00"));
@@ -100,7 +112,7 @@ function showMenuBtn(){
 				*/
 				menuBtn.setText('D');
 				//menuBtn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(bg));
-				
+
 				menuBtn.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function(viewarg) {
 						//mainMenu();
@@ -147,7 +159,7 @@ function showMenuBtn(){
 					}
 				});
 				menuBtn.getBackground().setAlpha(200);
-				
+
 				GUI = new android.widget.PopupWindow(menuBtn, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				GUI.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 				GUI.showAtLocation(ctx.getWindow()
