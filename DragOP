@@ -65,13 +65,23 @@ var btn = new android.widget.Button(ctx);
 
 return btn;
 };
+
+function dip2px(dips){
+    var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+    return Math.ceil(dips * ctx.getResources().getDisplayMetrics().density);
+}
+
 function showMenu(){
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function() {
 			try {
 				
 				var sbar = new android.widget.LinearLayout(ctx);
-				sbar.setBackgroundColor(android.graphics.Color.RED);
+				var bg = android.graphics.drawable.GradientDrawable();
+				bg.setColor(android.graphics.Color.TRANSPARENT);
+				bg.setStroke(dip2px(2), android.graphics.Color.RED);
+				bg.setCornerRadius(10);
+				sbar.setBackgroundDrawable(bg);
 				var search = new android.widget.EditText(ctx);
 				search.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 				search.setHint("Search a mod");
