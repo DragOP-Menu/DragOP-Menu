@@ -75,31 +75,38 @@ function showMenu(){
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function() {
 			try {
-				
+
 				var sbar = new android.widget.LinearLayout(ctx);
+				
 				var bg = android.graphics.drawable.GradientDrawable();
-				bg.setColor(android.graphics.Color.TRANSPARENT);
-				bg.setStroke(dip2px(2), android.graphics.Color.RED);
-				bg.setCornerRadius(10);
+				bg.setColor(android.graphics.Color.argb(100, 255, 255, 255));
+				bg.setStroke(dip2px(2), android.graphics.Color.BLACK);
+				bg.setCornerRadius(1);
+				
 				sbar.setBackgroundDrawable(bg);
 				var search = new android.widget.EditText(ctx);
 				search.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 				search.setHint("Search a mod");
+				
 				sbar.addView(search);
 				var mlist = new android.widget.LinearLayout(ctx);
 				mlist.setBackgroundColor(android.graphics.Color.GREEN);
+				//For testing only ^
 				mlist.addView(new android.widget.Button(ctx));
 				var toplayout = new android.widget.RelativeLayout(ctx);
 				toplayout.addView(sbar, new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
 				var lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-				lparam.addRule(android.widget.RelativeLayout.BELOW, mlist.getId());
+				lparam.addRule(android.widget.RelativeLayout.BELOW, toplayout.getChildAt(0).getId());
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
 				toplayout.addView(mlist, lparam);
 				//toplayout.setBackground(null);
 				toplayout.setGravity(android.view.Gravity.CENTER);
-				menu = new android.widget.PopupWindow(toplayout, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
+				menu = new android.widget.PopupWindow(toplayout, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, true);
 				//menu.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				//menu.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 				menu.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0/*ctx.getWindowManager().getDefaultDisplay().getHeight()*/);
+				//search.requestFocus();
+				//lol
 			}catch(e){
 				ctoast(e);
 			}
