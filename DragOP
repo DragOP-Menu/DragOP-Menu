@@ -6,7 +6,10 @@ l.push(new Array());//Codes
 l.push(new Array());//English
 l.push(new Array());//German
 //Multi Language Support
-function addLString(code, lang, value){
+function addCode(code){
+	l[0].push(code);
+}
+function setLString(code, lang, value){
 	var done = false;
 	l[0].forEach(function(entry, index, array){
 		if(entry.toLowerCase() == code.toLowerCase()){
@@ -15,41 +18,55 @@ function addLString(code, lang, value){
 		}
 	});
 	if(done)return;
-	l[0].push(code+"".toLowerCase());
-	addLString(code, lang, value);
+	//l[0].push(code+"".toLowerCase());
+	//setLString(code, lang, value);
 }
-//addLString(code, lc.en_US, value);
-addLString("hacks.gamemode", lc.en_US, "Gamemode");
-addLString("gm.survival", lc.en_US, "Survival");
-addLString("gm.creative", lc.en_US, "Creative");
+//addCode(code);
+addCode("hacks.gamemode");
+addCode("gm.survival");
+addCode("gm.creative");
+//setLString(code, lc.en_US, value);
+setLString("hacks.gamemode", lc.en_US, "Gamemode");
+setLString("gm.survival", lc.en_US, "Survival");
+setLString("gm.creative", lc.en_US, "Creative");
 //German
-addLString("hacks.gamemode", lc.de_DE, "Spielmodus");
-addLString("gm.survival", lc.de_DE, "Überleben");
-addLString("gm.creative", lc.de_DE, "Kreativ");
+setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
+setLString("gm.survival", lc.de_DE, "Überleben");
+setLString("gm.creative", lc.de_DE, "Kreativ");
+
 function getL(){
 	//Todo
 	return l[1];
 }
 function getLString(code){
+	var str = code;
 	l[0].forEach(function(entry, index, array){
 		
-		if(entry+"".toLowerCase().indexOf(code+"".toLowerCase())>-1){
+		if(entry.toLowerCase().indexOf(code.toLowerCase())>-1){
 			try{
-				print(entry);
-			     return getL()[index];
+				str = getL()[index];
 			}catch(e){
 				try{
-					return l[1][index];
+					str = l[1][index];
 				}catch(e){
 					ctoast(e);
-					return code;
 				}
 
 
 			}
 		}
 	});
+	return str;
 }
+mods.push({
+	name:"Gamemode",
+	isStateMode:function(){return false;},
+	extra:Level.getGameMode(),
+	onEnable:function(btn){/*Not used*/},
+	onDisable:function(btn){/*Not used*/},
+	onClick:function(btn){if(this.extra==1) this.extra = 0; else this.extra = 1;},
+	onRefresh:function(btn){btn.setText(getLString("hacks.gamemode")+": "+(this.extra==0?getLString("gm.survival"):getLString("gm.creative"))); Level.setGameMode(this.extra);}
+});
 mods.push({
 	name:"Gamemode",
 	isStateMode:function(){return false;},
@@ -70,13 +87,16 @@ var mwidth = ctx.getWindowManager().getDefaultDisplay().getWidth() / 100 * 70;
 var menu;
 var hackBtn = function(hack){
 var btn = new android.widget.Button(ctx);
+
 hack.onRefresh(btn);
 btn.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function(viewarg) {
 						hack.onClick(btn);
+						hack.onRefresh(btn);
 					}
 				}
 ));
+btn.setLayoutParams(new android.widget.LinearLayout.LayoutParams(mwidth/2, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1));
 return btn;
 };
 
@@ -101,24 +121,39 @@ function showMenu(){
 				var search = new android.widget.EditText(ctx);
 				search.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 				search.setHint("Search a mod");
-				
-				sbar.addView(search);
+				search.setGravity(android.view.Gravity.CENTER);
+				sbar.addView(search, new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
+				sbar.setId(39472);
 				var mlist = new android.widget.LinearLayout(ctx);
-				mlist.setBackgroundColor(android.graphics.Color.GREEN);
-				//For testing only ^
+				//mlist.setGravity(android.view.Gravity.TOP);
+				mlist.setId(20372);
 				mods.forEach(function(entry, index, array){
 					mlist.addView(new hackBtn(entry));
 				});
-				
-				var toplayout = new android.widget.RelativeLayout(ctx);
-				toplayout.addView(sbar, new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
 				var lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				
+				//lparam.addRule(android.widget.RelativeLayout.BELOW, toplayout.getChildAt(0).getId());
+				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				//lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
+				var toplayout = new android.widget.RelativeLayout(ctx);
+				toplayout.addView(sbar, lparam);
+				lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				
 				lparam.addRule(android.widget.RelativeLayout.BELOW, toplayout.getChildAt(0).getId());
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
-				toplayout.addView(mlist, lparam);
+				//lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
+				mlist.setLayoutParams(lparam);
+				toplayout.addView(mlist);
 				//toplayout.setBackground(null);
 				toplayout.setGravity(android.view.Gravity.CENTER);
-				menu = new android.widget.PopupWindow(toplayout, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, true);
+				toplayout.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function(viewarg) {
+						menu.dismiss();
+						showMenuBtn();
+					}
+				}
+));
+				menu = new android.widget.PopupWindow(toplayout,android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, true);
 				//menu.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 				//menu.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 				menu.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0/*ctx.getWindowManager().getDefaultDisplay().getHeight()*/);
