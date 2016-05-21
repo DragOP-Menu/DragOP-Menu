@@ -4,13 +4,19 @@ var lc = {en_US:1, de_DE:2};
 var l = new Array();
 l.push(new Array());//Codes
 l.push(new Array());//English
+l.push(new Array());//German
 //Multi Language Support
 function addLString(code, lang, value){
+	var done = false;
 	l[0].forEach(function(entry, index, array){
-		if(entry+"".toLowerCase() == code+"".toLowerCase()){
+		if(entry.toLowerCase() == code.toLowerCase()){
 			l[lang][index] = value;
+			done = true;
 		}
 	});
+	if(done)return;
+	l[0].push(code+"".toLowerCase());
+	addLString(code, lang, value);
 }
 //addLString(code, lc.en_US, value);
 addLString("hacks.gamemode", lc.en_US, "Gamemode");
@@ -26,8 +32,10 @@ function getL(){
 }
 function getLString(code){
 	l[0].forEach(function(entry, index, array){
+		
 		if(entry+"".toLowerCase().indexOf(code+"".toLowerCase())>-1){
 			try{
+				print(entry);
 			     return getL()[index];
 			}catch(e){
 				try{
@@ -62,7 +70,13 @@ var mwidth = ctx.getWindowManager().getDefaultDisplay().getWidth() / 100 * 70;
 var menu;
 var hackBtn = function(hack){
 var btn = new android.widget.Button(ctx);
-
+hack.onRefresh(btn);
+btn.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function(viewarg) {
+						hack.onClick(btn);
+					}
+				}
+));
 return btn;
 };
 
@@ -92,7 +106,10 @@ function showMenu(){
 				var mlist = new android.widget.LinearLayout(ctx);
 				mlist.setBackgroundColor(android.graphics.Color.GREEN);
 				//For testing only ^
-				mlist.addView(new android.widget.Button(ctx));
+				mods.forEach(function(entry, index, array){
+					mlist.addView(new hackBtn(entry));
+				});
+				
 				var toplayout = new android.widget.RelativeLayout(ctx);
 				toplayout.addView(sbar, new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
 				var lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
