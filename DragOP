@@ -76,6 +76,24 @@ mods.push({
 	onClick:function(btn){if(this.extra==1) this.extra = 0; else this.extra = 1;},
 	onRefresh:function(btn){btn.setText(getLString("hacks.gamemode")+": "+(this.extra==0?getLString("gm.survival"):getLString("gm.creative"))); Level.setGameMode(this.extra);}
 });
+mods.push({
+	name:"Gamemode",
+	isStateMode:function(){return false;},
+	extra:Level.getGameMode(),
+	onEnable:function(btn){/*Not used*/},
+	onDisable:function(btn){/*Not used*/},
+	onClick:function(btn){if(this.extra==1) this.extra = 0; else this.extra = 1;},
+	onRefresh:function(btn){btn.setText(getLString("hacks.gamemode")+": "+(this.extra==0?getLString("gm.survival"):getLString("gm.creative"))); Level.setGameMode(this.extra);}
+});
+mods.push({
+	name:"Gamemode",
+	isStateMode:function(){return false;},
+	extra:Level.getGameMode(),
+	onEnable:function(btn){/*Not used*/},
+	onDisable:function(btn){/*Not used*/},
+	onClick:function(btn){if(this.extra==1) this.extra = 0; else this.extra = 1;},
+	onRefresh:function(btn){btn.setText(getLString("hacks.gamemode")+": "+(this.extra==0?getLString("gm.survival"):getLString("gm.creative"))); Level.setGameMode(this.extra);}
+});
 //Menu open Button
 var menuBtn;
 var moving = false;
@@ -96,7 +114,7 @@ btn.setOnClickListener(new android.view.View.OnClickListener({
 					}
 				}
 ));
-btn.setLayoutParams(new android.widget.LinearLayout.LayoutParams(mwidth/2, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+//btn.setLayoutParams(new android.widget.TableLayout.LayoutParams(mwidth/2, android.widget.TableLayout.LayoutParams.WRAP_CONTENT, 1));
 return btn;
 };
 
@@ -104,7 +122,27 @@ function dip2px(dips){
     var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
     return Math.ceil(dips * ctx.getResources().getDisplayMetrics().density);
 }
-
+function generateMenu(){
+	var lay = new android.widget.TableLayout(ctx);
+	var currow;
+	mods.forEach(function(entry, index, array){
+		
+		if(index % 2 == 1){
+			currow.addView(new hackBtn(mods[index]));
+			lay.addView(currow);
+			currow = null;
+			print("true "+index);
+		}else{
+			currow = new android.widget.TableRow(ctx);
+			currow.addView(new hackBtn(mods[index]));
+			print("false "+index);
+		}
+	});
+	if(currow != null)lay.addView(currow);
+	
+	
+	return lay;
+}
 function showMenu(){
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function() {
@@ -127,9 +165,7 @@ function showMenu(){
 				var mlist = new android.widget.LinearLayout(ctx);
 				//mlist.setGravity(android.view.Gravity.TOP);
 				mlist.setId(20372);
-				mods.forEach(function(entry, index, array){
-					mlist.addView(new hackBtn(entry));
-				});
+				mlist.addView(generateMenu(mods));
 				var lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				
 				//lparam.addRule(android.widget.RelativeLayout.BELOW, toplayout.getChildAt(0).getId());
