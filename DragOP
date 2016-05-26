@@ -278,7 +278,7 @@ function showMenuBtn(){
 	}));
 }
 showMenuBtn();
-function ctoast(text, showprefix) {
+function ctoast(text, prefix) {
 	try {
 		var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 		ctx.runOnUiThread(new java.lang.Runnable({
@@ -302,3 +302,26 @@ function ctoast(text, showprefix) {
 		print(e);
 	}
 }
+function rptask() {
+    ctx.runOnUiThread(new java.lang.Runnable({
+        run: function() {
+            new android.os.Handler()
+                .postDelayed(new java.lang.Runnable({
+                    run: function() {
+                        nx = getPlayerX();
+                        ny = getPlayerY();
+                        nz = getPlayerZ();
+                        if((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing())){
+                            net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote = true; 
+                            net.zhuoweizhang.mcpelauncher.ScriptManager.setLevelFakeCallback(true, false);
+                            showMenuBtn();
+                         }
+                        //did you know thats its eval(java.lang.String) and not eval(null)?
+                        rptask();
+                    }
+                }),15 );
+        }
+    }))
+}
+
+rptask();
