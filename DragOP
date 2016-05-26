@@ -1,15 +1,17 @@
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
-var mods = new Array();
+var DragOP = {
+	mods: new Array()
+};
 var lc = {en_US:1, de_DE:2};
 var l = new Array();
 l.push(new Array());//Codes
 l.push(new Array());//English
 l.push(new Array());//German
 //Multi Language Support
-function addCode(code){
+DragOP.addCode = function(code) {
 	l[0].push(code);
 }
-function setLString(code, lang, value){
+DragOP.setLString = function(code, lang, value) {
 	var done = false;
 	l[0].forEach(function(entry, index, array){
 		if(entry.toLowerCase() == code.toLowerCase()){
@@ -19,37 +21,38 @@ function setLString(code, lang, value){
 	});
 	if(done)return;
 	//l[0].push(code+"".toLowerCase());
-	//setLString(code, lang, value);
+	//DragOP.setLString(code, lang, value);
 }
-//addCode(code);
-addCode("hacks.gamemode");
-addCode("gm.survival");
-addCode("gm.creative");
-//setLString(code, lc.en_US, value);
-setLString("hacks.gamemode", lc.en_US, "Gamemode");
-setLString("gm.survival", lc.en_US, "Survival");
-setLString("gm.creative", lc.en_US, "Creative");
+//DragOP.addCode(code);
+DragOP.addCode("hacks.gamemode");
+DragOP.addCode("gm.survival");
+DragOP.addCode("gm.creative");
+//DragOP.setLString(code, lc.en_US, value);
+DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
+DragOP.setLString("gm.survival", lc.en_US, "Survival");
+DragOP.setLString("gm.creative", lc.en_US, "Creative");
 //German
-setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
-setLString("gm.survival", lc.de_DE, "Überleben");
-setLString("gm.creative", lc.de_DE, "Kreativ");
+DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
+DragOP.setLString("gm.survival", lc.de_DE, "Überleben");
+DragOP.setLString("gm.creative", lc.de_DE, "Kreativ");
 
-function getL(){
+DragOP.getL = function() {
 	//Todo
 	return l[1];
 }
-function getLString(code){
+
+DragOP.getLString = function(code) {
 	var str = code;
 	l[0].forEach(function(entry, index, array){
 		
 		if(entry.toLowerCase().indexOf(code.toLowerCase())>-1){
 			try{
-				str = getL()[index];
+				str = DragOP.getL()[index];
 			}catch(e){
 				try{
 					str = l[1][index];
 				}catch(e){
-					ctoast(e);
+					DragOP.ctoast(e);
 				}
 
 
@@ -58,42 +61,54 @@ function getLString(code){
 	});
 	return str;
 }
-mods.push({
-	name:"Gamemode",
-	isStateMode:function(){return false;},
-	extra:Level.getGameMode(),
-	onEnable:function(btn){/*Not used*/},
-	onDisable:function(btn){/*Not used*/},
-	onClick:function(btn){if(this.extra==1) this.extra = 0; else this.extra = 1;},
-	onRefresh:function(btn){btn.setText(getLString("hacks.gamemode")+": "+(this.extra==0?getLString("gm.survival"):getLString("gm.creative"))); Level.setGameMode(this.extra);}
-});
-mods.push({
-	name:"Gamemode",
-	isStateMode:function(){return false;},
-	extra:Level.getGameMode(),
-	onEnable:function(btn){/*Not used*/},
-	onDisable:function(btn){/*Not used*/},
-	onClick:function(btn){if(this.extra==1) this.extra = 0; else this.extra = 1;},
-	onRefresh:function(btn){btn.setText(getLString("hacks.gamemode")+": "+(this.extra==0?getLString("gm.survival"):getLString("gm.creative"))); Level.setGameMode(this.extra);}
-});
-mods.push({
-	name:"Gamemode",
-	isStateMode:function(){return false;},
-	extra:Level.getGameMode(),
-	onEnable:function(btn){/*Not used*/},
-	onDisable:function(btn){/*Not used*/},
-	onClick:function(btn){if(this.extra==1) this.extra = 0; else this.extra = 1;},
-	onRefresh:function(btn){btn.setText(getLString("hacks.gamemode")+": "+(this.extra==0?getLString("gm.survival"):getLString("gm.creative"))); Level.setGameMode(this.extra);}
-});
-mods.push({
-	name:"Gamemode",
-	isStateMode:function(){return false;},
-	extra:Level.getGameMode(),
-	onEnable:function(btn){/*Not used*/},
-	onDisable:function(btn){/*Not used*/},
-	onClick:function(btn){if(this.extra==1) this.extra = 0; else this.extra = 1;},
-	onRefresh:function(btn){btn.setText(getLString("hacks.gamemode")+": "+(this.extra==0?getLString("gm.survival"):getLString("gm.creative"))); Level.setGameMode(this.extra);}
-});
+
+DragOP.ctoast = function(text, showprefix) {
+	try {
+		var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+		ctx.runOnUiThread(new java.lang.Runnable({
+			run: function() {
+				var thetoast = android.widget.Toast.makeText(com.mojang.minecraftpe.MainActivity.currentMainActivity.get(), text, android.widget.Toast.LENGTH_LONG);
+				var layout = new android.widget.LinearLayout(ctx);
+				var msg = new android.widget.TextView(ctx);
+				if(prefix || prefix == null)text = "DragOP: "+text;
+				msg.setText(text);
+				msg.setGravity(android.view.Gravity.CENTER);
+				msg.setTextSize(20);
+                msg.setPadding(10,10,10,10);
+                msg.setTextColor(android.graphics.Color.WHITE);
+				layout.addView(msg);
+				//layout.setBackground(new android.graphics.drawable.BitmapDrawable(bg));
+				thetoast.setView(layout);
+				thetoast.show();
+			}
+		}));
+	} catch (e) {
+		print(e);
+	}
+}
+
+DragOP.addModule = function(name, isStateMode, extra, onEnable, onDisable, onClick, onRefresh) {
+	DragOP.mods.push({
+		name: name,
+		isStateMode: function(){return false;},
+		extra: extra,
+		onEnable: onEnable,
+		onDisable: onDisable,
+		onClick: onClick,
+		onRefresh: onRefresh
+	});
+}
+
+DragOP.addModule(
+	"Gamemode", //name
+	function(){return false;}, //isStateMode
+	Level.getGameMode(), //extra
+	function(btn){/*Not used*/}, //onEnable
+	function(btn){/*Not used*/}, //onDisable
+	function(btn){if(this.extra==1) this.extra = 0; else this.extra = 1;}, //onClick
+	function(btn){btn.setText(DragOP.getLString("hacks.gamemode")+": "+(this.extra==0?DragOP.getLString("gm.survival"):DragOP.getLString("gm.creative"))); Level.setGameMode(this.extra);} //onRefresh
+);
+
 //Menu open Button
 var menuBtn;
 var moving = false;
@@ -122,7 +137,7 @@ function dip2px(dips){
     var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
     return Math.ceil(dips * ctx.getResources().getDisplayMetrics().density);
 }
-function generateMenu(){
+DragOP.generateMenu = function() {
 	var lay = new android.widget.TableLayout(ctx);
 	var currow;
 	mods.forEach(function(entry, index, array){
@@ -165,7 +180,7 @@ function showMenu(){
 				var mlist = new android.widget.LinearLayout(ctx);
 				//mlist.setGravity(android.view.Gravity.TOP);
 				mlist.setId(20372);
-				mlist.addView(generateMenu(mods));
+				mlist.addView(DragOP.generateMenu(mods));
 				var lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				
 				//lparam.addRule(android.widget.RelativeLayout.BELOW, toplayout.getChildAt(0).getId());
@@ -272,36 +287,13 @@ function showMenuBtn(){
 					.getDefaultDisplay()
 					.getWidth() / 16 * 5, 0);
 			} catch (err) {
-				ctoast( err);
+				DragOP.ctoast( err);
 			}
 		}
 	}));
 }
 showMenuBtn();
-function ctoast(text, prefix) {
-	try {
-		var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
-		ctx.runOnUiThread(new java.lang.Runnable({
-			run: function() {
-				var thetoast = android.widget.Toast.makeText(com.mojang.minecraftpe.MainActivity.currentMainActivity.get(), text, android.widget.Toast.LENGTH_LONG);
-				var layout = new android.widget.LinearLayout(ctx);
-				var msg = new android.widget.TextView(ctx);
-				if(prefix || prefix == null)text = "DragOP: "+text;
-				msg.setText(text);
-				msg.setGravity(android.view.Gravity.CENTER);
-				msg.setTextSize(20);
-                msg.setPadding(10,10,10,10);
-                msg.setTextColor(android.graphics.Color.WHITE);
-				layout.addView(msg);
-				//layout.setBackground(new android.graphics.drawable.BitmapDrawable(bg));
-				thetoast.setView(layout);
-				thetoast.show();
-			}
-		}));
-	} catch (e) {
-		print(e);
-	}
-}
+
 function rptask() {
     ctx.runOnUiThread(new java.lang.Runnable({
         run: function() {
