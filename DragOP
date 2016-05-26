@@ -1,6 +1,7 @@
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var LinearLayout = android.widget.LinearLayout;
 var GUI;
+
 var dialog;
 var DragOP = {
 	mods: new Array()
@@ -231,8 +232,8 @@ var gmhack = {
 		return false;
 	},
 	extra: Level.getGameMode(),
-	onEnable: function (btn) { /*Not used*/ },
-	onDisable: function (btn) { /*Not used*/ },
+	onEnable: null,
+	onDisable: null,
 	onClick: function (btn) {
 		if (this.extra == 1) this.extra = 0;
 		else this.extra = 1;
@@ -396,12 +397,12 @@ function showMenu() {
 }
 
 function showMenuBtn() {
-	
 	menuBtn = new android.widget.Button(ctx);
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
 			try {
 				if (GUI != null && GUI.isShowing()) GUI.dismiss();
+
 				/*if(ghost) {
 					menuBtn.setText('');
 					menuBtn.setBackgroundColor(android.graphics.Color.parseColor("#01ffff00"));
@@ -499,3 +500,35 @@ function rptask() {
 
 rptask();
 DragOP.loadModsAnim(0);
+
+DragOP.commandManager = function(cmd) {
+	var commandSplit = cmd.split(" ");
+	switch(commandSplit[0]) {
+		case "help":
+			clientMessage("[DragOP] Help command is coming soon!");
+			break;
+		case "t":
+			if(cmd.substring(2, cmd.length) != null && cmd.substring(2, cmd.length) != undefined) {
+				DragOP.mods.forEach(function (entry, index, array) {
+					if(entry.toLowerCase() == cmd.substring(2, cmd.length).toLowerCase() && DragOP.mods[index].isStateMode()) {
+						DragOP.mods[index].onClick(null);
+						DragOP.ctoast("Sucessfully toggled module " + entry.toLowerCase());
+						return;
+					}
+				});
+				DragOP.ctoast("Module " + cmd.substring(2, cmd.length) + " can't be found/toggled!");
+			} else {
+				DragOP.ctoast("Syntax error!");
+			}
+			break;
+	}
+}
+
+function chatHook(text) {
+	if(text.charAt(0) == ".") {
+		preventDefault();
+		com.mojang.minecraftpe.MainActivity.currentMainActivity.get().nativeSetTextboxText("");
+		com.mojang.minecraftpe.MainActivity.currentMainActivity.get().updateTextboxText("");
+		DragOP.commandManager(text.substring(1, text.length));
+	}
+}
