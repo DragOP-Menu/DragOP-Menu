@@ -17,6 +17,7 @@ l.push(new Array()); //German
 
 var Utils = {
 	online: false,
+	modsCount: 0,
 	Entity: {
 		bowAimAt: function(ent){
 			var velocity = 1;
@@ -138,13 +139,25 @@ DragOP.ctoast = function (text, showPrefix) {
         print(e);
     }
 }
-
+DragOP.loadModsAnim = function(progress){
+	  ctx.runOnUiThread(new java.lang.Runnable({
+        run: function() {
+            new android.os.Handler()
+                .postDelayed(new java.lang.Runnable({
+                    run: function() {
+                        ModPE.langEdit("menu.copyright", "DragOP: "+progress+" Mods loaded");
+                        if(progress<Utils.modsCount)DragOP.loadModsAnim(progress+1);
+                    }
+                }), 50);
+        }
+    }));
+}
 DragOP.getStyledBackground = function() {
 	var bg = android.graphics.drawable.GradientDrawable();
 	bg.setCornerRadius(2);
-	bg.setColor(android.graphics.Color.parseColor("#54008000"));
+	bg.setColor(android.graphics.Color.argb(210, 0, 128, 0));
 	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
-	bg.setStroke(dip2px(2), android.graphics.Color.parseColor("#548B0000"));
+	bg.setStroke(dip2px(2), android.graphics.Color.argb(210, 139, 0, 0));
 	return bg;
 }
 
@@ -202,35 +215,22 @@ DragOP.showModDialog = function(text, desc, type) {
 	});
 }
 
-DragOP.addModule = function (name, isStateMode, extra, onEnable, onDisable, onClick, onRefresh) {
-    DragOP.mods.push({
-        name: name,
-        isStateMode: isStateMode,
-        extra: extra,
-        onEnable: onEnable,
-        onDisable: onDisable,
-        onClick: onClick,
-        onRefresh: onRefresh
-    });
+DragOP.registerModule = function(mod) {
+	for(var i = 0; i < 40; i++){
+	DragOP.mods.push(mod);
+	Utils.modsCount += 1;
+	}
 }
-
-DragOP.addModule(
-    "Gamemode", //name
-    function () {
-        return false;
-    }, //isStateMode
-    Level.getGameMode(), //extra
-    function (btn) { /*Not used*/ }, //onEnable
-    function (btn) { /*Not used*/ }, //onDisable
-    function (btn) {
-        if (this.extra == 1) this.extra = 0;
-        else this.extra = 1;
-    }, //onClick
-    function (btn) {
-        btn.setText(DragOP.getLString("hacks.gamemode") + ": " + (this.extra == 0 ? DragOP.getLString("gm.survival") : DragOP.getLString("gm.creative")));
-        Level.setGameMode(this.extra);
-    } //onRefresh
-);
+var gmhack = {
+	name:"Gamemode",
+	isStateMode:function(){return false;},
+	extra:Level.getGameMode(),
+	onEnable:function(btn){/*Not used*/},
+	onDisable:function(btn){/*Not used*/},
+	onClick:function(btn){if(this.extra==1) this.extra = 0; else this.extra = 1; Level.setGameMode(this.extra);},
+	onRefresh:function(btn){btn.setText(DragOP.getLString("hacks.gamemode")+": "+(this.extra==0?DragOP.getLString("gm.survival"):DragOP.getLString("gm.creative"))); }
+};
+DragOP.registerModule(gmhack);
 
 //Menu open Button
 var menuBtn;
@@ -267,8 +267,9 @@ var modBtn = function (mod) {
 	btn1.setText("🔻");
     btn1.setOnClickListener(new android.view.View.OnClickListener({
         onClick: function (viewarg) {
+            DragOP.showModDialog(mod.name);
 			menu.dismiss();
-			DragOP.showModDialog(mod.name);
+			
             //Show a screen or a dialog with the mod's info and settings
         }
     }));
@@ -309,17 +310,17 @@ DragOP.generateMenu = function () {
             currow.addView(new modBtn(DragOP.mods[index]));
             lay.addView(currow);
             currow = null;
-            print("true " + index);
+            
         } else {
             currow = new android.widget.TableRow(ctx);
             currow.addView(new modBtn(DragOP.mods[index]));
-            print("false " + index);
+            
         }
     });
     if (currow != null) lay.addView(currow);
-
-
-    return lay;
+    var sc = new android.widget.ScrollView(ctx);
+    sc.addView(lay);
+    return sc;
 }
 
 function showMenu() {
@@ -383,6 +384,7 @@ function showMenu() {
 }
 
 function showMenuBtn() {
+	if(GUI != null && GUI.isShowing())GUI.dismiss();
     menuBtn = new android.widget.Button(ctx);
     ctx.runOnUiThread(new java.lang.Runnable({
         run: function () {
@@ -484,3 +486,4 @@ function rptask() {
 }
 
 rptask();
+DragOP.loadModsAnim(0);
