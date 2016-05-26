@@ -211,7 +211,7 @@ function showMenu(){
 				//search.requestFocus();
 				//lol
 			}catch(e){
-				ctoast(e);
+				DragOP.ctoast(e);
 			}
 		}}
 	));
@@ -261,7 +261,7 @@ function showMenuBtn(){
 									break;
 							}
 						} catch (e) {
-							ctoast("Error: " + e);
+							DragOP.ctoast("Error: " + e);
 						}
 
 						return true;
