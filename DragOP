@@ -1,6 +1,6 @@
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var LinearLayout = android.widget.LinearLayout;
-
+var GUI;
 var dialog;
 var DragOP = {
 	mods: new Array()
@@ -396,12 +396,12 @@ function showMenu() {
 }
 
 function showMenuBtn() {
-	if (GUI != null && GUI.isShowing()) GUI.dismiss();
+	
 	menuBtn = new android.widget.Button(ctx);
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
 			try {
-
+				if (GUI != null && GUI.isShowing()) GUI.dismiss();
 				/*if(ghost) {
 					menuBtn.setText('');
 					menuBtn.setBackgroundColor(android.graphics.Color.parseColor("#01ffff00"));
