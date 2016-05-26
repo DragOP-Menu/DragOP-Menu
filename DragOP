@@ -8,6 +8,49 @@ l.push(new Array());//Codes
 l.push(new Array());//English
 l.push(new Array());//German
 //Multi Language Support
+var Utils = {
+	online: false,
+	Entity: {
+		bowAimAt: function(ent){
+			var velocity = 1;
+			var posX = Entity.getX(ent) - Player.getX();
+	        var posY = Entity.getEntityTypeId(ent) == EntityType.PLAYER ? Entity.getY(ent) - Player.getY() : Entity.getY(ent) + 1 - Player.getY();
+	        var posZ = Entity.getZ(ent) - Player.getZ();
+	        var yaw = (Math.atan2(posZ, posX) * 180 / Math.PI) - 90;
+	        var y2 = Math.sqrt(posX * posX + posZ * posZ);
+	        var g = 0.006;
+	        var tmp = (velocity * velocity * velocity * velocity - g * (g * (y2 * y2) + 2 * posY * (velocity * velocity)));
+	        var pitch = -(180/Math.PI)*(Math.atan((velocity * velocity - Math.sqrt(tmp)) / (g * y2)));
+            setRot(Player.getEntity(), yaw, pitch);
+		},
+		getNearestEntity(max, useServerFunc){
+			var mobs = Entity.getAll();
+			var players = Server.getAllPlayers();
+			var small = max;
+			var ent = null;
+			for (var i = 0; i < mobs.length; i++) {
+					var x = Entity.getX(mobs[i]) - getPlayerX();
+					var y = Entity.getY(mobs[i]) - getPlayerY();
+					var z = Entity.getZ(mobs[i]) - getPlayerZ();
+					var dist = Math.sqrt(Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2));
+						if(dist < small && dist > 0 && Entity.getEntityTypeId(mobs[i]) <= 63 && Entity.getHealth(mobs[i]) >= 1){
+							small = dist;
+							ent = mobs[i];
+						}
+				    }
+			for (var i = 0; i < players.length; i++) {
+				var x = Entity.getX(players[i]) - getPlayerX();
+				var y = Entity.getY(players[i]) - getPlayerY();
+				var z = Entity.getZ(players[i]) - getPlayerZ();
+				var dist = Math.sqrt(Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2));
+				if(dist < small && dist > 0 && Entity.getHealth(players[i]) >= 1){
+					small = dist;
+					ent = players[i];
+				}
+			}
+		}
+	}
+};
 DragOP.addCode = function(code) {
 	l[0].push(code);
 }
