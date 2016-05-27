@@ -15,19 +15,19 @@ var ModuleType = {
 	special: 2,
 	command: 3,
 	cmd: 3,
-	toName: function(type){
-		switch(type){
-			case ModuleType.mod:
-				return DragOP.getLString("moduletype.mod");
-				break;
-			case ModuleType.special:
-				return DragOP.getLString("moduletype.special");
-				break;
-			case ModuleType.command:
-				return DragOP.getLString("moduletype.command");
-				break;
-			default:
-				return "unknown";
+	toName: function (type) {
+		switch (type) {
+		case ModuleType.mod:
+			return DragOP.getLString("moduletype.mod");
+			break;
+		case ModuleType.special:
+			return DragOP.getLString("moduletype.special");
+			break;
+		case ModuleType.command:
+			return DragOP.getLString("moduletype.command");
+			break;
+		default:
+			return "unknown";
 		}
 	}
 };
@@ -267,9 +267,9 @@ DragOP.showModDialog = function (mod) {
 }
 
 DragOP.registerModule = function (mod) {
-	for(var i = 0; i < 40; i++){
-	DragOP.mods.push(mod);
-	Utils.modsCount += 1;
+	for (var i = 0; i < 40; i++) {
+		DragOP.mods.push(mod);
+		Utils.modsCount += 1;
 	}
 }
 var gmhack = {
@@ -293,7 +293,7 @@ var gmhack = {
 		Level.setGameMode(this.extra);
 	},
 	onRefresh: function (btn) {
-		if(btn != null)
+		if (btn != null)
 			btn.setText(DragOP.getLString("hacks.gamemode") + ": " + (this.extra == 0 ? DragOP.getLString("gm.survival") : DragOP.getLString("gm.creative")));
 	}
 };
@@ -331,7 +331,7 @@ var modBtn = function (mod) {
 
 	var btn1 = styledBtn();
 	btn1.setTransformationMethod(null);
-	btn1.setText("🔻");
+	btn1.setText("??");
 	btn1.setOnClickListener(new android.view.View.OnClickListener({
 		onClick: function (viewarg) {
 			DragOP.showModDialog(mod);
@@ -372,18 +372,22 @@ DragOP.generateMenu = function (keyword) {
 	var lay = new android.widget.TableLayout(ctx);
 	var currow;
 	DragOP.mods.forEach(function (entry, index, array) {
-		if((entry.name.toString().toLowerCase().indexOf(keyword.toString().toLowerCase()))>-1 || (keyword == null || keyword == "" || keyword == undefined)){
-		if (index % 2 == 1) {
-			currow.addView(new modBtn(DragOP.mods[index]));
-			lay.addView(currow);
-			currow = null;
+		if ((entry.name.toString()
+				.toLowerCase()
+				.indexOf(keyword.toString()
+					.toLowerCase())) > -1 || (keyword == null || keyword == "" || keyword == undefined)) {
+			if (index % 2 == 1) {
+				currow.addView(new modBtn(DragOP.mods[index]));
+				lay.addView(currow);
+				currow = null;
 
+			} else {
+				currow = new android.widget.TableRow(ctx);
+				currow.addView(new modBtn(DragOP.mods[index]));
+
+			}
 		} else {
-			currow = new android.widget.TableRow(ctx);
-			currow.addView(new modBtn(DragOP.mods[index]));
 
-		}}else{
-			
 		}
 	});
 	if (currow != null) lay.addView(currow);
@@ -409,8 +413,8 @@ function showMenu() {
 				search.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 				search.setHint("Search a mod");
 				search.setGravity(android.view.Gravity.CENTER);
-				search.addTextChangedListener(new android.text.TextWatcher(){
-					afterTextChanged:function(text){
+				search.addTextChangedListener(new android.text.TextWatcher() {
+					afterTextChanged: function (text) {
 						updateMenu(text, toplayout);
 					}
 				});
@@ -419,7 +423,7 @@ function showMenu() {
 				var mlist = new android.widget.LinearLayout(ctx);
 				//mlist.setGravity(android.view.Gravity.TOP);
 				mlist.setId(20372);
-				mlist.addView(DragOP.generateMenu(search.getText()+""));
+				mlist.addView(DragOP.generateMenu(search.getText() + ""));
 				var lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 
 				//lparam.addRule(android.widget.RelativeLayout.BELOW, toplayout.getChildAt(0).getId());
@@ -456,35 +460,37 @@ function showMenu() {
 		}
 	}));
 }
-function updateMenu(keyword, toplayout){
+
+function updateMenu(keyword, toplayout) {
 	Utils.currentSearchCount += 1;
-	if(Utils.currentSearchCount > 999)Utils.currentSearchCount = 0;
+	if (Utils.currentSearchCount > 999) Utils.currentSearchCount = 0;
 	var myNum = Utils.currentSearchCount;
 	var r = new java.lang.Runnable({
 		run: function () {
 			var newList = DragOP.generateMenu(keyword);
-	ctx.runOnUiThread(new java.lang.Runnable({
-		run: function () {
-			try {
-				if(myNum == Utils.currentSearchCount){
-	            var mlist = toplayout.getChildAt(1);
-	var lparam = mlist.getLayoutParams();
-	while(mlist.getChildCount() > 0)mlist.removeView(mlist.getChildAt(0));
-	mlist.addView(newList);
-	}
-			}catch(e){
-				DragOP.ctoast(e);
-			}
-		}
-	}));
+			ctx.runOnUiThread(new java.lang.Runnable({
+				run: function () {
+					try {
+						if (myNum == Utils.currentSearchCount) {
+							var mlist = toplayout.getChildAt(1);
+							var lparam = mlist.getLayoutParams();
+							while (mlist.getChildCount() > 0) mlist.removeView(mlist.getChildAt(0));
+							mlist.addView(newList);
+						}
+					} catch (e) {
+						DragOP.ctoast(e);
+					}
+				}
+			}));
 		}
 	});
 	var t = new java.lang.Thread(r);
 	t.start();
-	
+
 }
+
 function showMenuBtn() {
-	
+
 	menuBtn = new android.widget.Button(ctx);
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
@@ -572,7 +578,7 @@ function rptask() {
 						nx = getPlayerX();
 						ny = getPlayerY();
 						nz = getPlayerZ();
-						if((GUI != null && GUI.isShowing()) && (menu != null && menu.isShowing()))GUI.dismiss();
+						if ((GUI != null && GUI.isShowing()) && (menu != null && menu.isShowing())) GUI.dismiss();
 						if ((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing()) && (dialog == null || !dialog.isShowing())) {
 							net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote = true;
 							net.zhuoweizhang.mcpelauncher.ScriptManager.setLevelFakeCallback(true, false);
@@ -589,45 +595,48 @@ function rptask() {
 rptask();
 DragOP.loadModsAnim(0);
 
-DragOP.commandManager = function(cmd) {
+DragOP.commandManager = function (cmd) {
 	var commandSplit = cmd.split(" ");
-	switch(commandSplit[0]) {
-		case "help":
-			clientMessage("[DragOP] Help command is coming soon!");
-			break;
-		case "t":
-			if(cmd.substring(2, cmd.length) != null && cmd.substring(2, cmd.length) != undefined) {
-				var shouldReturn = false;
-				DragOP.mods.forEach(function (entry, index, array) {
-					if(entry.name.toLowerCase() == cmd.substring(2, cmd.length).toLowerCase() && !shouldReturn) {
-						if(entry.isStateMode()){
-							DragOP.mods[index].state = !DragOP.mods[index].state;
-							DragOP.mods[index].onRefresh(null);
-							DragOP.ctoast("Sucessfully toggled module " + entry.name);
-						}else if(entry.isToggleAble()){
-							DragOP.mods[index].onClick(null);
-							DragOP.mods[index].onRefresh(null);
-							DragOP.ctoast("Sucessfully toggled module " + entry.name);
-						}else{
-							DragOP.ctoast(entry.name +"can't be toggled!");
-						}
-						shouldReturn = true;
+	switch (commandSplit[0]) {
+	case "help":
+		clientMessage("[DragOP] Help command is coming soon!");
+		break;
+	case "t":
+		if (cmd.substring(2, cmd.length) != null && cmd.substring(2, cmd.length) != undefined) {
+			var shouldReturn = false;
+			DragOP.mods.forEach(function (entry, index, array) {
+				if (entry.name.toLowerCase() == cmd.substring(2, cmd.length)
+					.toLowerCase() && !shouldReturn) {
+					if (entry.isStateMode()) {
+						DragOP.mods[index].state = !DragOP.mods[index].state;
+						DragOP.mods[index].onRefresh(null);
+						DragOP.ctoast("Sucessfully toggled module " + entry.name);
+					} else if (entry.isToggleAble()) {
+						DragOP.mods[index].onClick(null);
+						DragOP.mods[index].onRefresh(null);
+						DragOP.ctoast("Sucessfully toggled module " + entry.name);
+					} else {
+						DragOP.ctoast(entry.name + "can't be toggled!");
 					}
-				});
-				if(shouldReturn)return;
-				DragOP.ctoast("Module " + cmd.substring(2, cmd.length) + " can't be found/toggled!");
-			} else {
-				DragOP.ctoast("Syntax error!");
-			}
-			break;
+					shouldReturn = true;
+				}
+			});
+			if (shouldReturn) return;
+			DragOP.ctoast("Module " + cmd.substring(2, cmd.length) + " can't be found/toggled!");
+		} else {
+			DragOP.ctoast("Syntax error!");
+		}
+		break;
 	}
 }
 
 function chatHook(text) {
-	if(text.charAt(0) == ".") {
+	if (text.charAt(0) == ".") {
 		preventDefault();
-		com.mojang.minecraftpe.MainActivity.currentMainActivity.get().nativeSetTextboxText("");
-		com.mojang.minecraftpe.MainActivity.currentMainActivity.get().updateTextboxText("");
+		com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+			.nativeSetTextboxText("");
+		com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+			.updateTextboxText("");
 		DragOP.commandManager(text.substring(1, text.length));
 	}
 }
