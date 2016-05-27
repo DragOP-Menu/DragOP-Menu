@@ -1,7 +1,6 @@
 /*
 Planned features:
 -RGB color changers
--Menu Anims
 */
 
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
@@ -355,7 +354,7 @@ var styledBtn = function () {
 }
 
 var modBtn = function (mod) {
-	var btn = styledBtn();
+	var btn = new android.widget.Button(ctx);
 	btn.setTransformationMethod(null);
 	btn.setOnClickListener(new android.view.View.OnClickListener({
 		onClick: function (viewarg) {
@@ -364,7 +363,7 @@ var modBtn = function (mod) {
 		}
 	}));
 
-	var btn1 = styledBtn();
+	var btn1 = new android.widget.Button(ctx);
 	btn1.setTransformationMethod(null);
 	btn1.setText("\ud83d\udd3b");
 	btn1.setOnClickListener(new android.view.View.OnClickListener({
@@ -378,6 +377,7 @@ var modBtn = function (mod) {
 
 	var modButtonLayout = new LinearLayout(ctx);
 	modButtonLayout.setOrientation(LinearLayout.HORIZONTAL);
+	modButtonLayout.setBackground(DragOP.getStyledBackground());
 
 	var modButtonLayoutLeft = new LinearLayout(ctx);
 	modButtonLayoutLeft.setOrientation(1);
@@ -483,6 +483,7 @@ function showMenu() {
 					}
 				}));
 				menu = new android.widget.PopupWindow(toplayout, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, true);
+				menu.setAnimationStyle(android.R.style.Animation_Dialog);
 				//menu.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 				//menu.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 				menu.showAtLocation(ctx.getWindow()
@@ -615,8 +616,12 @@ function rptask() {
 						nz = getPlayerZ();
 						if ((GUI != null && GUI.isShowing()) && (menu != null && menu.isShowing())) GUI.dismiss();
 						if ((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing()) && (dialog == null || !dialog.isShowing())) {
+							try{
 							net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote = true;
 							net.zhuoweizhang.mcpelauncher.ScriptManager.setLevelFakeCallback(true, false);
+							}catch(e){
+								//toolbox....
+							}
 							showMenuBtn();
 						}
 						//did you know thats its eval(java.lang.String) and not eval(null)?
