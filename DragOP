@@ -2,12 +2,30 @@ var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var LinearLayout = android.widget.LinearLayout;
 var GUI;
 var dialog;
+
 var DragOP = {
 	mods: new Array()
 };
 var lc = {
 	en_US: 1,
 	de_DE: 2
+};
+var ModuleType = {
+	mod: 1,
+	command: 2,
+	cmd: 2,
+	toName: function(type){
+		switch(type){
+			case ModuleType.mod:
+				return DragOP.getLString("moduletype.mod");
+			break;
+			case ModuleType.command:
+				return DragOP.getLString("moduletype.command");
+			break;
+			default:
+				return "unknown";
+		}
+	}
 };
 var l = new Array();
 l.push(new Array()); //Codes
@@ -18,6 +36,7 @@ l.push(new Array()); //German
 var Utils = {
 	online: false,
 	modsCount: 0,
+	currentSearchCount: 0,
 	Entity: {
 		bowAimAt: function (ent) {
 			var velocity = 1;
@@ -79,14 +98,20 @@ DragOP.setLString = function (code, lang, value) {
 DragOP.addCode("hacks.gamemode");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
+DragOP.addCode("moduletype.mod");
+DragOP.addCode("moduletype.command");
 //DragOP.setLString(code, lc.en_US, value);
 DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
+DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
+DragOP.setLString("moduletype.command", lc.en_US, "Command");
 //German
 DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
 DragOP.setLString("gm.survival", lc.de_DE, "Überleben");
 DragOP.setLString("gm.creative", lc.de_DE, "Kreativ");
+DragOP.setLString("moduletype.mod", lc.de_DE, "Mod");
+DragOP.setLString("moduletype.command", lc.de_DE, "Befehl");
 
 DragOP.getL = function () {
 	//Todo
@@ -165,7 +190,7 @@ DragOP.getStyledBackground = function () {
 	return bg;
 }
 
-DragOP.showModDialog = function (text, desc, type) {
+DragOP.showModDialog = function (mod) {
 	ctx.runOnUiThread(new java.lang.Runnable() {
 		run: function () {
 			try {
@@ -175,34 +200,45 @@ DragOP.showModDialog = function (text, desc, type) {
 					.getDefaultDisplay()
 					.getMetrics(display);
 				var modTitle = new android.widget.TextView(ctx);
-				modTitle.setText(text);
+				modTitle.setText(mod.name);
 				modTitle.setTextSize(20);
+				modTitle.setGravity(android.view.Gravity.CENTER);
+				modTitle.setId(94771);
 				var modTypeText = new android.widget.TextView(ctx);
-				if (type == null) type = "Mod";
-				modTypeText.setText("Type: " + type + "\n");
+				modTypeText.setText("Type: " + ModuleType.toName(mod.type));
+				modTypeText.setGravity(android.view.Gravity.CENTER);
+				modTypeText.setId(93922);
 				var modDescTitle = new android.widget.TextView(ctx);
 				modDescTitle.setText("Description:");
+				modDescTitle.setGravity(android.view.Gravity.CENTER);
+				modDescTitle.setId(29582);
 				var modDescText = new android.widget.TextView(ctx);
-				if (desc == null) desc = "Not specified";
-				modDescText.setText(desc + ".\n");
+				modDescText.setText(mod.desc);
+				modDescText.setGravity(android.view.Gravity.CENTER);
+				modDescText.setId(29285);
 				var closeButton = new styledBtn();
 				closeButton.setText("Close");
 				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
-				var dialogLayout = new LinearLayout(ctx);
+				closeButton.setId(10472);
+				var dialogLayout = new android.widget.RelativeLayout(ctx);
 				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
-				dialogLayout.setGravity(android.view.Gravity.CENTER);
-				dialogLayout.setOrientation(LinearLayout.VERTICAL);
-				dialogLayout.addView(modTitle);
+				//dialogLayout.setGravity(android.view.Gravity.CENTER);
+				//dialogLayout.setOrientation(LinearLayout.VERTICAL);
+				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				dialogLayout.addView(modTitle, params);
 				dialogLayout.addView(modTypeText);
 				dialogLayout.addView(modDescTitle);
 				dialogLayout.addView(modDescText);
-				dialogLayout.addView(closeButton);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				dialogLayout.addView(closeButton, params);
 				dialog = new android.app.Dialog(ctx);
 				dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
 				dialog.getWindow()
 					.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 				dialog.setContentView(dialogLayout);
-				dialog.setTitle(text);
+				dialog.setTitle(mod.name);
 				dialog.setOnDismissListener(new android.content.DialogInterface.OnDismissListener() {
 					onDismiss: function () {
 						showMenu();
@@ -224,11 +260,15 @@ DragOP.showModDialog = function (text, desc, type) {
 }
 
 DragOP.registerModule = function (mod) {
+	for(var i = 0; i < 40; i++){
 	DragOP.mods.push(mod);
 	Utils.modsCount += 1;
+	}
 }
 var gmhack = {
 	name: "Gamemode",
+	desc: "Changes your GameMode!",
+	type: ModuleType.mod,
 	isStateMode: function () {
 		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
@@ -265,10 +305,10 @@ var mwidth = ctx.getWindowManager()
 	.getDefaultDisplay()
 	.getWidth() / 100 * 70;
 var menu;
+
 var styledBtn = function () {
 	var defaultBtn = new android.widget.Button(ctx);
 	defaultBtn.setBackgroundDrawable(DragOP.getStyledBackground());
-
 	return defaultBtn;
 }
 
@@ -287,7 +327,7 @@ var modBtn = function (mod) {
 	btn1.setText("🔻");
 	btn1.setOnClickListener(new android.view.View.OnClickListener({
 		onClick: function (viewarg) {
-			DragOP.showModDialog(mod.name);
+			DragOP.showModDialog(mod);
 			menu.dismiss();
 
 			//Show a screen or a dialog with the mod's info and settings
@@ -336,7 +376,7 @@ DragOP.generateMenu = function (keyword) {
 			currow.addView(new modBtn(DragOP.mods[index]));
 
 		}}else{
-			clientMessage(keyword.toString().toLowerCase()+" §l:§r "+entry.name.toLowerCase());
+			
 		}
 	});
 	if (currow != null) lay.addView(currow);
@@ -410,20 +450,31 @@ function showMenu() {
 	}));
 }
 function updateMenu(keyword, toplayout){
+	Utils.currentSearchCount += 1;
+	if(Utils.currentSearchCount > 999)Utils.currentSearchCount = 0;
+	var myNum = Utils.currentSearchCount;
+	var r = new java.lang.Runnable({
+		run: function () {
+			var newList = DragOP.generateMenu(keyword);
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
 			try {
-				var newList = DragOP.generateMenu(keyword);
+				if(myNum == Utils.currentSearchCount){
 	            var mlist = toplayout.getChildAt(1);
 	var lparam = mlist.getLayoutParams();
 	while(mlist.getChildCount() > 0)mlist.removeView(mlist.getChildAt(0));
 	mlist.addView(newList);
-	menu.update();
+	}
 			}catch(e){
 				DragOP.ctoast(e);
 			}
 		}
 	}));
+		}
+	});
+	var t = new java.lang.Thread(r);
+	t.start();
+	
 }
 function showMenuBtn() {
 	
@@ -514,6 +565,7 @@ function rptask() {
 						nx = getPlayerX();
 						ny = getPlayerY();
 						nz = getPlayerZ();
+						if((GUI != null && GUI.isShowing()) && (menu != null && menu.isShowing()))GUI.dismiss();
 						if ((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing()) && (dialog == null || !dialog.isShowing())) {
 							net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote = true;
 							net.zhuoweizhang.mcpelauncher.ScriptManager.setLevelFakeCallback(true, false);
