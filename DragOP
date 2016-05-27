@@ -1,3 +1,9 @@
+/*
+Planned features:
+-RGB color changers
+-Menu Anims
+*/
+
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var LinearLayout = android.widget.LinearLayout;
 var GUI;
@@ -105,6 +111,8 @@ DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
 DragOP.addCode("moduletype.special");
 DragOP.addCode("moduletype.command");
+DragOP.addCode("moddialog.description");
+DragOP.addCode("moddialog.type");
 //DragOP.setLString(code, lc.en_US, value);
 DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
@@ -112,13 +120,17 @@ DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
 DragOP.setLString("moduletype.special", lc.en_US, "Special");
 DragOP.setLString("moduletype.command", lc.en_US, "Command");
+DragOP.setLString("moddialog.description", lc.en_US, "Description");
+DragOP.setLString("moddialog.type", lc.en_US, "Type");
 //German
 DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
 DragOP.setLString("gm.survival", lc.de_DE, "Überleben");
 DragOP.setLString("gm.creative", lc.de_DE, "Kreativ");
 DragOP.setLString("moduletype.mod", lc.de_DE, "Mod");
-DragOP.setLString("moduletype.special", lc.de_DE, "Besondere");
+DragOP.setLString("moduletype.special", lc.de_DE, "Spezielles");
 DragOP.setLString("moduletype.command", lc.de_DE, "Befehl");
+DragOP.setLString("moddialog.description", lc.de_DE, "Beschreibung");
+DragOP.setLString("moddialog.type", lc.de_DE, "Typ");
 
 DragOP.getL = function () {
 	//Todo
@@ -206,22 +218,33 @@ DragOP.showModDialog = function (mod) {
 					.getWindowManager()
 					.getDefaultDisplay()
 					.getMetrics(display);
+				var content = new android.widget.RelativeLayout(ctx);
+				content.setId(9472729);
+				var contentScroll = new android.widget.ScrollView(ctx);
+				contentScroll.setId(492628);
 				var modTitle = new android.widget.TextView(ctx);
-				modTitle.setText(mod.name);
-				modTitle.setTextSize(20);
+				modTitle.setText(android.text.Html.fromHtml("<u>"+mod.name+"</u>"));
+				modTitle.setTextSize(dip2px(20));
 				modTitle.setGravity(android.view.Gravity.CENTER);
+				modTitle.setTextColor(android.graphics.Color.BLACK);
 				modTitle.setId(94771);
 				var modTypeText = new android.widget.TextView(ctx);
-				modTypeText.setText("Type: " + ModuleType.toName(mod.type));
+				modTypeText.setText(DragOP.getLString("moddialog.type") + ModuleType.toName(mod.type));
 				modTypeText.setGravity(android.view.Gravity.CENTER);
+				modTypeText.setTextColor(android.graphics.Color.BLACK);
+				modTypeText.setTextSize(dip2px(10));
 				modTypeText.setId(93922);
 				var modDescTitle = new android.widget.TextView(ctx);
-				modDescTitle.setText("Description:");
+				modDescTitle.setText(DragOP.getLString("moddialog.description"));
 				modDescTitle.setGravity(android.view.Gravity.CENTER);
+				modDescTitle.setTextColor(android.graphics.Color.BLACK);
+				modDescTitle.setTextSize(dip2px(11));
 				modDescTitle.setId(29582);
 				var modDescText = new android.widget.TextView(ctx);
 				modDescText.setText(mod.desc);
 				modDescText.setGravity(android.view.Gravity.CENTER);
+				modDescText.setTextSize(dip2px(10));
+				modDescText.setTextColor(android.graphics.Color.BLACK);
 				modDescText.setId(29285);
 				var closeButton = new styledBtn();
 				closeButton.setText("Close");
@@ -234,9 +257,21 @@ DragOP.showModDialog = function (mod) {
 				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				dialogLayout.addView(modTitle, params);
-				dialogLayout.addView(modTypeText);
-				dialogLayout.addView(modDescTitle);
-				dialogLayout.addView(modDescText);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				content.addView(modTypeText, params);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.BELOW, modTypeText.getId());
+				content.addView(modDescTitle, params);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.BELOW, modDescTitle.getId());
+				content.addView(modDescText, params);
+				contentScroll.addView(content);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.BELOW, modTitle.getId());
+				params.addRule(android.widget.RelativeLayout.ABOVE, closeButton.getId());
+				contentScroll.setFillViewport(true);
+				dialogLayout.addView(contentScroll, params);
 				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
 				dialogLayout.addView(closeButton, params);
@@ -633,10 +668,14 @@ DragOP.commandManager = function (cmd) {
 function chatHook(text) {
 	if (text.charAt(0) == ".") {
 		preventDefault();
+		try{
 		com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
 			.nativeSetTextboxText("");
 		com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
 			.updateTextboxText("");
+		}catch(e){
+			//Not-BlockLauncher-Error
+		}
 		DragOP.commandManager(text.substring(1, text.length));
 	}
 }
