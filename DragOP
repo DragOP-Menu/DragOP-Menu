@@ -129,8 +129,12 @@ DragOP.ctoast = function (text, showPrefix) {
 				msg.setTextSize(20);
 				msg.setPadding(10, 10, 10, 10);
 				msg.setTextColor(android.graphics.Color.WHITE);
+				var bg = new android.graphics.drawable.GradientDrawable();
+				bg.setColor(android.graphics.Color.argb(150, 50, 50, 50));
+				bg.setStroke(dip2px(5), android.graphics.Color.argb(200, 5, 5, 5));
+				bg.setCornerRadius(dip2px(20));
 				layout.addView(msg);
-				//layout.setBackground(new android.graphics.drawable.BitmapDrawable(bg));
+				layout.setBackground(bg);
 				thetoast.setView(layout);
 				thetoast.show();
 			}
@@ -220,15 +224,18 @@ DragOP.showModDialog = function (text, desc, type) {
 }
 
 DragOP.registerModule = function (mod) {
-	for (var i = 0; i < 40; i++) {
-		DragOP.mods.push(mod);
-		Utils.modsCount += 1;
-	}
+	DragOP.mods.push(mod);
+	Utils.modsCount += 1;
 }
 var gmhack = {
 	name: "Gamemode",
 	isStateMode: function () {
-		return false;
+		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
 	},
 	extra: Level.getGameMode(),
 	onEnable: function (btn) { /*Not used*/ },
@@ -239,7 +246,8 @@ var gmhack = {
 		Level.setGameMode(this.extra);
 	},
 	onRefresh: function (btn) {
-		btn.setText(DragOP.getLString("hacks.gamemode") + ": " + (this.extra == 0 ? DragOP.getLString("gm.survival") : DragOP.getLString("gm.creative")));
+		if(btn != null)
+			btn.setText(DragOP.getLString("hacks.gamemode") + ": " + (this.extra == 0 ? DragOP.getLString("gm.survival") : DragOP.getLString("gm.creative")));
 	}
 };
 DragOP.registerModule(gmhack);
@@ -530,13 +538,24 @@ DragOP.commandManager = function(cmd) {
 			break;
 		case "t":
 			if(cmd.substring(2, cmd.length) != null && cmd.substring(2, cmd.length) != undefined) {
+				var shouldReturn = false;
 				DragOP.mods.forEach(function (entry, index, array) {
-					if(entry.toLowerCase() == cmd.substring(2, cmd.length).toLowerCase() && DragOP.mods[index].isStateMode()) {
-						DragOP.mods[index].onClick(null);
-						DragOP.ctoast("Sucessfully toggled module " + entry.toLowerCase());
-						return;
+					if(entry.name.toLowerCase() == cmd.substring(2, cmd.length).toLowerCase() && !shouldReturn) {
+						if(entry.isStateMode()){
+							DragOP.mods[index].state = !DragOP.mods[index].state;
+							DragOP.mods[index].onRefresh(null);
+							DragOP.ctoast("Sucessfully toggled module " + entry.name);
+						}else if(entry.isToggleAble()){
+							DragOP.mods[index].onClick(null);
+							DragOP.mods[index].onRefresh(null);
+							DragOP.ctoast("Sucessfully toggled module " + entry.name);
+						}else{
+							DragOP.ctoast(entry.name +"can't be toggled!");
+						}
+						shouldReturn = true;
 					}
 				});
+				if(shouldReturn)return;
 				DragOP.ctoast("Module " + cmd.substring(2, cmd.length) + " can't be found/toggled!");
 			} else {
 				DragOP.ctoast("Syntax error!");
