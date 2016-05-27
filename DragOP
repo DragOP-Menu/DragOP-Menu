@@ -105,6 +105,7 @@ DragOP.setLString = function (code, lang, value) {
 	}
 	//DragOP.addCode(code);
 DragOP.addCode("hacks.gamemode");
+DragOP.addCode("hacks.speed");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
@@ -112,8 +113,12 @@ DragOP.addCode("moduletype.special");
 DragOP.addCode("moduletype.command");
 DragOP.addCode("moddialog.description");
 DragOP.addCode("moddialog.type");
+DragOP.addCode("state.on");
+DragOP.addCode("state.off");
+
 //DragOP.setLString(code, lc.en_US, value);
 DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
+DragOP.setLString("hacks.speed", lc.en_US, "Speed");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
@@ -121,8 +126,11 @@ DragOP.setLString("moduletype.special", lc.en_US, "Special");
 DragOP.setLString("moduletype.command", lc.en_US, "Command");
 DragOP.setLString("moddialog.description", lc.en_US, "Description");
 DragOP.setLString("moddialog.type", lc.en_US, "Type");
+DragOP.setLString("state.on", lc.en_US, "On");
+DragOP.setLString("state.off", lc.en_US, "Off");
 //German
 DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
+DragOP.setLString("hacks.speed", lc.de_DE, "Speedy Gonzales");
 DragOP.setLString("gm.survival", lc.de_DE, "Überleben");
 DragOP.setLString("gm.creative", lc.de_DE, "Kreativ");
 DragOP.setLString("moduletype.mod", lc.de_DE, "Mod");
@@ -205,6 +213,15 @@ DragOP.getStyledBackground = function () {
 	bg.setColor(android.graphics.Color.argb(210, 0, 128, 0));
 	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
 	bg.setStroke(dip2px(2), android.graphics.Color.argb(210, 139, 0, 0));
+	return bg;
+}
+DragOP.getStyledBtnBackground = function (state) {
+	var bg = android.graphics.drawable.GradientDrawable();
+	bg.setCornerRadius(1);
+	bg.setColor(android.graphics.Color.argb(100, 0, 0, 0));
+	if(state)bg.setColor(android.graphics.Color.argb(210, 0, 200, 0));
+	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+	bg.setStroke(dip2px(2), android.graphics.Color.argb(210, 0, 0, 0));
 	return bg;
 }
 
@@ -301,11 +318,33 @@ DragOP.showModDialog = function (mod) {
 }
 
 DragOP.registerModule = function (mod) {
-	for (var i = 0; i < 40; i++) {
+	
 		DragOP.mods.push(mod);
 		Utils.modsCount += 1;
-	}
+	
 }
+/*
+var hack = {
+	name: "Hack",
+	desc: "Some Desc",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	extra: 0,
+	onTick: function () { },
+	onEnable: function (btn) {  },
+	onDisable: function (btn) {  },
+	onClick: function (btn) {},
+	onRefresh: function (btn) {}
+};
+*/
 var gmhack = {
 	name: "Gamemode",
 	desc: "Changes your GameMode!",
@@ -319,6 +358,7 @@ var gmhack = {
 		//Call hack.onClick() to toggle
 	},
 	extra: Level.getGameMode(),
+	onTick: function () { /*some tick*/},
 	onEnable: function (btn) { /*Not used*/ },
 	onDisable: function (btn) { /*Not used*/ },
 	onClick: function (btn) {
@@ -332,7 +372,26 @@ var gmhack = {
 	}
 };
 DragOP.registerModule(gmhack);
-
+var speedhack = {
+	name: "Speedhack",
+	desc: "Let you run faster",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () { },
+	onEnable: function (btn) { this.state = true; },
+	onDisable: function (btn) { this.state = false; },
+	onClick: function (btn) { this.state = !this.state; },
+	onRefresh: function (btn) { if(btn != null)btn.setText(DragOP.getLString("hacks.speed"));}
+};
+DragOP.registerModule(speedhack);
 //Menu open Button
 var menuBtn;
 var moving = false;
@@ -356,6 +415,7 @@ var styledBtn = function () {
 var modBtn = function (mod) {
 	var btn = new android.widget.Button(ctx);
 	btn.setTransformationMethod(null);
+	btn.setBackground(null);
 	btn.setOnClickListener(new android.view.View.OnClickListener({
 		onClick: function (viewarg) {
 			mod.onClick(btn);
@@ -366,6 +426,7 @@ var modBtn = function (mod) {
 	var btn1 = new android.widget.Button(ctx);
 	btn1.setTransformationMethod(null);
 	btn1.setText("\ud83d\udd3b");
+	btn1.setBackground(null);
 	btn1.setOnClickListener(new android.view.View.OnClickListener({
 		onClick: function (viewarg) {
 			DragOP.showModDialog(mod);
@@ -377,7 +438,8 @@ var modBtn = function (mod) {
 
 	var modButtonLayout = new LinearLayout(ctx);
 	modButtonLayout.setOrientation(LinearLayout.HORIZONTAL);
-	modButtonLayout.setBackground(DragOP.getStyledBackground());
+	if(mod.isStateMode())modButtonLayout.setBackground(DragOP.getStyledBtnBackground(mod.state));
+	else modButtonLayout.setBackground(DragOP.getStyledBackground());
 
 	var modButtonLayoutLeft = new LinearLayout(ctx);
 	modButtonLayoutLeft.setOrientation(1);
@@ -614,6 +676,9 @@ function rptask() {
 						nx = getPlayerX();
 						ny = getPlayerY();
 						nz = getPlayerZ();
+						DragOP.mods.forEach(function(entry, index, array){
+							if(entry.onTick)entry.onTick();
+						});
 						if ((GUI != null && GUI.isShowing()) && (menu != null && menu.isShowing())) GUI.dismiss();
 						if ((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing()) && (dialog == null || !dialog.isShowing())) {
 							try{
