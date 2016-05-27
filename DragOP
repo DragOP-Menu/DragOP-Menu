@@ -331,7 +331,7 @@ var modBtn = function (mod) {
 
 	var btn1 = styledBtn();
 	btn1.setTransformationMethod(null);
-	btn1.setText("??");
+	btn1.setText("🔻");
 	btn1.setOnClickListener(new android.view.View.OnClickListener({
 		onClick: function (viewarg) {
 			DragOP.showModDialog(mod);
