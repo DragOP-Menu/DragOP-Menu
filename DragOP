@@ -12,16 +12,20 @@ var lc = {
 };
 var ModuleType = {
 	mod: 1,
-	command: 2,
-	cmd: 2,
+	special: 2,
+	command: 3,
+	cmd: 3,
 	toName: function(type){
 		switch(type){
 			case ModuleType.mod:
 				return DragOP.getLString("moduletype.mod");
-			break;
+				break;
+			case ModuleType.special:
+				return DragOP.getLString("moduletype.special");
+				break;
 			case ModuleType.command:
 				return DragOP.getLString("moduletype.command");
-			break;
+				break;
 			default:
 				return "unknown";
 		}
@@ -99,18 +103,21 @@ DragOP.addCode("hacks.gamemode");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
+DragOP.addCode("moduletype.special");
 DragOP.addCode("moduletype.command");
 //DragOP.setLString(code, lc.en_US, value);
 DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
+DragOP.setLString("moduletype.special", lc.en_US, "Special");
 DragOP.setLString("moduletype.command", lc.en_US, "Command");
 //German
 DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
 DragOP.setLString("gm.survival", lc.de_DE, "Überleben");
 DragOP.setLString("gm.creative", lc.de_DE, "Kreativ");
 DragOP.setLString("moduletype.mod", lc.de_DE, "Mod");
+DragOP.setLString("moduletype.special", lc.de_DE, "Besondere");
 DragOP.setLString("moduletype.command", lc.de_DE, "Befehl");
 
 DragOP.getL = function () {
