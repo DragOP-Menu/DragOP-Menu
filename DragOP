@@ -7,6 +7,7 @@ var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var LinearLayout = android.widget.LinearLayout;
 var GUI;
 var dialog;
+var searchQ = "";//Current search query
 
 var DragOP = {
 	mods: new Array()
@@ -215,13 +216,14 @@ DragOP.getStyledBackground = function () {
 	bg.setStroke(dip2px(2), android.graphics.Color.argb(210, 139, 0, 0));
 	return bg;
 }
-DragOP.getStyledBtnBackground = function (state) {
+DragOP.getStyledBtnBackground = function (state, toggleable) {
 	var bg = android.graphics.drawable.GradientDrawable();
 	bg.setCornerRadius(1);
-	bg.setColor(android.graphics.Color.argb(100, 0, 0, 0));
+	bg.setColor(android.graphics.Color.argb(80, 0, 0, 0));
 	if(state)bg.setColor(android.graphics.Color.argb(210, 0, 200, 0));
+	if(toggleable == false)bg.setColor(android.graphics.Color.argb(210, 230, 150, 30));
 	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
-	bg.setStroke(dip2px(2), android.graphics.Color.argb(210, 0, 0, 0));
+	bg.setStroke(dip2px(2), android.graphics.Color.argb(230, 0, 0, 0));
 	return bg;
 }
 
@@ -416,17 +418,23 @@ var modBtn = function (mod) {
 	var btn = new android.widget.Button(ctx);
 	btn.setTransformationMethod(null);
 	btn.setBackground(null);
+	btn.setShadowLayer (dip2px(1), dip2px(1), dip2px(1), android.graphics.Color.BLACK);
+	btn.setTextColor(android.graphics.Color.WHITE);
 	btn.setOnClickListener(new android.view.View.OnClickListener({
 		onClick: function (viewarg) {
 			mod.onClick(btn);
 			mod.onRefresh(btn);
+			if(mod.isStateMode())modButtonLayout.setBackground(DragOP.getStyledBtnBackground(mod.state, true));
+			else modButtonLayout.setBackground(DragOP.getStyledBtnBackground(false, false));
+
 		}
 	}));
 
 	var btn1 = new android.widget.Button(ctx);
 	btn1.setTransformationMethod(null);
 	btn1.setText("\ud83d\udd3b");
-	btn1.setBackground(null);
+	//btn1.setBackground(null);
+	btn1.setBackgroundColor(android.graphics.Color.argb(100, 0, 0, 0));
 	btn1.setOnClickListener(new android.view.View.OnClickListener({
 		onClick: function (viewarg) {
 			DragOP.showModDialog(mod);
@@ -438,8 +446,8 @@ var modBtn = function (mod) {
 
 	var modButtonLayout = new LinearLayout(ctx);
 	modButtonLayout.setOrientation(LinearLayout.HORIZONTAL);
-	if(mod.isStateMode())modButtonLayout.setBackground(DragOP.getStyledBtnBackground(mod.state));
-	else modButtonLayout.setBackground(DragOP.getStyledBackground());
+	if(mod.isStateMode())modButtonLayout.setBackground(DragOP.getStyledBtnBackground(mod.state, true));
+	else modButtonLayout.setBackground(DragOP.getStyledBtnBackground(false, false));
 
 	var modButtonLayoutLeft = new LinearLayout(ctx);
 	modButtonLayoutLeft.setOrientation(1);
@@ -474,6 +482,7 @@ DragOP.generateMenu = function (keyword) {
 				.indexOf(keyword.toString()
 					.toLowerCase())) > -1 || (keyword == null || keyword == "" || keyword == undefined)) {
 			if (index % 2 == 1) {
+				if(!currow)currow = new android.widget.TableRow(ctx);
 				currow.addView(new modBtn(DragOP.mods[index]));
 				lay.addView(currow);
 				currow = null;
@@ -513,6 +522,7 @@ function showMenu() {
 				search.addTextChangedListener(new android.text.TextWatcher() {
 					afterTextChanged: function (text) {
 						updateMenu(text, toplayout);
+						searchQ = text;
 					}
 				});
 				sbar.addView(search, new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
@@ -542,6 +552,7 @@ function showMenu() {
 					onClick: function (viewarg) {
 						menu.dismiss();
 						showMenuBtn();
+						searchQ = "";
 					}
 				}));
 				menu = new android.widget.PopupWindow(toplayout, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, true);
