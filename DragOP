@@ -387,7 +387,19 @@ var speedhack = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function () { },
+	onTick: function () { 
+		if(this.state){
+			var y = Entity.getY(getPlayerEnt());
+			while(y > 1)y -= 1;
+			if(y < 0)return;
+			if(Math.round(y * 100)>=65){
+				
+			}
+			if(Math.round(y * 100)==62)setVelY(getPlayerEnt(), 0.1);
+			if(Math.round(y * 100)>=65)setVelY(getPlayerEnt(), -1);
+			
+		}
+	},
 	onEnable: function (btn) { this.state = true; },
 	onDisable: function (btn) { this.state = false; },
 	onClick: function (btn) { this.state = !this.state; },
