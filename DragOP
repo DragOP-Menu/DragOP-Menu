@@ -506,6 +506,36 @@ var aimaura = {
 	}
 };
 DragOP.registerModule(aimaura);
+var bowaimbot = {
+	name: DragOP.getLString("hacks.bowaimbot"),
+	desc: "Automatically aims with a bow at near mobs!",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () { 
+		if(this.state && getCarriedItem() == 261/*No Dynamic :( */){
+			var ent = Utils.Entity.getNearestEntity(100);
+			Utils.Entity.bowAimAt(ent);
+		}
+	},
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
+		this.state = !this.state;
+	},
+	onRefresh: function (btn) {
+		if (btn != null)
+			btn.setText(DragOP.getLString("hacks.bowaimbot"));
+	}
+};
+DragOP.registerModule(bowaimbot);
 //Menu open Button
 var menuBtn;
 var moving = false;
@@ -830,7 +860,7 @@ function rptask() {
 		}
 	}))
 }
-print(Player.getEntity());
+
 rptask();
 DragOP.loadModsAnim(0);
 
@@ -883,3 +913,15 @@ function chatHook(text) {
 		DragOP.commandManager(text.substring(1, text.length));
 	}
 }
+this.Item.getEnchantType = function(id) {
+	if (id == 340) return 0;
+	if (Item.getUseAnimation(id) == UseAnimation.bow) return 1;
+	if (id == 258 || id == 271 || id == 275 || id == 279 || id == 286) return 2;
+	if (id == 290 || id == 291 || id == 292 || id == 293 || id == 294) return 2;
+	if (id == 257 || id == 270 || id == 274 || id == 278 || id == 285) return 2;
+	if (id == 256 || id == 269 || id == 273 || id == 277 || id == 284) return 2;
+	if (id == 359 || id == 259) return 2;
+	if (id == 267 || id == 268 || id == 272 || id == 276 || id == 283) return 3;
+	if (id >= 298 && id <= 317) return 4;
+	if (id == 346) return 5;
+};
