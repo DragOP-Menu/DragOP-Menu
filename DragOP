@@ -59,11 +59,17 @@ var Utils = {
 		lastZ: 0
 	},
 	Entity: {
-		crosshairAimAt: function (ent) {
+		crosshairAimAt: function (ent, pos) {
 			if(ent != null){
 				var x = Entity.getX(ent) - getPlayerX();
 				var y = Entity.getY(ent) - getPlayerY();
 				var z = Entity.getZ(ent) - getPlayerZ();
+				if(pos != null && pos instanceof Array){
+					
+				x = Entity.getX(ent) - pos[0];
+				y = Entity.getY(ent) - pos[1];
+				z = Entity.getZ(ent) - pos[2];
+				}
 				if(Entity.getEntityTypeId(ent) != 63)
 					y += 0.5;
 				var a = 0.5 + Entity.getX(ent);
@@ -536,6 +542,52 @@ var bowaimbot = {
 	}
 };
 DragOP.registerModule(bowaimbot);
+var tpaura = { 
+	name: DragOP.getLString("hacks.tpaura"),
+	desc: "Is teleporting you around people so that they cant hit you.",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function (){
+		
+	},
+	findPos: function(ent){
+		var Ppos = new Array(getPlayerX(), getPlayerY(), getPlayerZ());
+		var entPos = new Array(Entity.getX(ent), Entity.getY(ent), Entity.getZ(ent));
+		var diff = new Array(entPos[0] - Ppos[0], null, entPos[2] - Ppos[2]);
+		Ppos[0] += diff[0]*2;
+		Ppos[2] += diff[2]*2;
+		return Ppos;
+		//just inverting pos at the moment
+	},
+	onAttack: function (att, vic) { 
+		if(att == Player.getEntity() && this.state && Entity.getHealth(vic) > 0){
+			
+			var pos = this.findPos(vic);
+			
+			Entity.setPosition(Player.getEntity(), pos[0], pos[1], pos[2]);
+			
+			Utils.Entity.crosshairAimAt(vic, pos);
+		}
+	},
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
+		this.state = !this.state;
+	},
+	onRefresh: function (btn) {
+		if (btn != null)
+			btn.setText(DragOP.getLString("hacks.tpaura"));
+	}
+};
+DragOP.registerModule(tpaura);
 //Menu open Button
 var menuBtn;
 var moving = false;
@@ -925,3 +977,8 @@ this.Item.getEnchantType = function(id) {
 	if (id >= 298 && id <= 317) return 4;
 	if (id == 346) return 5;
 };
+function attackHook(att, vic){
+	DragOP.mods.forEach(function(entry, index, array){
+		if(entry.onAttack)entry.onAttack(att, vic);
+	});
+}
