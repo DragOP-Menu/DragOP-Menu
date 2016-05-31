@@ -568,7 +568,7 @@ var tpaura = {
 
 	},
 	findPos: function (ent) {
-		var Ppos = new Array(getPlayerX(), getPlayerY(), getPlayerZ());
+		var Ppos = new Array(getPlayerX(), getPlayerY()+0.5, getPlayerZ());
 		var entPos = new Array(Entity.getX(ent), Entity.getY(ent), Entity.getZ(ent));
 		var diff = new Array(entPos[0] - Ppos[0], null, entPos[2] - Ppos[2]);
 		Ppos[0] += diff[0] * 2;
