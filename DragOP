@@ -2,12 +2,18 @@
 Planned features:
 -RGB color changers
 */
+var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+var LinearLayout = android.widget.LinearLayout;
+/*
+Planned features:
+-RGB color changers
+*/
 
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var LinearLayout = android.widget.LinearLayout;
 var GUI;
 var dialog;
-var searchQ = "";//Current search query
+var searchQ = ""; //Current search query
 var tick1 = 0;
 
 var DragOP = {
@@ -60,17 +66,17 @@ var Utils = {
 	},
 	Entity: {
 		crosshairAimAt: function (ent, pos) {
-			if(ent != null){
+			if (ent != null) {
 				var x = Entity.getX(ent) - getPlayerX();
 				var y = Entity.getY(ent) - getPlayerY();
 				var z = Entity.getZ(ent) - getPlayerZ();
-				if(pos != null && pos instanceof Array){
-					
-				x = Entity.getX(ent) - pos[0];
-				y = Entity.getY(ent) - pos[1];
-				z = Entity.getZ(ent) - pos[2];
+				if (pos != null && pos instanceof Array) {
+
+					x = Entity.getX(ent) - pos[0];
+					y = Entity.getY(ent) - pos[1];
+					z = Entity.getZ(ent) - pos[2];
 				}
-				if(Entity.getEntityTypeId(ent) != 63)
+				if (Entity.getEntityTypeId(ent) != 63)
 					y += 0.5;
 				var a = 0.5 + Entity.getX(ent);
 				var b = Entity.getY(ent);
@@ -80,7 +86,7 @@ var Utils = {
 				var pitch = Math.asin(y);
 				pitch = pitch * 180.0 / Math.PI;
 				pitch = -pitch;
-				if (pitch < 90 && pitch > -90) {										
+				if (pitch < 90 && pitch > -90) {
 					Entity.setRot(Player.getEntity(), -Math.atan2(a - (Player.getX() + 0.5), c - (Player.getZ() + 0.5)) * (180 / Math.PI), pitch);
 				}
 			}
@@ -148,6 +154,7 @@ DragOP.addCode("hacks.speed");
 DragOP.addCode("hacks.aimaura");
 DragOP.addCode("hacks.jumpspeed");
 DragOP.addCode("hacks.autojump");
+DragOP.addCode("hacks.tpaura");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
@@ -164,6 +171,7 @@ DragOP.setLString("hacks.speed", lc.en_US, "Speed");
 DragOP.setLString("hacks.jumpspeed", lc.en_US, "JumpSpeed");
 DragOP.setLString("hacks.aimaura", lc.en_US, "AimAura"); //No good German translation for aim aura
 DragOP.setLString("hacks.autojump", lc.en_US, "AutoJump");
+DragOP.setLString("hacks.tpaura", lc.en_US, "TP-Aura");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
@@ -176,7 +184,7 @@ DragOP.setLString("state.off", lc.en_US, "Off");
 //German
 DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
 /*DragOP.setLString("hacks.speed", lc.de_DE, "Schnelligkeit");Schnelligkeit is bad*/
-DragOP.setLString("hacks.jumpspeed", lc.de_DE, "HasenTempo");//Why not using bunnyspeed? :)
+DragOP.setLString("hacks.jumpspeed", lc.de_DE, "HasenTempo"); //Why not using bunnyspeed? :)
 DragOP.setLString("hacks.autojump", lc.de_DE, "Automatisches\nSpringen");
 DragOP.setLString("gm.survival", lc.de_DE, "Überleben");
 DragOP.setLString("gm.creative", lc.de_DE, "Kreativ");
@@ -266,8 +274,8 @@ DragOP.getStyledBtnBackground = function (state, toggleable) {
 	var bg = android.graphics.drawable.GradientDrawable();
 	bg.setCornerRadius(1);
 	bg.setColor(android.graphics.Color.argb(80, 0, 0, 0));
-	if(state)bg.setColor(android.graphics.Color.argb(210, 0, 200, 0));
-	if(toggleable == false)bg.setColor(android.graphics.Color.argb(210, 230, 150, 30));
+	if (state) bg.setColor(android.graphics.Color.argb(210, 0, 200, 0));
+	if (toggleable == false) bg.setColor(android.graphics.Color.argb(210, 230, 150, 30));
 	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
 	bg.setStroke(dip2px(2), android.graphics.Color.argb(230, 0, 0, 0));
 	return bg;
@@ -287,19 +295,19 @@ DragOP.showModDialog = function (mod) {
 				var contentScroll = new android.widget.ScrollView(ctx);
 				contentScroll.setId(492628);
 				var modTitle = new android.widget.TextView(ctx);
-				modTitle.setText(android.text.Html.fromHtml("<u>"+mod.name+"</u>"));
+				modTitle.setText(android.text.Html.fromHtml("<u>" + mod.name + "</u>"));
 				modTitle.setTextSize(dip2px(20));
 				modTitle.setGravity(android.view.Gravity.CENTER);
 				modTitle.setTextColor(android.graphics.Color.BLACK);
 				modTitle.setId(94771);
 				var modTypeText = new android.widget.TextView(ctx);
-				modTypeText.setText(DragOP.getLString("moddialog.type") +": "+ ModuleType.toName(mod.type));
+				modTypeText.setText(DragOP.getLString("moddialog.type") + ": " + ModuleType.toName(mod.type));
 				modTypeText.setGravity(android.view.Gravity.CENTER);
 				modTypeText.setTextColor(android.graphics.Color.BLACK);
 				modTypeText.setTextSize(dip2px(10));
 				modTypeText.setId(93922);
 				var modDescTitle = new android.widget.TextView(ctx);
-				modDescTitle.setText(DragOP.getLString("moddialog.description")+":");
+				modDescTitle.setText(DragOP.getLString("moddialog.description") + ":");
 				modDescTitle.setGravity(android.view.Gravity.CENTER);
 				modDescTitle.setTextColor(android.graphics.Color.BLACK);
 				modDescTitle.setTextSize(dip2px(11));
@@ -366,33 +374,33 @@ DragOP.showModDialog = function (mod) {
 }
 
 DragOP.registerModule = function (mod) {
-	
+
 		DragOP.mods.push(mod);
 		Utils.modsCount += 1;
-	
-}
-/*
-var hack = {
-	name: "Hack",
-	desc: "Some Desc",
-	type: ModuleType.mod,
-	state: false,
-	isStateMode: function () {
-		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
-		//Call hack.state = !hack.state; to toggle 
-	},
-	isToggleAble: function () {
-		return true; //MUST be true if isStateMode = true
-		//Call hack.onClick() to toggle
-	},
-	extra: 0,
-	onTick: function () { },
-	onEnable: function (btn) {  },
-	onDisable: function (btn) {  },
-	onClick: function (btn) {},
-	onRefresh: function (btn) {}
-};
-*/
+
+	}
+	/*
+	var hack = {
+		name: "Hack",
+		desc: "Some Desc",
+		type: ModuleType.mod,
+		state: false,
+		isStateMode: function () {
+			return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+			//Call hack.state = !hack.state; to toggle 
+		},
+		isToggleAble: function () {
+			return true; //MUST be true if isStateMode = true
+			//Call hack.onClick() to toggle
+		},
+		extra: 0,
+		onTick: function () { },
+		onEnable: function (btn) {  },
+		onDisable: function (btn) {  },
+		onClick: function (btn) {},
+		onRefresh: function (btn) {}
+	};
+	*/
 var gmhack = {
 	name: "Gamemode",
 	desc: "Changes your GameMode!",
@@ -406,7 +414,7 @@ var gmhack = {
 		//Call hack.onClick() to toggle
 	},
 	extra: Level.getGameMode(),
-	onTick: function () { /*some tick*/},
+	onTick: function () { /*some tick*/ },
 	onEnable: function (btn) { /*Not used*/ },
 	onDisable: function (btn) { /*Not used*/ },
 	onClick: function (btn) {
@@ -433,28 +441,28 @@ var jumpspeed = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function () { 
-		if(this.state && Player.getEntity() != -1){
+	onTick: function () {
+		if (this.state && Player.getEntity() != -1) {
 			var y = Entity.getY(getPlayerEnt());
-			while(y > 1)y -= 1;
-			if(y < 0)return;
+			while (y > 1) y -= 1;
+			if (y < 0) return;
 			var max = 0.8;
-			var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX,2) + Math.pow(Utils.Vel.lastZ, 2));
-			var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()),2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
-			if(speed > 0.02){
-				if(Math.round(y * 100)==62)setVelY(getPlayerEnt(), 0.2);
-				else if(Math.round(y * 100)>=70)setVelY(getPlayerEnt(), -0.15);
-				
-			}else{
+			var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
+			var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
+			if (speed > 0.02) {
+				if (Math.round(y * 100) == 62) setVelY(getPlayerEnt(), 0.2);
+				else if (Math.round(y * 100) >= 70) setVelY(getPlayerEnt(), -0.15);
+
+			} else {
 				setVelX(getPlayerEnt(), 0);
 				setVelZ(getPlayerEnt(), 0);
 			}
-			if(speed >= lastSpeed && speed < max && tick1 % 1 == 0){
-				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())*1.1);
-				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())*1.1);
-			}else if(speed < lastSpeed || speed > max){
-				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX)/2);
-				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ)/2);
+			if (speed >= lastSpeed && speed < max && tick1 % 1 == 0) {
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * 1.1);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * 1.1);
+			} else if (speed < lastSpeed || speed > max) {
+				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 2);
+				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 2);
 			}
 			/*if(lastSpeed > speed+0.00001){
 				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())/2);
@@ -469,17 +477,25 @@ var jumpspeed = {
 				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())*1.5);
 				clientMessage(3);
 			}*/
-			
-			
-			
-		}else{
-			
+
+
+
+		} else {
+
 		}
 	},
-	onEnable: function (btn) { this.state = true; },
-	onDisable: function (btn) { this.state = false; },
-	onClick: function (btn) { this.state = !this.state; },
-	onRefresh: function (btn) { if(btn != null)btn.setText(DragOP.getLString("hacks.jumpspeed"));}
+	onEnable: function (btn) {
+		this.state = true;
+	},
+	onDisable: function (btn) {
+		this.state = false;
+	},
+	onClick: function (btn) {
+		this.state = !this.state;
+	},
+	onRefresh: function (btn) {
+		if (btn != null) btn.setText(DragOP.getLString("hacks.jumpspeed"));
+	}
 };
 DragOP.registerModule(jumpspeed);
 var aimaura = {
@@ -495,8 +511,8 @@ var aimaura = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function () { 
-		if(this.state){
+	onTick: function () {
+		if (this.state) {
 			var ent = Utils.Entity.getNearestEntity(7);
 			Utils.Entity.crosshairAimAt(ent);
 		}
@@ -525,8 +541,8 @@ var bowaimbot = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function () { 
-		if(this.state && getCarriedItem() == 261/*No Dynamic :( */){
+	onTick: function () {
+		if (this.state && getCarriedItem() == 261 /*No Dynamic :( */ ) {
 			var ent = Utils.Entity.getNearestEntity(100);
 			Utils.Entity.bowAimAt(ent);
 		}
@@ -542,9 +558,9 @@ var bowaimbot = {
 	}
 };
 DragOP.registerModule(bowaimbot);
-var tpaura = { 
+var tpaura = {
 	name: DragOP.getLString("hacks.tpaura"),
-	desc: "Is teleporting you around people so that they cant hit you.",
+	desc: "Automatically teleports you around people so that they can\'t hit you.",
 	type: ModuleType.mod,
 	state: false,
 	isStateMode: function () {
@@ -555,25 +571,27 @@ var tpaura = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function (){
-		
+	onTick: function () {
+
 	},
-	findPos: function(ent){
+	findPos: function (ent) {
 		var Ppos = new Array(getPlayerX(), getPlayerY(), getPlayerZ());
 		var entPos = new Array(Entity.getX(ent), Entity.getY(ent), Entity.getZ(ent));
 		var diff = new Array(entPos[0] - Ppos[0], null, entPos[2] - Ppos[2]);
-		Ppos[0] += diff[0]*2;
-		Ppos[2] += diff[2]*2;
+		Ppos[0] += diff[0] * 2;
+		Ppos[2] += diff[2] * 2;
 		return Ppos;
 		//just inverting pos at the moment
 	},
-	onAttack: function (att, vic) { 
-		if(att == Player.getEntity() && this.state && Entity.getHealth(vic) > 0){
-			
+	onAttack: function (att, vic) {
+		if (att == Player.getEntity() && this.state && Entity.getHealth(vic) > 0) {
+
 			var pos = this.findPos(vic);
-			
-			Entity.setPosition(Player.getEntity(), pos[0], pos[1], pos[2]);
-			
+
+			if (getTile(pos[0], pos[1], pos[2]) == 0 && getTile(pos[0], pos[1] - 1, pos[2]) == 0 && getTile(pos[0], pos[1] - 2, pos[2]) == 0) {
+				Entity.setPosition(Player.getEntity(), pos[0], pos[1], pos[2]);
+			}
+
 			Utils.Entity.crosshairAimAt(vic, pos);
 		}
 	},
@@ -612,13 +630,13 @@ var modBtn = function (mod) {
 	var btn = new android.widget.Button(ctx);
 	btn.setTransformationMethod(null);
 	btn.setBackground(null);
-	btn.setShadowLayer (dip2px(1), dip2px(1), dip2px(1), android.graphics.Color.BLACK);
+	btn.setShadowLayer(dip2px(1), dip2px(1), dip2px(1), android.graphics.Color.BLACK);
 	btn.setTextColor(android.graphics.Color.WHITE);
 	btn.setOnClickListener(new android.view.View.OnClickListener({
 		onClick: function (viewarg) {
 			mod.onClick(btn);
 			mod.onRefresh(btn);
-			if(mod.isStateMode())modButtonLayout.setBackground(DragOP.getStyledBtnBackground(mod.state, true));
+			if (mod.isStateMode()) modButtonLayout.setBackground(DragOP.getStyledBtnBackground(mod.state, true));
 			else modButtonLayout.setBackground(DragOP.getStyledBtnBackground(false, false));
 
 		}
@@ -626,7 +644,7 @@ var modBtn = function (mod) {
 
 	var btn1 = new android.widget.Button(ctx);
 	btn1.setTransformationMethod(null);
-	btn1.setText("\ud83d\udd3b");
+	btn1.setText("🔻");
 	//btn1.setBackground(null);
 	btn1.setBackgroundColor(android.graphics.Color.argb(100, 0, 0, 0));
 	btn1.setOnClickListener(new android.view.View.OnClickListener({
@@ -640,7 +658,7 @@ var modBtn = function (mod) {
 
 	var modButtonLayout = new LinearLayout(ctx);
 	modButtonLayout.setOrientation(LinearLayout.HORIZONTAL);
-	if(mod.isStateMode())modButtonLayout.setBackground(DragOP.getStyledBtnBackground(mod.state, true));
+	if (mod.isStateMode()) modButtonLayout.setBackground(DragOP.getStyledBtnBackground(mod.state, true));
 	else modButtonLayout.setBackground(DragOP.getStyledBtnBackground(false, false));
 
 	var modButtonLayoutLeft = new LinearLayout(ctx);
@@ -676,7 +694,7 @@ DragOP.generateMenu = function (keyword) {
 				.indexOf(keyword.toString()
 					.toLowerCase())) > -1 || (keyword == null || keyword == "" || keyword == undefined)) {
 			if (index % 2 == 1) {
-				if(!currow)currow = new android.widget.TableRow(ctx);
+				if (!currow) currow = new android.widget.TableRow(ctx);
 				currow.addView(new modBtn(DragOP.mods[index]));
 				lay.addView(currow);
 				currow = null;
@@ -878,34 +896,34 @@ function rptask() {
 			new android.os.Handler()
 				.postDelayed(new java.lang.Runnable({
 					run: function () {
-						
+
 						nx = getPlayerX();
 						ny = getPlayerY();
 						nz = getPlayerZ();
-						DragOP.mods.forEach(function(entry, index, array){
-							if(entry.onTick)entry.onTick();
+						DragOP.mods.forEach(function (entry, index, array) {
+							if (entry.onTick) entry.onTick();
 						});
 						if ((GUI != null && GUI.isShowing()) && (menu != null && menu.isShowing())) GUI.dismiss();
 						if ((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing()) && (dialog == null || !dialog.isShowing())) {
-							try{
-							net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote = true;
-							net.zhuoweizhang.mcpelauncher.ScriptManager.setLevelFakeCallback(true, false);
-							}catch(e){
+							try {
+								net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote = true;
+								net.zhuoweizhang.mcpelauncher.ScriptManager.setLevelFakeCallback(true, false);
+							} catch (e) {
 								//toolbox....
 							}
 							showMenuBtn();
 						}
 						//did you know thats its eval(java.lang.String) and not eval(null)?
-						if(Player.getEntity() != -1){
-						Utils.Vel.lastX = Entity.getVelX(Player.getEntity());
-						Utils.Vel.lastY = Entity.getVelY(Player.getEntity());
-						Utils.Vel.lastZ = Entity.getVelZ(Player.getEntity());
+						if (Player.getEntity() != -1) {
+							Utils.Vel.lastX = Entity.getVelX(Player.getEntity());
+							Utils.Vel.lastY = Entity.getVelY(Player.getEntity());
+							Utils.Vel.lastZ = Entity.getVelZ(Player.getEntity());
 						}
 						Utils.Pos.lastX = getPlayerX();
 						Utils.Pos.lastY = getPlayerY();
 						Utils.Pos.lastZ = getPlayerZ();
 						tick1++;
-						if(tick1 > 50)tick1 = 0;
+						if (tick1 > 50) tick1 = 0;
 						rptask();
 					}
 				}), 25);
@@ -954,18 +972,18 @@ DragOP.commandManager = function (cmd) {
 function chatHook(text) {
 	if (text.charAt(0) == ".") {
 		preventDefault();
-		try{
-		com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
-			.nativeSetTextboxText("");
-		com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
-			.updateTextboxText("");
-		}catch(e){
+		try {
+			com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+				.nativeSetTextboxText("");
+			com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+				.updateTextboxText("");
+		} catch (e) {
 			//Not-BlockLauncher-Error
 		}
 		DragOP.commandManager(text.substring(1, text.length));
 	}
 }
-this.Item.getEnchantType = function(id) {
+this.Item.getEnchantType = function (id) {
 	if (id == 340) return 0;
 	if (Item.getUseAnimation(id) == UseAnimation.bow) return 1;
 	if (id == 258 || id == 271 || id == 275 || id == 279 || id == 286) return 2;
@@ -977,8 +995,999 @@ this.Item.getEnchantType = function(id) {
 	if (id >= 298 && id <= 317) return 4;
 	if (id == 346) return 5;
 };
-function attackHook(att, vic){
-	DragOP.mods.forEach(function(entry, index, array){
-		if(entry.onAttack)entry.onAttack(att, vic);
+
+function attackHook(att, vic) {
+	DragOP.mods.forEach(function (entry, index, array) {
+		if (entry.onAttack) entry.onAttack(att, vic);
+	});
+}
+var GUI;
+var dialog;
+var searchQ = ""; //Current search query
+var tick1 = 0;
+
+var DragOP = {
+	mods: new Array()
+};
+var lc = {
+	en_US: 1,
+	de_DE: 2
+};
+var ModuleType = {
+	mod: 1,
+	special: 2,
+	command: 3,
+	cmd: 3,
+	toName: function (type) {
+		switch (type) {
+		case ModuleType.mod:
+			return DragOP.getLString("moduletype.mod");
+			break;
+		case ModuleType.special:
+			return DragOP.getLString("moduletype.special");
+			break;
+		case ModuleType.command:
+			return DragOP.getLString("moduletype.command");
+			break;
+		default:
+			return "unknown";
+		}
+	}
+};
+var l = new Array();
+l.push(new Array()); //Codes
+l.push(new Array()); //English
+l.push(new Array()); //German
+//Multi Language Support
+
+var Utils = {
+	online: false,
+	modsCount: 0,
+	currentSearchCount: 0,
+	Vel: {
+		lastX: 0,
+		lastY: 0,
+		lastZ: 0
+	},
+	Pos: {
+		lastX: 0,
+		lastY: 0,
+		lastZ: 0
+	},
+	Entity: {
+		crosshairAimAt: function (ent, pos) {
+			if (ent != null) {
+				var x = Entity.getX(ent) - getPlayerX();
+				var y = Entity.getY(ent) - getPlayerY();
+				var z = Entity.getZ(ent) - getPlayerZ();
+				if (pos != null && pos instanceof Array) {
+
+					x = Entity.getX(ent) - pos[0];
+					y = Entity.getY(ent) - pos[1];
+					z = Entity.getZ(ent) - pos[2];
+				}
+				if (Entity.getEntityTypeId(ent) != 63)
+					y += 0.5;
+				var a = 0.5 + Entity.getX(ent);
+				var b = Entity.getY(ent);
+				var c = 0.5 + Entity.getZ(ent);
+				var len = Math.sqrt(x * x + y * y + z * z);
+				var y = y / len;
+				var pitch = Math.asin(y);
+				pitch = pitch * 180.0 / Math.PI;
+				pitch = -pitch;
+				if (pitch < 90 && pitch > -90) {
+					Entity.setRot(Player.getEntity(), -Math.atan2(a - (Player.getX() + 0.5), c - (Player.getZ() + 0.5)) * (180 / Math.PI), pitch);
+				}
+			}
+		},
+		bowAimAt: function (ent) {
+			var velocity = 1;
+			var posX = Entity.getX(ent) - Player.getX();
+			var posY = Entity.getEntityTypeId(ent) == EntityType.PLAYER ? Entity.getY(ent) - Player.getY() : Entity.getY(ent) + 1 - Player.getY();
+			var posZ = Entity.getZ(ent) - Player.getZ();
+			var yaw = (Math.atan2(posZ, posX) * 180 / Math.PI) - 90;
+			var y2 = Math.sqrt(posX * posX + posZ * posZ);
+			var g = 0.006;
+			var tmp = (velocity * velocity * velocity * velocity - g * (g * (y2 * y2) + 2 * posY * (velocity * velocity)));
+			var pitch = -(180 / Math.PI) * (Math.atan((velocity * velocity - Math.sqrt(tmp)) / (g * y2)));
+			setRot(Player.getEntity(), yaw, pitch);
+		},
+		getNearestEntity(maxrange) {
+			var mobs = Entity.getAll();
+			var players = Server.getAllPlayers();
+			var small = maxrange;
+			var ent = null;
+			for (var i = 0; i < mobs.length; i++) {
+				var x = Entity.getX(mobs[i]) - getPlayerX();
+				var y = Entity.getY(mobs[i]) - getPlayerY();
+				var z = Entity.getZ(mobs[i]) - getPlayerZ();
+				var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+				if (dist < small && dist > 0 && Entity.getEntityTypeId(mobs[i]) <= 63 && Entity.getHealth(mobs[i]) >= 1) {
+					small = dist;
+					ent = mobs[i];
+				}
+			}
+			for (var i = 0; i < players.length; i++) {
+				var x = Entity.getX(players[i]) - getPlayerX();
+				var y = Entity.getY(players[i]) - getPlayerY();
+				var z = Entity.getZ(players[i]) - getPlayerZ();
+				var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+				if (dist < small && dist > 0 && Entity.getHealth(players[i]) >= 1) {
+					small = dist;
+					ent = players[i];
+				}
+			}
+			return ent;
+		}
+	}
+};
+
+DragOP.addCode = function (code) {
+	l[0].push(code);
+}
+DragOP.setLString = function (code, lang, value) {
+		var done = false;
+		l[0].forEach(function (entry, index, array) {
+			if (entry.toLowerCase() == code.toLowerCase()) {
+				l[lang][index] = value;
+				done = true;
+			}
+		});
+		if (done) return;
+		//l[0].push(code+"".toLowerCase());
+		//DragOP.setLString(code, lang, value);
+	}
+	//DragOP.addCode(code);
+DragOP.addCode("hacks.gamemode");
+DragOP.addCode("hacks.speed");
+DragOP.addCode("hacks.aimaura");
+DragOP.addCode("hacks.jumpspeed");
+DragOP.addCode("hacks.autojump");
+DragOP.addCode("hacks.tpaura");
+DragOP.addCode("gm.survival");
+DragOP.addCode("gm.creative");
+DragOP.addCode("moduletype.mod");
+DragOP.addCode("moduletype.special");
+DragOP.addCode("moduletype.command");
+DragOP.addCode("moddialog.description");
+DragOP.addCode("moddialog.type");
+DragOP.addCode("state.on");
+DragOP.addCode("state.off");
+
+//DragOP.setLString(code, lc.en_US, value);
+DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
+DragOP.setLString("hacks.speed", lc.en_US, "Speed");
+DragOP.setLString("hacks.jumpspeed", lc.en_US, "JumpSpeed");
+DragOP.setLString("hacks.aimaura", lc.en_US, "AimAura"); //No good German translation for aim aura
+DragOP.setLString("hacks.autojump", lc.en_US, "AutoJump");
+DragOP.setLString("hacks.tpaura", lc.en_US, "TP-Aura");
+DragOP.setLString("gm.survival", lc.en_US, "Survival");
+DragOP.setLString("gm.creative", lc.en_US, "Creative");
+DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
+DragOP.setLString("moduletype.special", lc.en_US, "Special");
+DragOP.setLString("moduletype.command", lc.en_US, "Command");
+DragOP.setLString("moddialog.description", lc.en_US, "Description");
+DragOP.setLString("moddialog.type", lc.en_US, "Type");
+DragOP.setLString("state.on", lc.en_US, "On");
+DragOP.setLString("state.off", lc.en_US, "Off");
+//German
+DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
+/*DragOP.setLString("hacks.speed", lc.de_DE, "Schnelligkeit");Schnelligkeit is bad*/
+DragOP.setLString("hacks.jumpspeed", lc.de_DE, "HasenTempo"); //Why not using bunnyspeed? :)
+DragOP.setLString("hacks.autojump", lc.de_DE, "Automatisches\nSpringen");
+DragOP.setLString("gm.survival", lc.de_DE, "Überleben");
+DragOP.setLString("gm.creative", lc.de_DE, "Kreativ");
+DragOP.setLString("moduletype.mod", lc.de_DE, "Mod");
+DragOP.setLString("moduletype.special", lc.de_DE, "Spezielles");
+DragOP.setLString("moduletype.command", lc.de_DE, "Befehl");
+DragOP.setLString("moddialog.description", lc.de_DE, "Beschreibung");
+DragOP.setLString("moddialog.type", lc.de_DE, "Typ");
+
+DragOP.getL = function () {
+	//Todo
+	return l[1];
+}
+
+DragOP.getLString = function (code) {
+	var str = code;
+	l[0].forEach(function (entry, index, array) {
+
+		if (entry.toLowerCase()
+			.indexOf(code.toLowerCase()) > -1) {
+			try {
+				str = DragOP.getL()[index];
+			} catch (e) {
+				try {
+					str = l[1][index];
+				} catch (e) {
+					DragOP.ctoast(e);
+				}
+
+
+			}
+		}
+	});
+	return str;
+}
+
+DragOP.ctoast = function (text, showPrefix) {
+	try {
+		var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+		ctx.runOnUiThread(new java.lang.Runnable({
+			run: function () {
+				var thetoast = android.widget.Toast.makeText(com.mojang.minecraftpe.MainActivity.currentMainActivity.get(), text, android.widget.Toast.LENGTH_LONG);
+				var layout = new android.widget.LinearLayout(ctx);
+				var msg = new android.widget.TextView(ctx);
+				if (showPrefix || showPrefix == null) text = "DragOP: " + text;
+				msg.setText(text);
+				msg.setGravity(android.view.Gravity.CENTER);
+				msg.setTextSize(20);
+				msg.setPadding(10, 10, 10, 10);
+				msg.setTextColor(android.graphics.Color.WHITE);
+				var bg = new android.graphics.drawable.GradientDrawable();
+				bg.setColor(android.graphics.Color.argb(150, 50, 50, 50));
+				bg.setStroke(dip2px(5), android.graphics.Color.argb(200, 5, 5, 5));
+				bg.setCornerRadius(dip2px(20));
+				layout.addView(msg);
+				layout.setBackground(bg);
+				thetoast.setView(layout);
+				thetoast.show();
+			}
+		}));
+	} catch (e) {
+		print(e);
+	}
+}
+DragOP.loadModsAnim = function (progress) {
+	ctx.runOnUiThread(new java.lang.Runnable({
+		run: function () {
+			new android.os.Handler()
+				.postDelayed(new java.lang.Runnable({
+					run: function () {
+						ModPE.langEdit("menu.copyright", "DragOP: " + progress + " Mods loaded");
+						if (progress < Utils.modsCount) DragOP.loadModsAnim(progress + 1);
+					}
+				}), 50);
+		}
+	}));
+}
+DragOP.getStyledBackground = function () {
+	var bg = android.graphics.drawable.GradientDrawable();
+	bg.setCornerRadius(2);
+	bg.setColor(android.graphics.Color.argb(210, 0, 128, 0));
+	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+	bg.setStroke(dip2px(2), android.graphics.Color.argb(210, 139, 0, 0));
+	return bg;
+}
+DragOP.getStyledBtnBackground = function (state, toggleable) {
+	var bg = android.graphics.drawable.GradientDrawable();
+	bg.setCornerRadius(1);
+	bg.setColor(android.graphics.Color.argb(80, 0, 0, 0));
+	if (state) bg.setColor(android.graphics.Color.argb(210, 0, 200, 0));
+	if (toggleable == false) bg.setColor(android.graphics.Color.argb(210, 230, 150, 30));
+	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+	bg.setStroke(dip2px(2), android.graphics.Color.argb(230, 0, 0, 0));
+	return bg;
+}
+
+DragOP.showModDialog = function (mod) {
+	ctx.runOnUiThread(new java.lang.Runnable() {
+		run: function () {
+			try {
+				var display = new android.util.DisplayMetrics();
+				com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+					.getWindowManager()
+					.getDefaultDisplay()
+					.getMetrics(display);
+				var content = new android.widget.RelativeLayout(ctx);
+				content.setId(9472729);
+				var contentScroll = new android.widget.ScrollView(ctx);
+				contentScroll.setId(492628);
+				var modTitle = new android.widget.TextView(ctx);
+				modTitle.setText(android.text.Html.fromHtml("<u>" + mod.name + "</u>"));
+				modTitle.setTextSize(dip2px(20));
+				modTitle.setGravity(android.view.Gravity.CENTER);
+				modTitle.setTextColor(android.graphics.Color.BLACK);
+				modTitle.setId(94771);
+				var modTypeText = new android.widget.TextView(ctx);
+				modTypeText.setText(DragOP.getLString("moddialog.type") + ": " + ModuleType.toName(mod.type));
+				modTypeText.setGravity(android.view.Gravity.CENTER);
+				modTypeText.setTextColor(android.graphics.Color.BLACK);
+				modTypeText.setTextSize(dip2px(10));
+				modTypeText.setId(93922);
+				var modDescTitle = new android.widget.TextView(ctx);
+				modDescTitle.setText(DragOP.getLString("moddialog.description") + ":");
+				modDescTitle.setGravity(android.view.Gravity.CENTER);
+				modDescTitle.setTextColor(android.graphics.Color.BLACK);
+				modDescTitle.setTextSize(dip2px(11));
+				modDescTitle.setId(29582);
+				var modDescText = new android.widget.TextView(ctx);
+				modDescText.setText(mod.desc);
+				modDescText.setGravity(android.view.Gravity.CENTER);
+				modDescText.setTextSize(dip2px(10));
+				modDescText.setTextColor(android.graphics.Color.BLACK);
+				modDescText.setId(29285);
+				var closeButton = new styledBtn();
+				closeButton.setText("Close");
+				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
+				closeButton.setId(10472);
+				var dialogLayout = new android.widget.RelativeLayout(ctx);
+				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
+				//dialogLayout.setGravity(android.view.Gravity.CENTER);
+				//dialogLayout.setOrientation(LinearLayout.VERTICAL);
+				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				dialogLayout.addView(modTitle, params);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				content.addView(modTypeText, params);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.BELOW, modTypeText.getId());
+				content.addView(modDescTitle, params);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.BELOW, modDescTitle.getId());
+				content.addView(modDescText, params);
+				contentScroll.addView(content);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.BELOW, modTitle.getId());
+				params.addRule(android.widget.RelativeLayout.ABOVE, closeButton.getId());
+				contentScroll.setFillViewport(true);
+				dialogLayout.addView(contentScroll, params);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				dialogLayout.addView(closeButton, params);
+				dialog = new android.app.Dialog(ctx);
+				dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+				dialog.getWindow()
+					.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				dialog.setContentView(dialogLayout);
+				dialog.setTitle(mod.name);
+				dialog.setOnDismissListener(new android.content.DialogInterface.OnDismissListener() {
+					onDismiss: function () {
+						showMenu();
+					}
+				});
+				dialog.show();
+				var window = dialog.getWindow();
+				window.setLayout(mwidth, display.heightPixels);
+				closeButton.setOnClickListener(new android.view.View.OnClickListener() {
+					onClick: function (view) {
+						dialog.dismiss();
+					}
+				});
+			} catch (e) {
+				DragOP.ctoast("Error: " + e);
+			}
+		}
+	});
+}
+
+DragOP.registerModule = function (mod) {
+
+		DragOP.mods.push(mod);
+		Utils.modsCount += 1;
+
+	}
+	/*
+	var hack = {
+		name: "Hack",
+		desc: "Some Desc",
+		type: ModuleType.mod,
+		state: false,
+		isStateMode: function () {
+			return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+			//Call hack.state = !hack.state; to toggle 
+		},
+		isToggleAble: function () {
+			return true; //MUST be true if isStateMode = true
+			//Call hack.onClick() to toggle
+		},
+		extra: 0,
+		onTick: function () { },
+		onEnable: function (btn) {  },
+		onDisable: function (btn) {  },
+		onClick: function (btn) {},
+		onRefresh: function (btn) {}
+	};
+	*/
+var gmhack = {
+	name: "Gamemode",
+	desc: "Changes your GameMode!",
+	type: ModuleType.mod,
+	isStateMode: function () {
+		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	extra: Level.getGameMode(),
+	onTick: function () { /*some tick*/ },
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
+		if (this.extra == 1) this.extra = 0;
+		else this.extra = 1;
+		Level.setGameMode(this.extra);
+	},
+	onRefresh: function (btn) {
+		if (btn != null)
+			btn.setText(DragOP.getLString("hacks.gamemode") + ": " + (this.extra == 0 ? DragOP.getLString("gm.survival") : DragOP.getLString("gm.creative")));
+	}
+};
+DragOP.registerModule(gmhack);
+var jumpspeed = {
+	name: DragOP.getLString("hacks.jumpspeed"),
+	desc: "Let you jump and run at once.",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if (this.state && Player.getEntity() != -1) {
+			var y = Entity.getY(getPlayerEnt());
+			while (y > 1) y -= 1;
+			if (y < 0) return;
+			var max = 0.8;
+			var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
+			var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
+			if (speed > 0.02) {
+				if (Math.round(y * 100) == 62) setVelY(getPlayerEnt(), 0.2);
+				else if (Math.round(y * 100) >= 70) setVelY(getPlayerEnt(), -0.15);
+
+			} else {
+				setVelX(getPlayerEnt(), 0);
+				setVelZ(getPlayerEnt(), 0);
+			}
+			if (speed >= lastSpeed && speed < max && tick1 % 1 == 0) {
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * 1.1);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * 1.1);
+			} else if (speed < lastSpeed || speed > max) {
+				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 2);
+				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 2);
+			}
+			/*if(lastSpeed > speed+0.00001){
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())/2);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())/2);
+				clientMessage(1);
+			}else if(speed < 0.01){
+				setVelX(getPlayerEnt(), 0);
+				setVelZ(getPlayerEnt(), 0);
+				clientMessage(2);
+			}else if(speed < max){
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())*1.5);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())*1.5);
+				clientMessage(3);
+			}*/
+
+
+
+		} else {
+
+		}
+	},
+	onEnable: function (btn) {
+		this.state = true;
+	},
+	onDisable: function (btn) {
+		this.state = false;
+	},
+	onClick: function (btn) {
+		this.state = !this.state;
+	},
+	onRefresh: function (btn) {
+		if (btn != null) btn.setText(DragOP.getLString("hacks.jumpspeed"));
+	}
+};
+DragOP.registerModule(jumpspeed);
+var aimaura = {
+	name: DragOP.getLString("hacks.aimaura"),
+	desc: "Automatically aims at near mobs!",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if (this.state) {
+			var ent = Utils.Entity.getNearestEntity(7);
+			Utils.Entity.crosshairAimAt(ent);
+		}
+	},
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
+		this.state = !this.state;
+	},
+	onRefresh: function (btn) {
+		if (btn != null)
+			btn.setText(DragOP.getLString("hacks.aimaura"));
+	}
+};
+DragOP.registerModule(aimaura);
+var bowaimbot = {
+	name: DragOP.getLString("hacks.bowaimbot"),
+	desc: "Automatically aims with a bow at near mobs!",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if (this.state && getCarriedItem() == 261 /*No Dynamic :( */ ) {
+			var ent = Utils.Entity.getNearestEntity(100);
+			Utils.Entity.bowAimAt(ent);
+		}
+	},
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
+		this.state = !this.state;
+	},
+	onRefresh: function (btn) {
+		if (btn != null)
+			btn.setText(DragOP.getLString("hacks.bowaimbot"));
+	}
+};
+DragOP.registerModule(bowaimbot);
+var tpaura = {
+	name: DragOP.getLString("hacks.tpaura"),
+	desc: "Automatically teleports you around people so that they can\'t hit you.",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+
+	},
+	findPos: function (ent) {
+		var Ppos = new Array(getPlayerX(), getPlayerY(), getPlayerZ());
+		var entPos = new Array(Entity.getX(ent), Entity.getY(ent), Entity.getZ(ent));
+		var diff = new Array(entPos[0] - Ppos[0], null, entPos[2] - Ppos[2]);
+		Ppos[0] += diff[0] * 2;
+		Ppos[2] += diff[2] * 2;
+		return Ppos;
+		//just inverting pos at the moment
+	},
+	onAttack: function (att, vic) {
+		if (att == Player.getEntity() && this.state && Entity.getHealth(vic) > 0) {
+
+			var pos = this.findPos(vic);
+
+			if (getTile(pos[0], pos[1], pos[2]) == 0 && getTile(pos[0], pos[1] - 1, pos[2]) == 0 && getTile(pos[0], pos[1] - 2, pos[2]) == 0) {
+				Entity.setPosition(Player.getEntity(), pos[0], pos[1], pos[2]);
+			}
+
+			Utils.Entity.crosshairAimAt(vic, pos);
+		}
+	},
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
+		this.state = !this.state;
+	},
+	onRefresh: function (btn) {
+		if (btn != null)
+			btn.setText(DragOP.getLString("hacks.tpaura"));
+	}
+};
+DragOP.registerModule(tpaura);
+//Menu open Button
+var menuBtn;
+var moving = false;
+var dx = 0;
+var dy = 0;
+var mPosX = ctx.getWindowManager()
+	.getDefaultDisplay()
+	.getWidth() / 16 * 5;
+//Main Menu
+var mwidth = ctx.getWindowManager()
+	.getDefaultDisplay()
+	.getWidth() / 100 * 70;
+var menu;
+
+var styledBtn = function () {
+	var defaultBtn = new android.widget.Button(ctx);
+	defaultBtn.setBackgroundDrawable(DragOP.getStyledBackground());
+	return defaultBtn;
+}
+
+var modBtn = function (mod) {
+	var btn = new android.widget.Button(ctx);
+	btn.setTransformationMethod(null);
+	btn.setBackground(null);
+	btn.setShadowLayer(dip2px(1), dip2px(1), dip2px(1), android.graphics.Color.BLACK);
+	btn.setTextColor(android.graphics.Color.WHITE);
+	btn.setOnClickListener(new android.view.View.OnClickListener({
+		onClick: function (viewarg) {
+			mod.onClick(btn);
+			mod.onRefresh(btn);
+			if (mod.isStateMode()) modButtonLayout.setBackground(DragOP.getStyledBtnBackground(mod.state, true));
+			else modButtonLayout.setBackground(DragOP.getStyledBtnBackground(false, false));
+
+		}
+	}));
+
+	var btn1 = new android.widget.Button(ctx);
+	btn1.setTransformationMethod(null);
+	btn1.setText("🔻");
+	//btn1.setBackground(null);
+	btn1.setBackgroundColor(android.graphics.Color.argb(100, 0, 0, 0));
+	btn1.setOnClickListener(new android.view.View.OnClickListener({
+		onClick: function (viewarg) {
+			DragOP.showModDialog(mod);
+			menu.dismiss();
+
+			//Show a screen or a dialog with the mod's info and settings
+		}
+	}));
+
+	var modButtonLayout = new LinearLayout(ctx);
+	modButtonLayout.setOrientation(LinearLayout.HORIZONTAL);
+	if (mod.isStateMode()) modButtonLayout.setBackground(DragOP.getStyledBtnBackground(mod.state, true));
+	else modButtonLayout.setBackground(DragOP.getStyledBtnBackground(false, false));
+
+	var modButtonLayoutLeft = new LinearLayout(ctx);
+	modButtonLayoutLeft.setOrientation(1);
+	modButtonLayoutLeft.setLayoutParams(new android.view.ViewGroup.LayoutParams(mwidth / 2.5, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
+	modButtonLayout.addView(modButtonLayoutLeft);
+
+	var modButtonLayoutRight = new LinearLayout(ctx);
+	modButtonLayoutRight.setOrientation(1);
+	modButtonLayoutRight.setLayoutParams(new android.view.ViewGroup.LayoutParams(mwidth / 2 - mwidth / 2.5, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
+	modButtonLayout.addView(modButtonLayoutRight);
+
+	modButtonLayoutLeft.addView(btn);
+	modButtonLayoutRight.addView(btn1);
+
+	mod.onRefresh(btn);
+	//btn.setLayoutParams(new android.widget.TableLayout.LayoutParams(mwidth/2, android.widget.TableLayout.LayoutParams.WRAP_CONTENT, 1));
+	return modButtonLayout;
+};
+
+function dip2px(dips) {
+	var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+	return Math.ceil(dips * ctx.getResources()
+		.getDisplayMetrics()
+		.density);
+}
+DragOP.generateMenu = function (keyword) {
+	var lay = new android.widget.TableLayout(ctx);
+	var currow;
+	DragOP.mods.forEach(function (entry, index, array) {
+		if ((entry.name.toString()
+				.toLowerCase()
+				.indexOf(keyword.toString()
+					.toLowerCase())) > -1 || (keyword == null || keyword == "" || keyword == undefined)) {
+			if (index % 2 == 1) {
+				if (!currow) currow = new android.widget.TableRow(ctx);
+				currow.addView(new modBtn(DragOP.mods[index]));
+				lay.addView(currow);
+				currow = null;
+
+			} else {
+				currow = new android.widget.TableRow(ctx);
+				currow.addView(new modBtn(DragOP.mods[index]));
+
+			}
+		} else {
+
+		}
+	});
+	if (currow != null) lay.addView(currow);
+	var sc = new android.widget.ScrollView(ctx);
+	sc.addView(lay);
+	return sc;
+}
+
+function showMenu() {
+	ctx.runOnUiThread(new java.lang.Runnable({
+		run: function () {
+			try {
+
+				var sbar = new android.widget.LinearLayout(ctx);
+
+				var bg = android.graphics.drawable.GradientDrawable();
+				bg.setColor(android.graphics.Color.argb(100, 255, 255, 255));
+				bg.setStroke(dip2px(2), android.graphics.Color.BLACK);
+				bg.setCornerRadius(1);
+
+				sbar.setBackgroundDrawable(bg);
+				var search = new android.widget.EditText(ctx);
+				search.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+				search.setHint("Search a mod");
+				search.setGravity(android.view.Gravity.CENTER);
+				search.addTextChangedListener(new android.text.TextWatcher() {
+					afterTextChanged: function (text) {
+						updateMenu(text, toplayout);
+						searchQ = text;
+					}
+				});
+				sbar.addView(search, new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
+				sbar.setId(39472);
+				var mlist = new android.widget.LinearLayout(ctx);
+				//mlist.setGravity(android.view.Gravity.TOP);
+				mlist.setId(20372);
+				mlist.addView(DragOP.generateMenu(search.getText() + ""));
+				var lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+				//lparam.addRule(android.widget.RelativeLayout.BELOW, toplayout.getChildAt(0).getId());
+				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				//lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
+				var toplayout = new android.widget.RelativeLayout(ctx);
+				toplayout.addView(sbar, lparam);
+				lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+				lparam.addRule(android.widget.RelativeLayout.BELOW, toplayout.getChildAt(0)
+					.getId());
+				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				//lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
+				mlist.setLayoutParams(lparam);
+				toplayout.addView(mlist);
+				//toplayout.setBackground(null);
+				toplayout.setGravity(android.view.Gravity.CENTER);
+				toplayout.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function (viewarg) {
+						menu.dismiss();
+						showMenuBtn();
+						searchQ = "";
+					}
+				}));
+				menu = new android.widget.PopupWindow(toplayout, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, true);
+				menu.setAnimationStyle(android.R.style.Animation_Dialog);
+				//menu.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				//menu.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+				menu.showAtLocation(ctx.getWindow()
+					.getDecorView(), android.view.Gravity.CENTER, 0, 0 /*ctx.getWindowManager().getDefaultDisplay().getHeight()*/ );
+				//search.requestFocus();
+				//lol
+			} catch (e) {
+				DragOP.ctoast(e);
+			}
+		}
+	}));
+}
+
+function updateMenu(keyword, toplayout) {
+	Utils.currentSearchCount += 1;
+	if (Utils.currentSearchCount > 999) Utils.currentSearchCount = 0;
+	var myNum = Utils.currentSearchCount;
+	var r = new java.lang.Runnable({
+		run: function () {
+			var newList = DragOP.generateMenu(keyword);
+			ctx.runOnUiThread(new java.lang.Runnable({
+				run: function () {
+					try {
+						if (myNum == Utils.currentSearchCount) {
+							var mlist = toplayout.getChildAt(1);
+							var lparam = mlist.getLayoutParams();
+							while (mlist.getChildCount() > 0) mlist.removeView(mlist.getChildAt(0));
+							mlist.addView(newList);
+						}
+					} catch (e) {
+						DragOP.ctoast(e);
+					}
+				}
+			}));
+		}
+	});
+	var t = new java.lang.Thread(r);
+	t.start();
+
+}
+
+function showMenuBtn() {
+
+	menuBtn = new android.widget.Button(ctx);
+	ctx.runOnUiThread(new java.lang.Runnable({
+		run: function () {
+			try {
+				if (GUI != null && GUI.isShowing()) GUI.dismiss();
+				/*if(ghost) {
+					menuBtn.setText('');
+					menuBtn.setBackgroundColor(android.graphics.Color.parseColor("#01ffff00"));
+				} else {
+					menuBtn.setText('D');
+					menuBtn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(bg));
+				}
+				*/
+				menuBtn.setText('D');
+				//menuBtn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(bg));
+
+				menuBtn.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function (viewarg) {
+						//mainMenu();
+						//windowMenu();
+						/*exit();*/
+						showMenu();
+						GUI.dismiss();
+						GUI = null;
+					}
+				}));
+				menuBtn.setOnTouchListener(new android.view.View.OnTouchListener() {
+					onTouch: function (view, motionEvent) {
+						try {
+							if (!moving) return false;
+							switch (motionEvent.getAction()) {
+							case android.view.MotionEvent.ACTION_DOWN:
+								dx = mPosX - motionEvent.getRawX();
+								break;
+							case android.view.MotionEvent.ACTION_MOVE:
+								mPosX = (motionEvent.getRawX() + dx);
+								GUI.update(mPosX, 0, -1, -1);
+								break;
+							case android.view.MotionEvent.ACTION_UP:
+							case android.view.MotionEvent.ACTION_CANCEL:
+								moving = false;
+								break;
+							}
+						} catch (e) {
+							DragOP.ctoast("Error: " + e);
+						}
+
+						return true;
+					}
+				});
+				menuBtn.setOnLongClickListener(new android.view.View.OnLongClickListener() {
+					onLongClick: function (v, t) {
+						ctx.getSystemService(android.content.Context.VIBRATOR_SERVICE)
+							.vibrate(60);
+						/*gad();
+						configd1();
+						advsetd();*/
+						moving = true;
+						return true;
+					}
+				});
+				menuBtn.getBackground()
+					.setAlpha(200);
+
+				GUI = new android.widget.PopupWindow(menuBtn, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				GUI.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				GUI.showAtLocation(ctx.getWindow()
+					.getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, ctx.getWindowManager()
+					.getDefaultDisplay()
+					.getWidth() / 16 * 5, 0);
+			} catch (err) {
+				DragOP.ctoast(err);
+			}
+		}
+	}));
+}
+showMenuBtn();
+
+function rptask() {
+	ctx.runOnUiThread(new java.lang.Runnable({
+		run: function () {
+			new android.os.Handler()
+				.postDelayed(new java.lang.Runnable({
+					run: function () {
+
+						nx = getPlayerX();
+						ny = getPlayerY();
+						nz = getPlayerZ();
+						DragOP.mods.forEach(function (entry, index, array) {
+							if (entry.onTick) entry.onTick();
+						});
+						if ((GUI != null && GUI.isShowing()) && (menu != null && menu.isShowing())) GUI.dismiss();
+						if ((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing()) && (dialog == null || !dialog.isShowing())) {
+							try {
+								net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote = true;
+								net.zhuoweizhang.mcpelauncher.ScriptManager.setLevelFakeCallback(true, false);
+							} catch (e) {
+								//toolbox....
+							}
+							showMenuBtn();
+						}
+						//did you know thats its eval(java.lang.String) and not eval(null)?
+						if (Player.getEntity() != -1) {
+							Utils.Vel.lastX = Entity.getVelX(Player.getEntity());
+							Utils.Vel.lastY = Entity.getVelY(Player.getEntity());
+							Utils.Vel.lastZ = Entity.getVelZ(Player.getEntity());
+						}
+						Utils.Pos.lastX = getPlayerX();
+						Utils.Pos.lastY = getPlayerY();
+						Utils.Pos.lastZ = getPlayerZ();
+						tick1++;
+						if (tick1 > 50) tick1 = 0;
+						rptask();
+					}
+				}), 25);
+		}
+	}))
+}
+
+rptask();
+DragOP.loadModsAnim(0);
+
+DragOP.commandManager = function (cmd) {
+	var commandSplit = cmd.split(" ");
+	switch (commandSplit[0]) {
+	case "help":
+		clientMessage("[DragOP] Help command is coming soon!");
+		break;
+	case "t":
+		if (cmd.substring(2, cmd.length) != null && cmd.substring(2, cmd.length) != undefined) {
+			var shouldReturn = false;
+			DragOP.mods.forEach(function (entry, index, array) {
+				if (entry.name.toLowerCase() == cmd.substring(2, cmd.length)
+					.toLowerCase() && !shouldReturn) {
+					if (entry.isStateMode()) {
+						DragOP.mods[index].state = !DragOP.mods[index].state;
+						DragOP.mods[index].onRefresh(null);
+						DragOP.ctoast("Sucessfully toggled module " + entry.name);
+					} else if (entry.isToggleAble()) {
+						DragOP.mods[index].onClick(null);
+						DragOP.mods[index].onRefresh(null);
+						DragOP.ctoast("Sucessfully toggled module " + entry.name);
+					} else {
+						DragOP.ctoast(entry.name + "can't be toggled!");
+					}
+					shouldReturn = true;
+				}
+			});
+			if (shouldReturn) return;
+			DragOP.ctoast("Module " + cmd.substring(2, cmd.length) + " can't be found/toggled!");
+		} else {
+			DragOP.ctoast("Syntax error!");
+		}
+		break;
+	}
+}
+
+function chatHook(text) {
+	if (text.charAt(0) == ".") {
+		preventDefault();
+		try {
+			com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+				.nativeSetTextboxText("");
+			com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+				.updateTextboxText("");
+		} catch (e) {
+			//Not-BlockLauncher-Error
+		}
+		DragOP.commandManager(text.substring(1, text.length));
+	}
+}
+this.Item.getEnchantType = function (id) {
+	if (id == 340) return 0;
+	if (Item.getUseAnimation(id) == UseAnimation.bow) return 1;
+	if (id == 258 || id == 271 || id == 275 || id == 279 || id == 286) return 2;
+	if (id == 290 || id == 291 || id == 292 || id == 293 || id == 294) return 2;
+	if (id == 257 || id == 270 || id == 274 || id == 278 || id == 285) return 2;
+	if (id == 256 || id == 269 || id == 273 || id == 277 || id == 284) return 2;
+	if (id == 359 || id == 259) return 2;
+	if (id == 267 || id == 268 || id == 272 || id == 276 || id == 283) return 3;
+	if (id >= 298 && id <= 317) return 4;
+	if (id == 346) return 5;
+};
+
+function attackHook(att, vic) {
+	DragOP.mods.forEach(function (entry, index, array) {
+		if (entry.onAttack) entry.onAttack(att, vic);
 	});
 }
