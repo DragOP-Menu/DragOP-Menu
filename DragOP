@@ -159,7 +159,7 @@ DragOP.setLString("moddialog.type", lc.de_DE, "Typ");
 
 DragOP.getL = function () {
 	//Todo
-	return l[2];
+	return l[1];
 }
 
 DragOP.getLString = function (code) {
@@ -391,7 +391,7 @@ var gmhack = {
 	}
 };
 DragOP.registerModule(gmhack);
-var speedhack = {
+var jumpspeed = {
 	name: DragOP.getLString("hacks.jumpspeed"),
 	desc: "Let you jump and run at once.",
 	type: ModuleType.mod,
@@ -449,7 +449,7 @@ var speedhack = {
 	onClick: function (btn) { this.state = !this.state; },
 	onRefresh: function (btn) { if(btn != null)btn.setText(DragOP.getLString("hacks.jumpspeed"));}
 };
-DragOP.registerModule(speedhack);
+DragOP.registerModule(jumpspeed);
 //Menu open Button
 var menuBtn;
 var moving = false;
