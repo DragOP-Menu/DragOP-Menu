@@ -148,6 +148,8 @@ DragOP.addCode("hacks.aimaura");
 DragOP.addCode("hacks.jumpspeed");
 DragOP.addCode("hacks.autojump");
 DragOP.addCode("hacks.tpaura");
+DragOP.addCode("hacks.bowaimbot");
+DragOP.addCode("hacks.clicktp");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
@@ -165,6 +167,8 @@ DragOP.setLString("hacks.jumpspeed", lc.en_US, "JumpSpeed");
 DragOP.setLString("hacks.aimaura", lc.en_US, "AimAura"); //No good German translation for aim aura
 DragOP.setLString("hacks.autojump", lc.en_US, "AutoJump");
 DragOP.setLString("hacks.tpaura", lc.en_US, "TP-Aura");
+DragOP.setLString("hacks.bowaimbot", lc.en_US, "BowAimBot");
+DragOP.setLString("hacks.clicktp", lc.en_US, "TapTeleport");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
@@ -599,6 +603,31 @@ var tpaura = {
 	}
 };
 DragOP.registerModule(tpaura);
+var clicktp = {
+	name: DragOP.getLString("hacks.clicktp"),
+	desc: "Teleports you to the place where you clicked",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onUseItem: function (x,y,z, itemid, blockid, side) {
+		if(getTile(x,y+1,z)==0&&getTile(x,y+2,z)==0&&this.state){
+			Entity.setPosition(Player.getEntity(), x+0.5, y+2.63/*1.62 = eye height of steve*/,z+0.5);
+		}
+	},
+	onClick: function (btn) {this.state = !this.state;},
+	onRefresh: function (btn) {
+		if(btn!=null)
+			btn.setText(DragOP.getLString("hacks.clicktp"));
+	}
+};
+DragOP.registerModule(clicktp);
 //Menu open Button
 var menuBtn;
 var moving = false;
@@ -993,5 +1022,10 @@ this.Item.getEnchantType = function (id) {
 function attackHook(att, vic) {
 	DragOP.mods.forEach(function (entry, index, array) {
 		if (entry.onAttack) entry.onAttack(att, vic);
+	});
+}
+function useItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage){
+	DragOP.mods.forEach(function (entry, index, array) {
+		if (entry.onUseItem) entry.onUseItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage);
 	});
 }
