@@ -8,6 +8,7 @@ var LinearLayout = android.widget.LinearLayout;
 var GUI;
 var dialog;
 var searchQ = "";//Current search query
+var tick1 = 0;
 
 var DragOP = {
 	mods: new Array()
@@ -47,6 +48,16 @@ var Utils = {
 	online: false,
 	modsCount: 0,
 	currentSearchCount: 0,
+	Vel: {
+		lastX: 0,
+		lastY: 0,
+		lastZ: 0
+	},
+	Pos: {
+		lastX: 0,
+		lastY: 0,
+		lastZ: 0
+	},
 	Entity: {
 		bowAimAt: function (ent) {
 			var velocity = 1;
@@ -60,10 +71,10 @@ var Utils = {
 			var pitch = -(180 / Math.PI) * (Math.atan((velocity * velocity - Math.sqrt(tmp)) / (g * y2)));
 			setRot(Player.getEntity(), yaw, pitch);
 		},
-		getNearestEntity(max, useServerFunc) {
+		getNearestEntity(maxrange) {
 			var mobs = Entity.getAll();
 			var players = Server.getAllPlayers();
-			var small = max;
+			var small = maxrange;
 			var ent = null;
 			for (var i = 0; i < mobs.length; i++) {
 				var x = Entity.getX(mobs[i]) - getPlayerX();
@@ -107,6 +118,8 @@ DragOP.setLString = function (code, lang, value) {
 	//DragOP.addCode(code);
 DragOP.addCode("hacks.gamemode");
 DragOP.addCode("hacks.speed");
+DragOP.addCode("hacks.jumpspeed");
+DragOP.addCode("hacks.autojump");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
@@ -120,6 +133,8 @@ DragOP.addCode("state.off");
 //DragOP.setLString(code, lc.en_US, value);
 DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
 DragOP.setLString("hacks.speed", lc.en_US, "Speed");
+DragOP.setLString("hacks.jumpspeed", lc.en_US, "JumpSpeed");
+DragOP.setLString("hacks.autojump", lc.en_US, "AutoJump");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
@@ -131,7 +146,9 @@ DragOP.setLString("state.on", lc.en_US, "On");
 DragOP.setLString("state.off", lc.en_US, "Off");
 //German
 DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
-DragOP.setLString("hacks.speed", lc.de_DE, "Speedy Gonzales");
+/*DragOP.setLString("hacks.speed", lc.de_DE, "Schnelligkeit");Schnelligkeit is bad*/
+DragOP.setLString("hacks.jumpspeed", lc.de_DE, "HasenTempo");//Why not using bunnyspeed? :)
+DragOP.setLString("hacks.autojump", lc.de_DE, "Automatisches\nSpringen");
 DragOP.setLString("gm.survival", lc.de_DE, "Überleben");
 DragOP.setLString("gm.creative", lc.de_DE, "Kreativ");
 DragOP.setLString("moduletype.mod", lc.de_DE, "Mod");
@@ -142,7 +159,7 @@ DragOP.setLString("moddialog.type", lc.de_DE, "Typ");
 
 DragOP.getL = function () {
 	//Todo
-	return l[1];
+	return l[2];
 }
 
 DragOP.getLString = function (code) {
@@ -247,13 +264,13 @@ DragOP.showModDialog = function (mod) {
 				modTitle.setTextColor(android.graphics.Color.BLACK);
 				modTitle.setId(94771);
 				var modTypeText = new android.widget.TextView(ctx);
-				modTypeText.setText(DragOP.getLString("moddialog.type") + ModuleType.toName(mod.type));
+				modTypeText.setText(DragOP.getLString("moddialog.type") +": "+ ModuleType.toName(mod.type));
 				modTypeText.setGravity(android.view.Gravity.CENTER);
 				modTypeText.setTextColor(android.graphics.Color.BLACK);
 				modTypeText.setTextSize(dip2px(10));
 				modTypeText.setId(93922);
 				var modDescTitle = new android.widget.TextView(ctx);
-				modDescTitle.setText(DragOP.getLString("moddialog.description"));
+				modDescTitle.setText(DragOP.getLString("moddialog.description")+":");
 				modDescTitle.setGravity(android.view.Gravity.CENTER);
 				modDescTitle.setTextColor(android.graphics.Color.BLACK);
 				modDescTitle.setTextSize(dip2px(11));
@@ -375,8 +392,8 @@ var gmhack = {
 };
 DragOP.registerModule(gmhack);
 var speedhack = {
-	name: "Speedhack",
-	desc: "Let you run faster",
+	name: DragOP.getLString("hacks.jumpspeed"),
+	desc: "Let you jump and run at once.",
 	type: ModuleType.mod,
 	state: false,
 	isStateMode: function () {
@@ -392,18 +409,45 @@ var speedhack = {
 			var y = Entity.getY(getPlayerEnt());
 			while(y > 1)y -= 1;
 			if(y < 0)return;
-			if(Math.round(y * 100)>=65){
-				
+			var max = 0.8;
+			var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX,2) + Math.pow(Utils.Vel.lastZ, 2));
+			var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()),2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
+			if(speed > 0.02){
+				if(Math.round(y * 100)==62)setVelY(getPlayerEnt(), 0.2);
+				else if(Math.round(y * 100)>=70)setVelY(getPlayerEnt(), -0.15);
+			}else{
+				setVelX(getPlayerEnt(), 0);
+				setVelZ(getPlayerEnt(), 0);
 			}
-			if(Math.round(y * 100)==62)setVelY(getPlayerEnt(), 0.1);
-			if(Math.round(y * 100)>=65)setVelY(getPlayerEnt(), -1);
+			if(speed >= lastSpeed && speed < max && tick1 % 1 == 0){
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())*1.2);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())*1.2);
+			}else if(speed < lastSpeed){
+				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX)/1.4);
+				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ)/1.4);
+			}
+			/*if(lastSpeed > speed+0.00001){
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())/2);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())/2);
+				clientMessage(1);
+			}else if(speed < 0.01){
+				setVelX(getPlayerEnt(), 0);
+				setVelZ(getPlayerEnt(), 0);
+				clientMessage(2);
+			}else if(speed < max){
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())*1.5);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())*1.5);
+				clientMessage(3);
+			}*/
+			
+			
 			
 		}
 	},
 	onEnable: function (btn) { this.state = true; },
 	onDisable: function (btn) { this.state = false; },
 	onClick: function (btn) { this.state = !this.state; },
-	onRefresh: function (btn) { if(btn != null)btn.setText(DragOP.getLString("hacks.speed"));}
+	onRefresh: function (btn) { if(btn != null)btn.setText(DragOP.getLString("hacks.jumpspeed"));}
 };
 DragOP.registerModule(speedhack);
 //Menu open Button
@@ -713,9 +757,18 @@ function rptask() {
 							showMenuBtn();
 						}
 						//did you know thats its eval(java.lang.String) and not eval(null)?
+						Utils.Vel.lastX = Entity.getVelX(Player.getEntity());
+						Utils.Vel.lastY = Entity.getVelY(Player.getEntity());
+						Utils.Vel.lastZ = Entity.getVelZ(Player.getEntity());
+						
+						Utils.Pos.lastX = getPlayerX();
+						Utils.Pos.lastY = getPlayerY();
+						Utils.Pos.lastZ = getPlayerZ();
+						tick1++;
+						if(tick1 > 50)tick1 = 0;
 						rptask();
 					}
-				}), 15);
+				}), 25);
 		}
 	}))
 }
