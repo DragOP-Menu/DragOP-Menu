@@ -637,7 +637,8 @@ var modBtn = function (mod) {
 
 	var btn1 = new android.widget.Button(ctx);
 	btn1.setTransformationMethod(null);
-	btn1.setText("\ud83d\udd3b");
+	var txt = eval("new String(\"\\"+"ud83d"+"\\"+"udd3b\")");
+	btn1.setText(txt+"");
 	//btn1.setBackground(null);
 	btn1.setBackgroundColor(android.graphics.Color.argb(100, 0, 0, 0));
 	btn1.setOnClickListener(new android.view.View.OnClickListener({
