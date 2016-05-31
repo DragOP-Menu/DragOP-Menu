@@ -59,6 +59,26 @@ var Utils = {
 		lastZ: 0
 	},
 	Entity: {
+		crosshairAimAt: function (ent) {
+			if(ent != null){
+				var x = Entity.getX(ent) - getPlayerX();
+				var y = Entity.getY(ent) - getPlayerY();
+				var z = Entity.getZ(ent) - getPlayerZ();
+				if(Entity.getEntityTypeId(ent) != 63)
+					y += 0.5;
+				var a = 0.5 + Entity.getX(ent);
+				var b = Entity.getY(ent);
+				var c = 0.5 + Entity.getZ(ent);
+				var len = Math.sqrt(x * x + y * y + z * z);
+				var y = y / len;
+				var pitch = Math.asin(y);
+				pitch = pitch * 180.0 / Math.PI;
+				pitch = -pitch;
+				if (pitch < 90 && pitch > -90) {										
+					Entity.setRot(Player.getEntity(), -Math.atan2(a - (Player.getX() + 0.5), c - (Player.getZ() + 0.5)) * (180 / Math.PI), pitch);
+				}
+			}
+		},
 		bowAimAt: function (ent) {
 			var velocity = 1;
 			var posX = Entity.getX(ent) - Player.getX();
@@ -96,6 +116,7 @@ var Utils = {
 					ent = players[i];
 				}
 			}
+			return ent;
 		}
 	}
 };
@@ -118,6 +139,7 @@ DragOP.setLString = function (code, lang, value) {
 	//DragOP.addCode(code);
 DragOP.addCode("hacks.gamemode");
 DragOP.addCode("hacks.speed");
+DragOP.addCode("hacks.aimaura");
 DragOP.addCode("hacks.jumpspeed");
 DragOP.addCode("hacks.autojump");
 DragOP.addCode("gm.survival");
@@ -134,6 +156,7 @@ DragOP.addCode("state.off");
 DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
 DragOP.setLString("hacks.speed", lc.en_US, "Speed");
 DragOP.setLString("hacks.jumpspeed", lc.en_US, "JumpSpeed");
+DragOP.setLString("hacks.aimaura", lc.en_US, "AimAura"); //No good German translation for aim aura
 DragOP.setLString("hacks.autojump", lc.en_US, "AutoJump");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
@@ -405,7 +428,7 @@ var jumpspeed = {
 		//Call hack.onClick() to toggle
 	},
 	onTick: function () { 
-		if(this.state){
+		if(this.state && Player.getEntity() != -1){
 			var y = Entity.getY(getPlayerEnt());
 			while(y > 1)y -= 1;
 			if(y < 0)return;
@@ -415,16 +438,17 @@ var jumpspeed = {
 			if(speed > 0.02){
 				if(Math.round(y * 100)==62)setVelY(getPlayerEnt(), 0.2);
 				else if(Math.round(y * 100)>=70)setVelY(getPlayerEnt(), -0.15);
+				
 			}else{
 				setVelX(getPlayerEnt(), 0);
 				setVelZ(getPlayerEnt(), 0);
 			}
 			if(speed >= lastSpeed && speed < max && tick1 % 1 == 0){
-				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())*1.2);
-				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())*1.2);
-			}else if(speed < lastSpeed){
-				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX)/1.4);
-				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ)/1.4);
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())*1.1);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())*1.1);
+			}else if(speed < lastSpeed || speed > max){
+				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX)/2);
+				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ)/2);
 			}
 			/*if(lastSpeed > speed+0.00001){
 				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())/2);
@@ -442,6 +466,8 @@ var jumpspeed = {
 			
 			
 			
+		}else{
+			
 		}
 	},
 	onEnable: function (btn) { this.state = true; },
@@ -450,6 +476,36 @@ var jumpspeed = {
 	onRefresh: function (btn) { if(btn != null)btn.setText(DragOP.getLString("hacks.jumpspeed"));}
 };
 DragOP.registerModule(jumpspeed);
+var aimaura = {
+	name: DragOP.getLString("hacks.aimaura"),
+	desc: "Automatically aims at near mobs!",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () { 
+		if(this.state){
+			var ent = Utils.Entity.getNearestEntity(7);
+			Utils.Entity.crosshairAimAt(ent);
+		}
+	},
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
+		this.state = !this.state;
+	},
+	onRefresh: function (btn) {
+		if (btn != null)
+			btn.setText(DragOP.getLString("hacks.aimaura"));
+	}
+};
+DragOP.registerModule(aimaura);
 //Menu open Button
 var menuBtn;
 var moving = false;
@@ -740,6 +796,7 @@ function rptask() {
 			new android.os.Handler()
 				.postDelayed(new java.lang.Runnable({
 					run: function () {
+						
 						nx = getPlayerX();
 						ny = getPlayerY();
 						nz = getPlayerZ();
@@ -757,10 +814,11 @@ function rptask() {
 							showMenuBtn();
 						}
 						//did you know thats its eval(java.lang.String) and not eval(null)?
+						if(Player.getEntity() != -1){
 						Utils.Vel.lastX = Entity.getVelX(Player.getEntity());
 						Utils.Vel.lastY = Entity.getVelY(Player.getEntity());
 						Utils.Vel.lastZ = Entity.getVelZ(Player.getEntity());
-						
+						}
 						Utils.Pos.lastX = getPlayerX();
 						Utils.Pos.lastY = getPlayerY();
 						Utils.Pos.lastZ = getPlayerZ();
@@ -772,7 +830,7 @@ function rptask() {
 		}
 	}))
 }
-
+print(Player.getEntity());
 rptask();
 DragOP.loadModsAnim(0);
 
