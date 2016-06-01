@@ -47,10 +47,22 @@ var Utils = {
 	online: false,
 	modsCount: 0,
 	currentSearchCount: 0,
+	Player: {
+		onGround: function(){
+			var y = getPlayerY();
+			while (y > 1) y -= 1;
+			if (Math.round(y*100) == 62 && getTile(getPlayerX(), getPlayerY()-1.65, getPlayerZ()) != 0)return true;
+			if (Math.round(y*100) == 12 && getTile(getPlayerX(), getPlayerY()-1.65, getPlayerZ()) != 0)return true;
+			return false;
+		}
+	},
 	Vel: {
 		lastX: 0,
 		lastY: 0,
-		lastZ: 0
+		lastZ: 0,
+		calculateSpeed: function(){
+			return Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
+		}
 	},
 	Pos: {
 		lastX: 0,
@@ -376,28 +388,7 @@ DragOP.registerModule = function (mod) {
 		Utils.modsCount += 1;
 
 	}
-	/*
-	var hack = {
-		name: "Hack",
-		desc: "Some Desc",
-		type: ModuleType.mod,
-		state: false,
-		isStateMode: function () {
-			return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
-			//Call hack.state = !hack.state; to toggle 
-		},
-		isToggleAble: function () {
-			return true; //MUST be true if isStateMode = true
-			//Call hack.onClick() to toggle
-		},
-		extra: 0,
-		onTick: function () { },
-		onEnable: function (btn) {  },
-		onDisable: function (btn) {  },
-		onClick: function (btn) {},
-		onRefresh: function (btn) {}
-	};
-	*/
+	
 var gmhack = {
 	name: "Gamemode",
 	desc: "Changes your GameMode!",
@@ -447,7 +438,7 @@ var jumpspeed = {
 			var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
 			var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
 			if (speed > 0.02) {
-				if (Math.round(y * 100) == 62) setVelY(getPlayerEnt(), 0.2);
+				if (Utils.Player.onGround()) setVelY(getPlayerEnt(), 0.2);
 				else if (Math.round(y * 100) >= 70) setVelY(getPlayerEnt(), -0.15);
 
 			} else {
@@ -628,6 +619,77 @@ var clicktp = {
 	}
 };
 DragOP.registerModule(clicktp);
+var longjump = {
+	name: DragOP.getLString("hacks.longjump"),
+	desc: "Jumps while walking. (About ~5 blocks long)",
+	type: ModuleType.mod,
+	state: false,
+	extratick: 0,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if(this.state && Utils.Player.onGround()){
+			this.extratick++;
+			if(this.extratick > 6)this.extratick = 0;
+			if(Utils.Vel.calculateSpeed() > 0.105 && this.extratick == 0){
+				var vector = new Array();
+				var yaw = (getYaw(getPlayerEnt()) + 90) * (Math.PI/180);
+				var pitch = 0;
+				vector[0] = Math.cos(yaw) * Math.cos(pitch);
+				vector[2] = Math.sin(yaw) * Math.cos(pitch);
+				Entity.setVelX(getPlayerEnt(), vector[0]);
+				Entity.setVelY(getPlayerEnt(), 0.5);
+				Entity.setVelZ(getPlayerEnt(), vector[2]);
+			}else if(this.extratick == 0){
+				Entity.setVelX(getPlayerEnt(), 0);
+				Entity.setVelZ(getPlayerEnt(), 0);
+			}
+		}
+	},
+	onClick: function (btn) {
+		this.state = !this.state;
+	},
+	onRefresh: function (btn) {
+		if(btn != null)
+			btn.setText(DragOP.getLString("hacks.longjump"));
+	}
+};
+DragOP.registerModule(longjump);
+/*
+var statehack = {
+	name: "Hack",
+	desc: "Some Desc",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () { },
+	onClick: function (btn) {},
+	onRefresh: function (btn) {}
+};
+	*/
+
+
+
+
+
+
+
+
+
+
 //Menu open Button
 var menuBtn;
 var moving = false;
@@ -945,6 +1007,7 @@ function rptask() {
 						Utils.Pos.lastX = getPlayerX();
 						Utils.Pos.lastY = getPlayerY();
 						Utils.Pos.lastZ = getPlayerZ();
+						
 						tick1++;
 						if (tick1 > 50) tick1 = 0;
 						rptask();
