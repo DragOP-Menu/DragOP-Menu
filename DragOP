@@ -770,7 +770,7 @@ var step = {
 	
 	onTick: function () { 
 		if(this.state && Utils.Player.isCollidedHorizontally()){
-			Entity.setPositionRelative(getPlayerEnt(), 0, 3, 0);
+			Entity.setPositionRelative(getPlayerEnt(), 0, 1.2, 0);
 		}
 	},
 	onClick: function (btn) {this.state=!this.state;},
@@ -796,9 +796,9 @@ var jesus = {
 	},
 	onTick: function () {
 		if(this.state ){
-			if((getTile(getPlayerX(), getPlayerY()-0.5, getPlayerZ())>=8 && getTile(getPlayerX(), getPlayerY(), getPlayerZ())<=11)){
+			if((getTile(getPlayerX(), getPlayerY()-0.5, getPlayerZ())>=8 && getTile(getPlayerX(), getPlayerY()-0.5, getPlayerZ())<=11)){
 				setVelY(getPlayerEnt(), 0.2);
-			}else if((getTile(getPlayerX(), getPlayerY()-1.67, getPlayerZ())>=8 && getTile(getPlayerX(), getPlayerY(), getPlayerZ())<=11)){
+			}else if((getTile(getPlayerX(), getPlayerY()-1.67, getPlayerZ())>=8 && getTile(getPlayerX(), getPlayerY()-1.67, getPlayerZ())<=11)){
 				setVelY(getPlayerEnt(), 0.01);
 			}
 		}
@@ -1162,7 +1162,7 @@ function rptask() {
 						if (tick1 > 50) tick1 = 0;
 						rptask();
 					}
-				}), 25);
+				}), 15);
 		}
 	}))
 }
