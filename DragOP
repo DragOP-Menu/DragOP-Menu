@@ -8,6 +8,7 @@ var GUI;
 var dialog;
 var searchQ = ""; //Current search query
 var tick1 = 0;
+var search;
 
 var DragOP = {
 	mods: new Array()
@@ -48,11 +49,11 @@ var Utils = {
 	modsCount: 0,
 	currentSearchCount: 0,
 	Player: {
-		onGround: function(){
+		onGround: function () {
 			var y = getPlayerY();
 			while (y > 1) y -= 1;
-			if (Math.round(y*100) == 62 && getTile(getPlayerX(), getPlayerY()-1.65, getPlayerZ()) != 0)return true;
-			if (Math.round(y*100) == 12 && getTile(getPlayerX(), getPlayerY()-1.65, getPlayerZ()) != 0)return true;
+			if (Math.round(y * 100) == 62 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0) return true;
+			if (Math.round(y * 100) == 12 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0) return true;
 			return false;
 		}
 	},
@@ -60,7 +61,7 @@ var Utils = {
 		lastX: 0,
 		lastY: 0,
 		lastZ: 0,
-		calculateSpeed: function(){
+		calculateSpeed: function () {
 			return Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
 		}
 	},
@@ -154,6 +155,7 @@ DragOP.setLString = function (code, lang, value) {
 		//DragOP.setLString(code, lang, value);
 	}
 	//DragOP.addCode(code);
+DragOP.addCode("hacks.panic");
 DragOP.addCode("hacks.gamemode");
 DragOP.addCode("hacks.speed");
 DragOP.addCode("hacks.aimaura");
@@ -162,6 +164,8 @@ DragOP.addCode("hacks.autojump");
 DragOP.addCode("hacks.tpaura");
 DragOP.addCode("hacks.bowaimbot");
 DragOP.addCode("hacks.clicktp");
+DragOP.addCode("hacks.longjump");
+DragOP.addCode("hacks.flight");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
@@ -173,6 +177,7 @@ DragOP.addCode("state.on");
 DragOP.addCode("state.off");
 
 //DragOP.setLString(code, lc.en_US, value);
+DragOP.setLString("hacks.panic", lc.en_US, "Panic");
 DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
 DragOP.setLString("hacks.speed", lc.en_US, "Speed");
 DragOP.setLString("hacks.jumpspeed", lc.en_US, "JumpSpeed");
@@ -181,6 +186,8 @@ DragOP.setLString("hacks.autojump", lc.en_US, "AutoJump");
 DragOP.setLString("hacks.tpaura", lc.en_US, "TP-Aura");
 DragOP.setLString("hacks.bowaimbot", lc.en_US, "BowAimBot");
 DragOP.setLString("hacks.clicktp", lc.en_US, "TapTeleport");
+DragOP.setLString("hacks.longjump", lc.en_US, "BunnyHop");
+DragOP.setLString("hacks.flight", lc.en_US, "Flight");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
@@ -384,14 +391,41 @@ DragOP.showModDialog = function (mod) {
 
 DragOP.registerModule = function (mod) {
 
-		DragOP.mods.push(mod);
-		Utils.modsCount += 1;
+	DragOP.mods.push(mod);
+	Utils.modsCount += 1;
 
+}
+
+var panic = {
+	name: "Panic",
+	desc: "Disables all mods at once!",
+	type: ModuleType.mod,
+	isStateMode: function () {
+		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return false; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () { /*some tick*/ },
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
+		DragOP.mods.forEach(function (entry, index, array) {
+			if (entry.isStateMode() && entry.state) entry.onClick(null);
+		});
+		refreshMenu();
+	},
+	onRefresh: function (btn) {
+		if (btn != null)
+			btn.setText(DragOP.getLString("hacks.panic"));
 	}
-	
+};
+DragOP.registerModule(panic);
 var gmhack = {
 	name: "Gamemode",
-	desc: "Changes your GameMode!",
+	desc: "Changes your gamemode!",
 	type: ModuleType.mod,
 	isStateMode: function () {
 		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -563,7 +597,7 @@ var tpaura = {
 
 	},
 	findPos: function (ent) {
-		var Ppos = new Array(getPlayerX(), getPlayerY()+0.5, getPlayerZ());
+		var Ppos = new Array(getPlayerX(), getPlayerY() + 0.5, getPlayerZ());
 		var entPos = new Array(Entity.getX(ent), Entity.getY(ent), Entity.getZ(ent));
 		var diff = new Array(entPos[0] - Ppos[0], null, entPos[2] - Ppos[2]);
 		Ppos[0] += diff[0] * 2;
@@ -607,14 +641,16 @@ var clicktp = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onUseItem: function (x,y,z, itemid, blockid, side) {
-		if(getTile(x,y+1,z)==0&&getTile(x,y+2,z)==0&&this.state){
-			Entity.setPosition(Player.getEntity(), x+0.5, y+2.63/*1.62 = eye height of steve*/,z+0.5);
+	onUseItem: function (x, y, z, itemid, blockid, side) {
+		if (getTile(x, y + 1, z) == 0 && getTile(x, y + 2, z) == 0 && this.state) {
+			Entity.setPosition(Player.getEntity(), x + 0.5, y + 2.63 /*1.62 = eye height of steve*/ , z + 0.5);
 		}
 	},
-	onClick: function (btn) {this.state = !this.state;},
+	onClick: function (btn) {
+		this.state = !this.state;
+	},
 	onRefresh: function (btn) {
-		if(btn!=null)
+		if (btn != null)
 			btn.setText(DragOP.getLString("hacks.clicktp"));
 	}
 };
@@ -634,19 +670,19 @@ var longjump = {
 		//Call hack.onClick() to toggle
 	},
 	onTick: function () {
-		if(this.state && Utils.Player.onGround()){
+		if (this.state && Utils.Player.onGround()) {
 			this.extratick++;
-			if(this.extratick > 6)this.extratick = 0;
-			if(Utils.Vel.calculateSpeed() > 0.105 && this.extratick == 0){
+			if (this.extratick > 6) this.extratick = 0;
+			if (Utils.Vel.calculateSpeed() > 0.105 && this.extratick == 0) {
 				var vector = new Array();
-				var yaw = (getYaw(getPlayerEnt()) + 90) * (Math.PI/180);
+				var yaw = (getYaw(getPlayerEnt()) + 90) * (Math.PI / 180);
 				var pitch = 0;
 				vector[0] = Math.cos(yaw) * Math.cos(pitch);
 				vector[2] = Math.sin(yaw) * Math.cos(pitch);
 				Entity.setVelX(getPlayerEnt(), vector[0]);
 				Entity.setVelY(getPlayerEnt(), 0.5);
 				Entity.setVelZ(getPlayerEnt(), vector[2]);
-			}else if(this.extratick == 0){
+			} else if (this.extratick == 0) {
 				Entity.setVelX(getPlayerEnt(), 0);
 				Entity.setVelZ(getPlayerEnt(), 0);
 			}
@@ -656,11 +692,47 @@ var longjump = {
 		this.state = !this.state;
 	},
 	onRefresh: function (btn) {
-		if(btn != null)
+		if (btn != null)
 			btn.setText(DragOP.getLString("hacks.longjump"));
 	}
 };
 DragOP.registerModule(longjump);
+var flight = {
+	name: DragOP.getLString("hacks.flight"),
+	desc: "Makes you fly.",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if (this.state) {
+			Player.setFlying(1);
+		}
+	},
+	onClick: function (btn) {
+		this.state = !this.state;
+		if (!this.state) {
+			Player.setFlying(0);
+			if (Level.getGameMode() == 0) {
+				Player.setCanFly(0);
+			}
+		} else {
+			Player.setCanFly(1);
+			Player.setFlying(1);
+		}
+	},
+	onRefresh: function (btn) {
+		if (btn != null)
+			btn.setText(DragOP.getLString("hacks.flight"));
+	}
+};
+DragOP.registerModule(flight);
 /*
 var statehack = {
 	name: "Hack",
@@ -680,12 +752,6 @@ var statehack = {
 	onRefresh: function (btn) {}
 };
 	*/
-
-
-
-
-
-
 
 
 
@@ -728,8 +794,8 @@ var modBtn = function (mod) {
 
 	var btn1 = new android.widget.Button(ctx);
 	btn1.setTransformationMethod(null);
-	var txt = eval("new String(\"\\"+"ud83d"+"\\"+"udd3b\")");
-	btn1.setText(txt+"");
+	var txt = eval("new String(\"\\" + "ud83d" + "\\" + "udd3b\")");
+	btn1.setText(txt + "");
 	//btn1.setBackground(null);
 	btn1.setBackgroundColor(android.graphics.Color.argb(100, 0, 0, 0));
 	btn1.setOnClickListener(new android.view.View.OnClickListener({
@@ -812,7 +878,7 @@ function showMenu() {
 				bg.setCornerRadius(1);
 
 				sbar.setBackgroundDrawable(bg);
-				var search = new android.widget.EditText(ctx);
+				search = new android.widget.EditText(ctx);
 				search.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 				search.setHint("Search a mod");
 				search.setGravity(android.view.Gravity.CENTER);
@@ -824,7 +890,7 @@ function showMenu() {
 				});
 				sbar.addView(search, new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
 				sbar.setId(39472);
-				var mlist = new android.widget.LinearLayout(ctx);
+				mlist = new android.widget.LinearLayout(ctx);
 				//mlist.setGravity(android.view.Gravity.TOP);
 				mlist.setId(20372);
 				mlist.addView(DragOP.generateMenu(search.getText() + ""));
@@ -865,6 +931,13 @@ function showMenu() {
 			}
 		}
 	}));
+}
+
+function refreshMenu() {
+	if (mlist != null) {
+		mlist.removeAllViewsInLayout();
+		mlist.addView(DragOP.generateMenu(search.getText() + ""));
+	}
 }
 
 function updateMenu(keyword, toplayout) {
@@ -1007,7 +1080,7 @@ function rptask() {
 						Utils.Pos.lastX = getPlayerX();
 						Utils.Pos.lastY = getPlayerY();
 						Utils.Pos.lastZ = getPlayerZ();
-						
+
 						tick1++;
 						if (tick1 > 50) tick1 = 0;
 						rptask();
@@ -1087,7 +1160,8 @@ function attackHook(att, vic) {
 		if (entry.onAttack) entry.onAttack(att, vic);
 	});
 }
-function useItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage){
+
+function useItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage) {
 	DragOP.mods.forEach(function (entry, index, array) {
 		if (entry.onUseItem) entry.onUseItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage);
 	});
