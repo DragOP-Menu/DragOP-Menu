@@ -65,14 +65,23 @@ var Utils = {
 			var z = getPlayerZ();
 			var blockX = Math.round(x-0.5);
 			var blockZ = Math.round(z-0.5);
+			while(x < 1)x += 1;
+			while(z < 1)z += 1;
 			while(x > 1)x -= 1;
 			while(z > 1)z -= 1;
+			
+			if(Math.round(x * 100) == 31)x-=0.01;
+			if(Math.round(z * 100) == 31)z-=0.01;
+			if(Math.round(x * 100) == 69)x+=0.01;
+			if(Math.round(z * 100) == 69)z+=0.01;
 			if(Math.round(x * 100) == 30)blockX--;
 			if(Math.round(z * 100) == 30)blockZ--;
 			if(Math.round(x * 100) == 70)blockX++;
 			if(Math.round(z * 100) == 70)blockZ++;
 			//clientMessage(blockX+";"+blockZ);
 			if(getTile(blockX, getPlayerY(), blockZ) == 0 && getTile(blockX, getPlayerY()-1, blockZ)==0)return false;
+			
+			if(Block.getDestroyTime(getTile(blockX, getPlayerY()-1, blockZ)) <= 0.1 && Block.getDestroyTime(getTile(blockX, getPlayerY(), blockZ)) <= 0.1)return false;
 			
 			if(Math.round(x * 100) == 30 || Math.round(x * 100) == 70)return true;
 			if(Math.round(z * 100) == 30 || Math.round(z * 100) == 70)return true;
@@ -772,7 +781,7 @@ var step = {
 	
 	onTick: function () { 
 		if(this.state && Utils.Player.isCollidedHorizontally()){
-			Entity.setPositionRelative(getPlayerEnt(), 0, 1.2, 0);
+			Entity.setPositionRelative(getPlayerEnt(), 0, 1.6, 0);
 		}
 	},
 	onClick: function (btn) {this.state=!this.state;},
