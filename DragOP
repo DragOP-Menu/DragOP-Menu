@@ -1,7 +1,4 @@
-/*
-Planned features:
--RGB color changers
-*/
+
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var LinearLayout = android.widget.LinearLayout;
 var GUI;
@@ -54,6 +51,24 @@ var Utils = {
 			while (y > 1) y -= 1;
 			if (Math.round(y * 100) == 62 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0) return true;
 			if (Math.round(y * 100) == 12 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0) return true;
+			return false;
+		},
+		isCollidedHorizontally: function(){
+			var x = getPlayerX();
+			var z = getPlayerZ();
+			var blockX = Math.round(x-0.5);
+			var blockZ = Math.round(z-0.5);
+			while(x > 1)x -= 1;
+			while(z > 1)z -= 1;
+			if(Math.round(x * 100) == 30)blockX--;
+			if(Math.round(z * 100) == 30)blockZ--;
+			if(Math.round(x * 100) == 70)blockX++;
+			if(Math.round(z * 100) == 70)blockZ++;
+			//clientMessage(blockX+";"+blockZ);
+			if(getTile(blockX, getPlayerY(), blockZ) == 0 && getTile(blockX, getPlayerY()-1, blockZ)==0)return false;
+			
+			if(Math.round(x * 100) == 30 || Math.round(x * 100) == 70)return true;
+			if(Math.round(z * 100) == 30 || Math.round(z * 100) == 70)return true;
 			return false;
 		}
 	},
@@ -166,6 +181,8 @@ DragOP.addCode("hacks.bowaimbot");
 DragOP.addCode("hacks.clicktp");
 DragOP.addCode("hacks.longjump");
 DragOP.addCode("hacks.flight");
+DragOP.addCode("hacks.step");
+DragOP.addCode("hacks.jesus");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
@@ -188,6 +205,8 @@ DragOP.setLString("hacks.bowaimbot", lc.en_US, "BowAimBot");
 DragOP.setLString("hacks.clicktp", lc.en_US, "TapTeleport");
 DragOP.setLString("hacks.longjump", lc.en_US, "BunnyHop");
 DragOP.setLString("hacks.flight", lc.en_US, "Flight");
+DragOP.setLString("hacks.step", lc.en_US, "Step");
+DragOP.setLString("hacks.jesus", lc.en_US, "Jesus");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
@@ -202,6 +221,8 @@ DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
 /*DragOP.setLString("hacks.speed", lc.de_DE, "Schnelligkeit");Schnelligkeit is bad*/
 DragOP.setLString("hacks.jumpspeed", lc.de_DE, "HasenTempo"); //Why not using bunnyspeed? :)
 DragOP.setLString("hacks.autojump", lc.de_DE, "Automatisches\nSpringen");
+DragOP.setLString("hacks.jesus", lc.de_DE, "Wasserlauf");
+DragOP.setLString("hacks.flight", lc.de_DE, "Fliegen");
 DragOP.setLString("gm.survival", lc.de_DE, "Überleben");
 DragOP.setLString("gm.creative", lc.de_DE, "Kreativ");
 DragOP.setLString("moduletype.mod", lc.de_DE, "Mod");
@@ -271,10 +292,10 @@ DragOP.loadModsAnim = function (progress) {
 			new android.os.Handler()
 				.postDelayed(new java.lang.Runnable({
 					run: function () {
-						ModPE.langEdit("menu.copyright", "DragOP: " + progress + " Mods loaded");
+						ModPE.langEdit("menu.copyright", "DragOP: " + progress + " Modules loaded");
 						if (progress < Utils.modsCount) DragOP.loadModsAnim(progress + 1);
 					}
-				}), 50);
+				}), 70);
 		}
 	}));
 }
@@ -711,21 +732,14 @@ var flight = {
 		//Call hack.onClick() to toggle
 	},
 	onTick: function () {
-		if (this.state) {
+		if (this.state)
 			Player.setFlying(1);
-		}
+		
 	},
 	onClick: function (btn) {
 		this.state = !this.state;
-		if (!this.state) {
-			Player.setFlying(0);
-			if (Level.getGameMode() == 0) {
-				Player.setCanFly(0);
-			}
-		} else {
-			Player.setCanFly(1);
-			Player.setFlying(1);
-		}
+		Player.setFlying(this.state?1:0);
+		Player.setCanFly(this.state?1:Level.getGameMode());
 	},
 	onRefresh: function (btn) {
 		if (btn != null)
@@ -733,6 +747,58 @@ var flight = {
 	}
 };
 DragOP.registerModule(flight);
+var step = {
+	name: DragOP.getLString("hacks.step"),
+	desc: "Steps on full blocks like you will on a half slap",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	
+	onTick: function () { 
+		if(this.state && Utils.Player.isCollidedHorizontally()){
+			Entity.setPositionRelative(getPlayerEnt(), 0, 3, 0);
+		}
+	},
+	onClick: function (btn) {this.state=!this.state;},
+	onRefresh: function (btn) {
+		if(btn != null)
+			btn.setText(DragOP.getLString("hacks.step"));
+	}
+};
+DragOP.registerModule(step);
+
+var jesus = {
+	name: DragOP.getLString("hacks.jesus"),
+	desc: "Jesus used this hack 2000 years ago",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if(this.state){
+			
+		}
+	},
+	onClick: function (btn) {this.state=!this.state;},
+	onRefresh: function (btn) {
+		if(btn!=null)
+			btn.setText(DragOP.getLString("hacks.jesus"));
+	}
+};
+DragOP.registerModule(jesus);
 /*
 var statehack = {
 	name: "Hack",
