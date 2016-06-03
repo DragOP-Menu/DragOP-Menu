@@ -45,12 +45,19 @@ var Utils = {
 	online: false,
 	modsCount: 0,
 	currentSearchCount: 0,
+	Block: {
+		isLiquid: function(id){
+			if(id >= 8 && id<= 11)return true;
+			return false;
+		}
+	},
 	Player: {
 		onGround: function () {
 			var y = getPlayerY();
 			while (y > 1) y -= 1;
-			if (Math.round(y * 100) == 62 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0) return true;
-			if (Math.round(y * 100) == 12 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0) return true;
+			
+			if (Math.round(y * 100) == 62 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0 && !Utils.Block.isLiquid(getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()))) return true;
+			if (Math.round(y * 100) == 12 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0 &&!Utils.Block.isLiquid(getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ())) ) return true;
 			return false;
 		},
 		isCollidedHorizontally: function(){
@@ -788,8 +795,12 @@ var jesus = {
 		//Call hack.onClick() to toggle
 	},
 	onTick: function () {
-		if(this.state){
-			
+		if(this.state ){
+			if((getTile(getPlayerX(), getPlayerY()-0.5, getPlayerZ())>=8 && getTile(getPlayerX(), getPlayerY(), getPlayerZ())<=11)){
+				setVelY(getPlayerEnt(), 0.2);
+			}else if((getTile(getPlayerX(), getPlayerY()-1.67, getPlayerZ())>=8 && getTile(getPlayerX(), getPlayerY(), getPlayerZ())<=11)){
+				setVelY(getPlayerEnt(), 0.01);
+			}
 		}
 	},
 	onClick: function (btn) {this.state=!this.state;},
