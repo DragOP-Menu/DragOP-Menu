@@ -190,6 +190,7 @@ DragOP.addCode("hacks.longjump");
 DragOP.addCode("hacks.flight");
 DragOP.addCode("hacks.step");
 DragOP.addCode("hacks.jesus");
+DragOP.addCode("hacks.nodownglide");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
@@ -214,6 +215,7 @@ DragOP.setLString("hacks.longjump", lc.en_US, "BunnyHop");
 DragOP.setLString("hacks.flight", lc.en_US, "Flight");
 DragOP.setLString("hacks.step", lc.en_US, "Step");
 DragOP.setLString("hacks.jesus", lc.en_US, "Jesus");
+DragOP.setLString("hacks.nodownglide", lc.en_US, "NoDownGlide");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
@@ -810,6 +812,31 @@ var jesus = {
 	}
 };
 DragOP.registerModule(jesus);
+var nodownglide = {
+	name: DragOP.getLString("hacks.nodownglide"),
+	desc: "Not letting you to move on y-axis (upwards & downwards)",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if(this.state){
+			setVelY(getPlayerEnt(), 0.000000000001);
+		}
+	},
+	onClick: function (btn) {this.state=!this.state;},
+	onRefresh: function (btn) {
+		if(btn != null)
+			btn.setText(DragOP.getLString("hacks.nodownglide"));
+	}
+};
+DragOP.registerModule(nodownglide);
 /*
 var statehack = {
 	name: "Hack",
