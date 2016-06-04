@@ -45,6 +45,7 @@ var Utils = {
 	online: false,
 	modsCount: 0,
 	currentSearchCount: 0,
+	font: android.os.Build.VERSION.SDK_INT>=17?android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL):android.graphics.Typeface.DEFAULT,
 	Block: {
 		isLiquid: function(id){
 			if(id >= 8 && id<= 11)return true;
@@ -200,6 +201,7 @@ DragOP.addCode("hacks.flight");
 DragOP.addCode("hacks.step");
 DragOP.addCode("hacks.jesus");
 DragOP.addCode("hacks.nodownglide");
+DragOP.addCode("hacks.glide");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
@@ -225,6 +227,7 @@ DragOP.setLString("hacks.flight", lc.en_US, "Flight");
 DragOP.setLString("hacks.step", lc.en_US, "Step");
 DragOP.setLString("hacks.jesus", lc.en_US, "Jesus");
 DragOP.setLString("hacks.nodownglide", lc.en_US, "NoDownGlide");
+DragOP.setLString("hacks.glide", lc.en_US, "Glide");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
@@ -920,6 +923,7 @@ var modBtn = function (mod) {
 	btn.setBackground(null);
 	btn.setShadowLayer(dip2px(1), dip2px(1), dip2px(1), android.graphics.Color.BLACK);
 	btn.setTextColor(android.graphics.Color.WHITE);
+	btn.setTypeface(Utils.font);
 	btn.setOnClickListener(new android.view.View.OnClickListener({
 		onClick: function (viewarg) {
 			mod.onClick(btn);
@@ -1019,6 +1023,7 @@ function showMenu() {
 				search = new android.widget.EditText(ctx);
 				search.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 				search.setHint("Search a mod");
+				search.setTypeface(Utils.font);
 				search.setGravity(android.view.Gravity.CENTER);
 				search.addTextChangedListener(new android.text.TextWatcher() {
 					afterTextChanged: function (text) {
@@ -1122,8 +1127,8 @@ function showMenuBtn() {
 				}
 				*/
 				menuBtn.setText('D');
+				menuBtn.setTypeface(Utils.font);
 				//menuBtn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(bg));
-
 				menuBtn.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (viewarg) {
 						//mainMenu();
