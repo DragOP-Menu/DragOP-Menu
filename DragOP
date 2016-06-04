@@ -322,10 +322,10 @@ DragOP.loadModsAnim = function (progress) {
 }
 DragOP.getStyledBackground = function () {
 	var bg = android.graphics.drawable.GradientDrawable();
-	bg.setCornerRadius(2);
-	bg.setColor(android.graphics.Color.argb(210, 0, 128, 0));
+	bg.setCornerRadius(1);
+	bg.setColor(android.graphics.Color.argb(90, 255, 255, 255));
 	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
-	bg.setStroke(dip2px(2), android.graphics.Color.argb(210, 139, 0, 0));
+	bg.setStroke(dip2px(2), android.graphics.Color.argb(210, 0, 0, 0));
 	return bg;
 }
 DragOP.getStyledBtnBackground = function (state, toggleable) {
@@ -357,29 +357,34 @@ DragOP.showModDialog = function (mod) {
 				modTitle.setTextSize(dip2px(20));
 				modTitle.setGravity(android.view.Gravity.CENTER);
 				modTitle.setTextColor(android.graphics.Color.BLACK);
+				modTitle.setTypeface(Utils.font);
 				modTitle.setId(94771);
 				var modTypeText = new android.widget.TextView(ctx);
 				modTypeText.setText(DragOP.getLString("moddialog.type") + ": " + ModuleType.toName(mod.type));
 				modTypeText.setGravity(android.view.Gravity.CENTER);
 				modTypeText.setTextColor(android.graphics.Color.BLACK);
 				modTypeText.setTextSize(dip2px(10));
+				modTypeText.setTypeface(Utils.font);
 				modTypeText.setId(93922);
 				var modDescTitle = new android.widget.TextView(ctx);
 				modDescTitle.setText(DragOP.getLString("moddialog.description") + ":");
 				modDescTitle.setGravity(android.view.Gravity.CENTER);
 				modDescTitle.setTextColor(android.graphics.Color.BLACK);
 				modDescTitle.setTextSize(dip2px(11));
+				modDescTitle.setTypeface(Utils.font);
 				modDescTitle.setId(29582);
 				var modDescText = new android.widget.TextView(ctx);
 				modDescText.setText(mod.desc);
 				modDescText.setGravity(android.view.Gravity.CENTER);
 				modDescText.setTextSize(dip2px(10));
+				modDescText.setTypeface(Utils.font);
 				modDescText.setTextColor(android.graphics.Color.BLACK);
 				modDescText.setId(29285);
 				var closeButton = new styledBtn();
 				closeButton.setText("Close");
 				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
 				closeButton.setId(10472);
+				closeButton.setTypeface(Utils.font);
 				var dialogLayout = new android.widget.RelativeLayout(ctx);
 				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
 				//dialogLayout.setGravity(android.view.Gravity.CENTER);
