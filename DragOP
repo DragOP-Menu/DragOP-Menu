@@ -241,7 +241,7 @@ DragOP.setLString("hacks.jumpspeed", lc.de_DE, "HasenTempo"); //Why not using bu
 DragOP.setLString("hacks.autojump", lc.de_DE, "Automatisches\nSpringen");
 DragOP.setLString("hacks.jesus", lc.de_DE, "Wasserlauf");
 DragOP.setLString("hacks.flight", lc.de_DE, "Fliegen");
-DragOP.setLString("gm.survival", lc.de_DE, "Überleben");
+DragOP.setLString("gm.survival", lc.de_DE, "Ãberleben");
 DragOP.setLString("gm.creative", lc.de_DE, "Kreativ");
 DragOP.setLString("moduletype.mod", lc.de_DE, "Mod");
 DragOP.setLString("moduletype.special", lc.de_DE, "Spezielles");
@@ -846,6 +846,31 @@ var nodownglide = {
 	}
 };
 DragOP.registerModule(nodownglide);
+var glide = {
+	name: DragOP.getLString("hacks.glide"),
+	desc: "Let you glide through the air. Sometimes good to bypass anti cheats",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if(this.state){
+			if(Entity.getVelY(getPlayerEnt()) <= -0.1 && !Player.isFlying())setVelY(getPlayerEnt(), -0.05);
+		}
+	},
+	onClick: function (btn) {this.state = !this.state;},
+	onRefresh: function (btn) {
+		if(btn!=null)
+			btn.setText(DragOP.getLString("hacks.glide"));
+	}
+};
+DragOP.registerModule(glide);
 /*
 var statehack = {
 	name: "Hack",
