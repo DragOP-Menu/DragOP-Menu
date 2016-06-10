@@ -515,23 +515,28 @@ var jumpspeed = {
 			var y = Entity.getY(getPlayerEnt());
 			while (y > 1) y -= 1;
 			if (y < 0) return;
-			var max = 0.8;
+			var max = 0.6;
 			var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
 			var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
-			if (speed > 0.02) {
+			if (speed > 0.04) {
 				if (Utils.Player.onGround()) setVelY(getPlayerEnt(), 0.2);
 				else if (Math.round(y * 100) >= 70) setVelY(getPlayerEnt(), -0.15);
 
-			} else {
+			} else if(speed < 0.04){
 				setVelX(getPlayerEnt(), 0);
 				setVelZ(getPlayerEnt(), 0);
 			}
+			clientMessage(speed);
 			if (speed >= lastSpeed && speed < max && tick1 % 1 == 0) {
-				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * 1.1);
-				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * 1.1);
-			} else if (speed < lastSpeed || speed > max) {
-				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 2);
-				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 2);
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * 1.15);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * 1.15);
+			} else if (speed < lastSpeed-0.0001) {
+				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 1.5);
+				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.5);
+				clientMessage("shit");
+			}else if(speed > max){
+				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 1.1);
+				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.1);
 			}
 			/*if(lastSpeed > speed+0.00001){
 				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())/2);
@@ -647,8 +652,8 @@ var tpaura = {
 		var Ppos = new Array(getPlayerX(), getPlayerY() + 0.5, getPlayerZ());
 		var entPos = new Array(Entity.getX(ent), Entity.getY(ent), Entity.getZ(ent));
 		var diff = new Array(entPos[0] - Ppos[0], null, entPos[2] - Ppos[2]);
-		Ppos[0] += diff[0] * 2;
-		Ppos[2] += diff[2] * 2;
+		Ppos[0] += diff[0] * 1.6;
+		Ppos[2] += diff[2] * 1.6;
 		return Ppos;
 		//just inverting pos at the moment
 	},
