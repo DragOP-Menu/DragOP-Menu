@@ -526,7 +526,7 @@ var jumpspeed = {
 				setVelX(getPlayerEnt(), 0);
 				setVelZ(getPlayerEnt(), 0);
 			}
-			clientMessage(speed);
+			
 			if (speed >= lastSpeed && speed < max && tick1 % 1 == 0) {
 				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * 1.15);
 				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * 1.15);
