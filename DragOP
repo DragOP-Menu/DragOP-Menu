@@ -719,7 +719,7 @@ var longjump = {
 	onTick: function () {
 		if (this.state && Utils.Player.onGround()) {
 			this.extratick++;
-			if (this.extratick > 6) this.extratick = 0;
+			if (this.extratick > 7) this.extratick = 0;
 			if (Utils.Vel.calculateSpeed() > 0.105 && this.extratick == 0) {
 				var vector = new Array();
 				var yaw = (getYaw(getPlayerEnt()) + 90) * (Math.PI / 180);
@@ -729,7 +729,7 @@ var longjump = {
 				Entity.setVelX(getPlayerEnt(), vector[0]);
 				Entity.setVelY(getPlayerEnt(), 0.5);
 				Entity.setVelZ(getPlayerEnt(), vector[2]);
-			} else if (this.extratick == 0) {
+			} else if (this.extratick == 0 && Utils.Vel.calculateSpeed() < 0.106) {
 				Entity.setVelX(getPlayerEnt(), 0);
 				Entity.setVelZ(getPlayerEnt(), 0);
 			}
@@ -815,10 +815,12 @@ var jesus = {
 	},
 	onTick: function () {
 		if(this.state ){
-			if((getTile(getPlayerX(), getPlayerY()-0.5, getPlayerZ())>=8 && getTile(getPlayerX(), getPlayerY()-0.5, getPlayerZ())<=11)){
+			if((getTile(getPlayerX(), getPlayerY()-0.8, getPlayerZ()-1)>=8 && getTile(getPlayerX(), getPlayerY()-0.8, getPlayerZ()-1)<=11)){
 				setVelY(getPlayerEnt(), 0.2);
-			}else if((getTile(getPlayerX(), getPlayerY()-1.67, getPlayerZ())>=8 && getTile(getPlayerX(), getPlayerY()-1.67, getPlayerZ())<=11)){
-				setVelY(getPlayerEnt(), 0.01);
+			}else if((getTile(getPlayerX(), getPlayerY()-1.3, getPlayerZ()-1)>=8 && getTile(getPlayerX(), getPlayerY()-1.3, getPlayerZ()-1)<=11)){
+				setVelY(getPlayerEnt(), 0.05);
+			}else if((getTile(getPlayerX(), getPlayerY()-1.68, getPlayerZ()-1)>=8 && getTile(getPlayerX(), getPlayerY()-1.68, getPlayerZ()-1)<=11)){
+				setVelY(getPlayerEnt(), 0.015);
 			}
 		}
 	},
@@ -834,6 +836,7 @@ var nodownglide = {
 	desc: "Not letting you to move on y-axis (upwards & downwards)",
 	type: ModuleType.mod,
 	state: false,
+	startY: -1,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
@@ -844,10 +847,11 @@ var nodownglide = {
 	},
 	onTick: function () {
 		if(this.state){
-			setVelY(getPlayerEnt(), 0.000000000001);
+			setVelY(getPlayerEnt(), -0.000000000001);
+			Entity.setPositionRelative(getPlayerEnt(), 0, this.startY-getPlayerY(), 0);
 		}
 	},
-	onClick: function (btn) {this.state=!this.state;},
+	onClick: function (btn) {this.startY = getPlayerY();this.state=!this.state;},
 	onRefresh: function (btn) {
 		if(btn != null)
 			btn.setText(DragOP.getLString("hacks.nodownglide"));
@@ -1029,6 +1033,8 @@ function showMenu() {
 				search.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 				search.setHint("Search a mod");
 				search.setTypeface(Utils.font);
+				search.setHintTextColor(android.graphics.Color.argb(240, 80, 80, 80));
+				search.setTextColor(android.graphics.Color.BLACK);
 				search.setGravity(android.view.Gravity.CENTER);
 				search.addTextChangedListener(new android.text.TextWatcher() {
 					afterTextChanged: function (text) {
