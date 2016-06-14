@@ -46,6 +46,11 @@ var Utils = {
 	modsCount: 0,
 	currentSearchCount: 0,
 	font: android.os.Build.VERSION.SDK_INT>=17?android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL):android.graphics.Typeface.DEFAULT,
+	ModSettings: {
+		getSlider: function(){
+			return new android.widget.SeekBar(ctx);
+		}
+	},
 	Block: {
 		isLiquid: function(id){
 			if(id >= 8 && id<= 11)return true;
@@ -143,6 +148,7 @@ var Utils = {
 		},
 		getNearestEntity(maxrange) {
 			var mobs = Entity.getAll();
+			
 			var players = Server.getAllPlayers();
 			var small = maxrange;
 			var ent = null;
@@ -151,9 +157,11 @@ var Utils = {
 				var y = Entity.getY(mobs[i]) - getPlayerY();
 				var z = Entity.getZ(mobs[i]) - getPlayerZ();
 				var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
-				if (dist < small && dist > 0 && Entity.getEntityTypeId(mobs[i]) <= 63 && Entity.getHealth(mobs[i]) >= 1) {
+				if (dist < small && dist > 0 && Entity.getEntityTypeId(mobs[i]) <= 63 && Entity.getHealth(mobs[i]) > 0) {
 					small = dist;
 					ent = mobs[i];
+				}else{
+					
 				}
 			}
 			for (var i = 0; i < players.length; i++) {
@@ -166,6 +174,7 @@ var Utils = {
 					ent = players[i];
 				}
 			}
+			
 			return ent;
 		}
 	}
@@ -352,6 +361,7 @@ DragOP.showModDialog = function (mod) {
 				content.setId(9472729);
 				var contentScroll = new android.widget.ScrollView(ctx);
 				contentScroll.setId(492628);
+				//default content
 				var modTitle = new android.widget.TextView(ctx);
 				modTitle.setText(android.text.Html.fromHtml("<u>" + mod.name + "</u>"));
 				modTitle.setTextSize(dip2px(20));
@@ -380,11 +390,40 @@ DragOP.showModDialog = function (mod) {
 				modDescText.setTypeface(Utils.font);
 				modDescText.setTextColor(android.graphics.Color.BLACK);
 				modDescText.setId(29285);
+				//settings
+				var modSettings = new android.widget.LinearLayout(ctx);
+				modSettings.setOrientation(1);
+				if(mod.getSettingsLayout){
+					//modSettings = mod.Layout();
+					var params = new android.widget.LinearLayout.LayoutParams(mwidth, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+					var line = new android.widget.TextView(ctx);
+					line.setText("");
+					var gradientLine = new android.graphics.drawable.GradientDrawable();
+					gradientLine.setShape(android.graphics.drawable.GradientDrawable.LINE);
+					gradientLine.setColor(android.graphics.Color.TRANSPARENT);
+					//gradientLine.setCornerRadius(dip2px(100));
+					gradientLine.setStroke(dip2px(1), android.graphics.Color.argb(50,0,0,0));
+					line.setBackground(gradientLine);
+					line.setGravity(android.view.Gravity.CENTER);
+					modSettings.addView(line, params);
+					var settingText = new android.widget.TextView(ctx);
+					settingText.setText("Settings");
+					settingText.setGravity(android.view.Gravity.CENTER);
+					settingText.setTextColor(android.graphics.Color.BLACK);
+					settingText.setTextSize(dip2px(11));
+					settingText.setTypeface(Utils.font);
+					modSettings.addView(settingText, params);
+					var extraParams = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+					modSettings.addView(mod.getSettingsLayout(extraParams));
+					//Im thinking about a line (html <hr> tag) and the layout underneath
+				}
+				//footer
 				var closeButton = new styledBtn();
 				closeButton.setText("Close");
 				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
 				closeButton.setId(10472);
 				closeButton.setTypeface(Utils.font);
+				//layout alignement....
 				var dialogLayout = new android.widget.RelativeLayout(ctx);
 				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
 				//dialogLayout.setGravity(android.view.Gravity.CENTER);
@@ -401,6 +440,9 @@ DragOP.showModDialog = function (mod) {
 				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.BELOW, modDescTitle.getId());
 				content.addView(modDescText, params);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.BELOW, modDescText.getId());
+				content.addView(modSettings, params);
 				contentScroll.addView(content);
 				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.BELOW, modTitle.getId());
@@ -410,6 +452,7 @@ DragOP.showModDialog = function (mod) {
 				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
 				dialogLayout.addView(closeButton, params);
+				//Dialog Stuff
 				dialog = new android.app.Dialog(ctx);
 				dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
 				dialog.getWindow()
@@ -607,6 +650,7 @@ var bowaimbot = {
 	desc: "Automatically aims with a bow at near mobs!",
 	type: ModuleType.mod,
 	state: false,
+	range: 100,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
@@ -615,10 +659,37 @@ var bowaimbot = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
+	getSettingsLayout: function(params){
+		var settings = new android.widget.LinearLayout(ctx);
+		settings.setOrientation(1);
+		var rangeText = new android.widget.TextView(ctx);
+		rangeText.setText("Range: "+this.range);
+		rangeText.setTextColor(android.graphics.Color.BLACK);
+		rangeText.setTextSize(dip2px(9));
+		rangeText.setGravity(android.view.Gravity.CENTER);
+		rangeText.setTypeface(Utils.font);
+		var rangeSlider = Utils.ModSettings.getSlider();
+		rangeSlider.setMax(100);
+		//rangeSlider.setMin(1);
+		rangeSlider.setProgress(this.range);
+		rangeSlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
+		onProgressChanged:function (seekBar, progress, fromUser){
+			bowaimbot.range = progress;
+			rangeText.setText("Range: "+bowaimbot.range);
+			clientMessage(bowaimbot.range);
+		}});
+		settings.addView(rangeSlider, params);
+		settings.addView(rangeText, params);
+		
+		
+		return settings;
+	},
 	onTick: function () {
 		if (this.state && getCarriedItem() == 261 /*No Dynamic :( */ ) {
-			var ent = Utils.Entity.getNearestEntity(100);
-			Utils.Entity.bowAimAt(ent);
+			var ent = Utils.Entity.getNearestEntity(this.range);
+			
+			if(ent != null)Utils.Entity.bowAimAt(ent);
+			else clientMessage(this.range);
 		}
 	},
 	onEnable: function (btn) { /*Not used*/ },
