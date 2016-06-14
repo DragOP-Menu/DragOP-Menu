@@ -129,8 +129,9 @@ var Utils = {
 				var pitch = Math.asin(y);
 				pitch = pitch * 180.0 / Math.PI;
 				pitch = -pitch;
-				if (pitch < 90 && pitch > -90) {
-					Entity.setRot(Player.getEntity(), -Math.atan2(a - (Player.getX() + 0.5), c - (Player.getZ() + 0.5)) * (180 / Math.PI), pitch);
+				var yaw =  -Math.atan2(a - (Player.getX() + 0.5), c - (Player.getZ() + 0.5)) * (180 / Math.PI);
+				if (pitch < 89 && pitch > -89) {
+					Entity.setRot(Player.getEntity(),yaw, pitch);
 				}
 			}
 		},
@@ -144,7 +145,10 @@ var Utils = {
 			var g = 0.006;
 			var tmp = (velocity * velocity * velocity * velocity - g * (g * (y2 * y2) + 2 * posY * (velocity * velocity)));
 			var pitch = -(180 / Math.PI) * (Math.atan((velocity * velocity - Math.sqrt(tmp)) / (g * y2)));
-			setRot(Player.getEntity(), yaw, pitch);
+			if (pitch < 89 && pitch > -89) {
+				setRot(Player.getEntity(), yaw, pitch);
+			}
+			
 		},
 		getNearestEntity(maxrange) {
 			var mobs = Entity.getAll();
@@ -620,6 +624,32 @@ var aimaura = {
 	desc: "Automatically aims at near mobs!",
 	type: ModuleType.mod,
 	state: false,
+	range: 7,
+	getSettingsLayout: function(params){
+		var settings = new android.widget.LinearLayout(ctx);
+		settings.setOrientation(1);
+		var rangeText = new android.widget.TextView(ctx);
+		rangeText.setText("Range: "+this.range);
+		rangeText.setTextColor(android.graphics.Color.BLACK);
+		rangeText.setTextSize(dip2px(9));
+		rangeText.setGravity(android.view.Gravity.CENTER);
+		rangeText.setTypeface(Utils.font);
+		var rangeSlider = Utils.ModSettings.getSlider();
+		rangeSlider.setMax(20);
+		//rangeSlider.setMin(1);
+		rangeSlider.setProgress(this.range);
+		rangeSlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
+		onProgressChanged:function (seekBar, progress, fromUser){
+			aimaura.range = progress;
+			rangeText.setText("Range: "+aimaura.range);
+			
+		}});
+		settings.addView(rangeSlider, params);
+		settings.addView(rangeText, params);
+		
+		
+		return settings;
+	},
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
@@ -630,8 +660,8 @@ var aimaura = {
 	},
 	onTick: function () {
 		if (this.state) {
-			var ent = Utils.Entity.getNearestEntity(7);
-			Utils.Entity.crosshairAimAt(ent);
+			var ent = Utils.Entity.getNearestEntity(this.range);
+			if(ent!=null)Utils.Entity.crosshairAimAt(ent);
 		}
 	},
 	onEnable: function (btn) { /*Not used*/ },
@@ -676,7 +706,7 @@ var bowaimbot = {
 		onProgressChanged:function (seekBar, progress, fromUser){
 			bowaimbot.range = progress;
 			rangeText.setText("Range: "+bowaimbot.range);
-			clientMessage(bowaimbot.range);
+			
 		}});
 		settings.addView(rangeSlider, params);
 		settings.addView(rangeText, params);
