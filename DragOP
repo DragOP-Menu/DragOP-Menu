@@ -108,6 +108,7 @@ var Utils = {
 		lastZ: 0
 	},
 	Entity: {
+		targettedMobs: [true, true],/*first mobs second players*/
 		allEntitys: new Array(),
 		crosshairAimAt: function (ent, pos) {
 			if (ent != null) {
@@ -162,20 +163,28 @@ var Utils = {
 				var x = Entity.getX(mobs[i]) - getPlayerX();
 				var y = Entity.getY(mobs[i]) - getPlayerY();
 				var z = Entity.getZ(mobs[i]) - getPlayerZ();
+				
 				var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
-				if (dist < small && dist > 0 && Entity.getEntityTypeId(mobs[i]) <= 63 && Entity.getHealth(mobs[i]) > 0) {
+				var allowed = false;
+				if(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(mobs[i]) == 63)allowed = true;
+				if(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(mobs[i]) < 63)allowed = true;
+				
+				if (dist < small && dist > 0 && allowed == true&& Entity.getHealth(mobs[i]) > 0) {
 					small = dist;
 					ent = mobs[i];
-				}else{
-					
+				}else if(dist < small && dist > 0){
+					//clientMessage(Entity.getEntityTypeId(mobs[i]));
 				}
 			}
 			for (var i = 0; i < players.length; i++) {
 				var x = Entity.getX(players[i]) - getPlayerX();
 				var y = Entity.getY(players[i]) - getPlayerY();
 				var z = Entity.getZ(players[i]) - getPlayerZ();
+				var allowed = false;
+				if(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(players[i]) == 63)allowed = true;
+				if(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(players[i]) < 63)allowed = true;
 				var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
-				if (dist < small && dist > 0 && Entity.getHealth(players[i]) >= 1) {
+				if (dist < small && dist > 0 && allowed && Entity.getHealth(players[i]) >= 1) {
 					small = dist;
 					ent = players[i];
 				}
@@ -202,7 +211,7 @@ DragOP.setLString = function (code, lang, value) {
 		//DragOP.setLString(code, lang, value);
 	}
 	//DragOP.addCode(code);
-DragOP.addCode("hacks.panic");
+DragOP.addCode("special.panic");
 DragOP.addCode("hacks.gamemode");
 DragOP.addCode("hacks.speed");
 DragOP.addCode("hacks.aimaura");
@@ -228,7 +237,7 @@ DragOP.addCode("state.on");
 DragOP.addCode("state.off");
 
 //DragOP.setLString(code, lc.en_US, value);
-DragOP.setLString("hacks.panic", lc.en_US, "Panic");
+DragOP.setLString("special.panic", lc.en_US, "Panic");
 DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
 DragOP.setLString("hacks.speed", lc.en_US, "Speed");
 DragOP.setLString("hacks.jumpspeed", lc.en_US, "JumpSpeed");
@@ -491,9 +500,57 @@ DragOP.registerModule = function (mod) {
 	Utils.modsCount += 1;
 
 }
-
+var target = {
+	name: DragOP.getLString("special.target"),
+	desc: "Let you choose the type of entitys that are targetted by Modules like AimAura and BowAimBot.",
+	type: ModuleType.special,
+	getSettingsLayout: function(params){
+		var settings = new android.widget.LinearLayout(ctx);
+		settings.setOrientation(1);
+		var players = new android.widget.CheckBox(ctx);
+		players.setText("Players");
+		players.setTypeface(Utils.font);
+		players.setTextColor(android.graphics.Color.BLACK);
+		players.setChecked(Utils.Entity.targettedMobs[1]);
+		players.setOnClickListener(new android.view.View.OnClickListener({
+			onClick:function(v){
+				Utils.Entity.targettedMobs = [Utils.Entity.targettedMobs[0], v.isChecked()];
+			}
+		}));
+		var mobs = new android.widget.CheckBox(ctx);
+		mobs.setText("Mobs");
+		mobs.setTextColor(android.graphics.Color.BLACK);
+		mobs.setTypeface(Utils.font);
+		mobs.setChecked(Utils.Entity.targettedMobs[0]);
+		mobs.setOnClickListener(new android.view.View.OnClickListener({
+			onClick:function(v){
+				Utils.Entity.targettedMobs = [v.isChecked(), Utils.Entity.targettedMobs[1]];
+			}
+		}));
+		settings.addView(players, params);
+		settings.addView(mobs, params);
+		return settings;
+	},
+	isStateMode: function () {
+		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return false; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onClick: function (btn) {
+		DragOP.showModDialog(this);
+		menu.dismiss();
+	},
+	onRefresh: function (btn) {
+		if (btn != null)
+			btn.setText(DragOP.getLString("special.target"));
+	}
+};
+DragOP.registerModule(target);
 var panic = {
-	name: "Panic",
+	name: DragOP.getLString("special.panic"),
 	desc: "Disables all mods at once!",
 	type: ModuleType.mod,
 	isStateMode: function () {
@@ -515,7 +572,7 @@ var panic = {
 	},
 	onRefresh: function (btn) {
 		if (btn != null)
-			btn.setText(DragOP.getLString("hacks.panic"));
+			btn.setText(DragOP.getLString("special.panic"));
 	}
 };
 DragOP.registerModule(panic);
@@ -1329,7 +1386,10 @@ function rptask() {
 						ny = getPlayerY();
 						nz = getPlayerZ();
 						DragOP.mods.forEach(function (entry, index, array) {
-							if (entry.onTick) entry.onTick();
+							try{
+								if (entry.onTick) entry.onTick();
+							}catch(e){}
+							
 						});
 						if ((GUI != null && GUI.isShowing()) && (menu != null && menu.isShowing())) GUI.dismiss();
 						if ((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing()) && (dialog == null || !dialog.isShowing())) {
@@ -1427,13 +1487,19 @@ this.Item.getEnchantType = function (id) {
 
 function attackHook(att, vic) {
 	DragOP.mods.forEach(function (entry, index, array) {
-		if (entry.onAttack) entry.onAttack(att, vic);
+		try{
+			entry.onAttack(att, vic);
+		}catch(e){}
+		
 	});
 }
 
 function useItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage) {
 	DragOP.mods.forEach(function (entry, index, array) {
-		if (entry.onUseItem) entry.onUseItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage);
+		try{
+			entry.onUseItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage);
+		}catch(e){}
+		
 	});
 }
 function leaveGame(){
