@@ -108,6 +108,7 @@ var Utils = {
 		lastZ: 0
 	},
 	Entity: {
+		allEntitys: new Array(),
 		crosshairAimAt: function (ent, pos) {
 			if (ent != null) {
 				var x = Entity.getX(ent) - getPlayerX();
@@ -151,11 +152,12 @@ var Utils = {
 			
 		},
 		getNearestEntity(maxrange) {
-			var mobs = Entity.getAll();
+			var mobs = Utils.Entity.allEntitys;
 			
 			var players = Server.getAllPlayers();
 			var small = maxrange;
 			var ent = null;
+			/*if(mobs.length > 500)clientMessage("lag found: "+mobs.length);*/
 			for (var i = 0; i < mobs.length; i++) {
 				var x = Entity.getX(mobs[i]) - getPlayerX();
 				var y = Entity.getY(mobs[i]) - getPlayerY();
@@ -580,7 +582,7 @@ var jumpspeed = {
 			} else if (speed < lastSpeed-0.0001) {
 				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 1.5);
 				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.5);
-				clientMessage("shit");
+				
 			}else if(speed > max){
 				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 1.1);
 				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.1);
@@ -640,10 +642,14 @@ var aimaura = {
 		rangeSlider.setProgress(this.range);
 		rangeSlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
 		onProgressChanged:function (seekBar, progress, fromUser){
-			aimaura.range = progress;
-			rangeText.setText("Range: "+aimaura.range);
 			
-		}});
+			rangeText.setText("Range: "+progress);
+			
+		},
+		onStopTrackingTouch: function(seekbar){
+			aimaura.range = seekbar.getProgress();
+		}
+});
 		settings.addView(rangeSlider, params);
 		settings.addView(rangeText, params);
 		
@@ -704,10 +710,14 @@ var bowaimbot = {
 		rangeSlider.setProgress(this.range);
 		rangeSlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
 		onProgressChanged:function (seekBar, progress, fromUser){
-			bowaimbot.range = progress;
-			rangeText.setText("Range: "+bowaimbot.range);
 			
-		}});
+			rangeText.setText("Range: "+progress);
+			
+		},
+		onStopTrackingTouch: function(seekbar){
+			bowaimbot.range = seekbar.getProgress();
+		}
+});
 		settings.addView(rangeSlider, params);
 		settings.addView(rangeText, params);
 		
@@ -719,7 +729,7 @@ var bowaimbot = {
 			var ent = Utils.Entity.getNearestEntity(this.range);
 			
 			if(ent != null)Utils.Entity.bowAimAt(ent);
-			else clientMessage(this.range);
+			
 		}
 	},
 	onEnable: function (btn) { /*Not used*/ },
@@ -1424,5 +1434,18 @@ function attackHook(att, vic) {
 function useItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage) {
 	DragOP.mods.forEach(function (entry, index, array) {
 		if (entry.onUseItem) entry.onUseItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage);
+	});
+}
+function leaveGame(){
+	Utils.Entity.allEntitys = new Array();
+}
+function entityAddedHook(ent){
+	Utils.Entity.allEntitys.push(ent);
+	//clientMessage("Entity added count:"+Utils.Entity.allEntitys.length);
+}
+function entityRemovedHook(ent){
+	
+	Utils.Entity.allEntitys.forEach(function(entry, index, array){
+		if(entry == ent)Utils.Entity.allEntitys.splice(index, 1);
 	});
 }
