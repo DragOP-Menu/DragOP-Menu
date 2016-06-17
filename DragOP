@@ -40,8 +40,12 @@ l.push(new Array()); //Codes
 l.push(new Array()); //English
 l.push(new Array()); //German
 //Multi Language Support
-
+var BypassMode = {
+	DEFAULT: 0,
+	LBSG: 1
+};
 var Utils = {
+	bypassMode: BypassMode.DEFAULT,
 	online: false,
 	modsCount: 0,
 	currentSearchCount: 0,
@@ -548,7 +552,71 @@ var target = {
 			btn.setText(DragOP.getLString("special.target"));
 	}
 };
+
 DragOP.registerModule(target);
+var bypass = {
+	name: DragOP.getLString("special.bypass"),
+	desc: "Mods will bypass AntiCheats or disable them if they can't.",
+	type: ModuleType.special,
+	getSettingsLayout: function(params){
+		var settings = new android.widget.LinearLayout(ctx);
+		settings.setOrientation(1);
+		var enabledGradient = new android.graphics.drawable.GradientDrawable();
+		enabledGradient.setColor(android.graphics.Color.argb(150, 0, 200, 0));
+		enabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
+		enabledGradient.setCornerRadius(dip2px(3));
+		var disabledGradient = new android.graphics.drawable.GradientDrawable();
+		disabledGradient.setColor(android.graphics.Color.argb(130, 200, 0,0));
+		disabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
+		disabledGradient.setCornerRadius(dip2px(3));
+		var lbsg = new android.widget.Button(ctx);
+		lbsg.setText("LBSG Anti-Cheat");
+		lbsg.setTypeface(Utils.font);
+		
+		lbsg.setBackground(Utils.bypassMode == BypassMode.LSBG?enabledGradient:disabledGradient);
+		lbsg.setTextColor(android.graphics.Color.BLACK);
+		lbsg.setOnClickListener(new android.view.View.OnClickListener({
+			onClick:function(v){
+				Utils.bypassMode = BypassMode.LBSG;
+				lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG?enabledGradient:disabledGradient);
+				vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT?enabledGradient:disabledGradient);
+			}
+		}));
+		var vanilla = new android.widget.Button(ctx);
+		vanilla.setText("Vanilla");
+		vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT?enabledGradient:disabledGradient);
+		vanilla.setTextColor(android.graphics.Color.BLACK);
+		vanilla.setTypeface(Utils.font);
+		
+		vanilla.setOnClickListener(new android.view.View.OnClickListener({
+			onClick:function(v){
+				Utils.bypassMode = BypassMode.DEFAULT;
+				lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG?enabledGradient:disabledGradient);
+				vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT?enabledGradient:disabledGradient);
+			}
+		}));
+		settings.addView(vanilla, params);
+		settings.addView(lbsg, params);
+		return settings;
+	},
+	isStateMode: function () {
+		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return false; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onClick: function (btn) {
+		DragOP.showModDialog(this);
+		menu.dismiss();
+	},
+	onRefresh: function (btn) {
+		if (btn != null)
+			btn.setText(DragOP.getLString("special.bypass"));
+	}
+};
+DragOP.registerModule(bypass);
 var panic = {
 	name: DragOP.getLString("special.panic"),
 	desc: "Disables all mods at once!",
@@ -1045,8 +1113,16 @@ var glide = {
 		//Call hack.onClick() to toggle
 	},
 	onTick: function () {
-		if(this.state){
-			if(Entity.getVelY(getPlayerEnt()) <= -0.1 && !Player.isFlying())setVelY(getPlayerEnt(), -0.05);
+		if(this.state && Entity.getVelY(getPlayerEnt()) < 0&& !Player.isFlying()){
+			switch(Utils.bypassMode){
+				case BypassMode.DEFAULT:
+				    setVelY(getPlayerEnt(), -0.001);
+					break;
+				case BypassMode.LBSG:
+					setVelY(getPlayerEnt(), -0.001);
+					break;
+			}
+			
 		}
 	},
 	onClick: function (btn) {this.state = !this.state;},
