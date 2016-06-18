@@ -44,8 +44,14 @@ var BypassMode = {
 	DEFAULT: 0,
 	LBSG: 1
 };
+var SpeedMode = {
+	DEFAULT: 0,
+	BHOP: 1,
+	LONGJUMP: 2
+};
 var Utils = {
 	bypassMode: BypassMode.DEFAULT,
+	speedMode: SpeedMode.DEFAULT,
 	online: false,
 	modsCount: 0,
 	currentSearchCount: 0,
@@ -216,6 +222,8 @@ DragOP.setLString = function (code, lang, value) {
 	}
 	//DragOP.addCode(code);
 DragOP.addCode("special.panic");
+DragOP.addCode("special.target");
+DragOP.addCode("special.bypass");
 DragOP.addCode("hacks.gamemode");
 DragOP.addCode("hacks.speed");
 DragOP.addCode("hacks.aimaura");
@@ -241,6 +249,8 @@ DragOP.addCode("state.on");
 DragOP.addCode("state.off");
 
 //DragOP.setLString(code, lc.en_US, value);
+DragOP.setLString("special.bypass", lc.en_US, "Bypass");
+DragOP.setLString("special.target", lc.en_US, "Target");
 DragOP.setLString("special.panic", lc.en_US, "Panic");
 DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
 DragOP.setLString("hacks.speed", lc.en_US, "Speed");
@@ -671,81 +681,7 @@ var gmhack = {
 	}
 };
 DragOP.registerModule(gmhack);
-var jumpspeed = {
-	name: DragOP.getLString("hacks.jumpspeed"),
-	desc: "Let you jump and run at once.",
-	type: ModuleType.mod,
-	state: false,
-	isStateMode: function () {
-		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
-		//Call hack.state = !hack.state; to toggle 
-	},
-	isToggleAble: function () {
-		return true; //MUST be true if isStateMode = true
-		//Call hack.onClick() to toggle
-	},
-	onTick: function () {
-		if (this.state && Player.getEntity() != -1) {
-			var y = Entity.getY(getPlayerEnt());
-			while (y > 1) y -= 1;
-			if (y < 0) return;
-			var max = 0.6;
-			var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
-			var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
-			if (speed > 0.04) {
-				if (Utils.Player.onGround()) setVelY(getPlayerEnt(), 0.2);
-				else if (Math.round(y * 100) >= 70) setVelY(getPlayerEnt(), -0.15);
 
-			} else if(speed < 0.04){
-				setVelX(getPlayerEnt(), 0);
-				setVelZ(getPlayerEnt(), 0);
-			}
-			
-			if (speed >= lastSpeed && speed < max && tick1 % 1 == 0) {
-				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * 1.15);
-				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * 1.15);
-			} else if (speed < lastSpeed-0.0001) {
-				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 1.5);
-				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.5);
-				
-			}else if(speed > max){
-				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 1.1);
-				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.1);
-			}
-			/*if(lastSpeed > speed+0.00001){
-				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())/2);
-				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())/2);
-				clientMessage(1);
-			}else if(speed < 0.01){
-				setVelX(getPlayerEnt(), 0);
-				setVelZ(getPlayerEnt(), 0);
-				clientMessage(2);
-			}else if(speed < max){
-				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())*1.5);
-				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())*1.5);
-				clientMessage(3);
-			}*/
-
-
-
-		} else {
-
-		}
-	},
-	onEnable: function (btn) {
-		this.state = true;
-	},
-	onDisable: function (btn) {
-		this.state = false;
-	},
-	onClick: function (btn) {
-		this.state = !this.state;
-	},
-	onRefresh: function (btn) {
-		if (btn != null) btn.setText(DragOP.getLString("hacks.jumpspeed"));
-	}
-};
-DragOP.registerModule(jumpspeed);
 var aimaura = {
 	name: DragOP.getLString("hacks.aimaura"),
 	desc: "Automatically aims at near mobs!",
@@ -943,12 +879,69 @@ var clicktp = {
 	}
 };
 DragOP.registerModule(clicktp);
-var longjump = {
-	name: DragOP.getLString("hacks.longjump"),
-	desc: "Jumps while walking. (About ~5 blocks long)",
+var speed = {
+	name: DragOP.getLString("hacks.speed"),
+	desc: "Standard: Standard speed without any modifications\n"+DragOP.getLString("hacks.jumpspeed")+": Jumps ~0.2 blocks high while walking\n"+DragOP.getLString("hacks.longjump")+": Jumps up to 6 blocks long while walking!",
 	type: ModuleType.mod,
 	state: false,
 	extratick: 0,
+	getSettingsLayout: function(params){
+		var settings = new android.widget.LinearLayout(ctx);
+		settings.setOrientation(1);
+		var enabledGradient = new android.graphics.drawable.GradientDrawable();
+		enabledGradient.setColor(android.graphics.Color.argb(150, 0, 200, 0));
+		enabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
+		enabledGradient.setCornerRadius(dip2px(3));
+		var disabledGradient = new android.graphics.drawable.GradientDrawable();
+		disabledGradient.setColor(android.graphics.Color.argb(130, 200, 0,0));
+		disabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
+		disabledGradient.setCornerRadius(dip2px(3));
+		var defaultspeed = new android.widget.Button(ctx);
+		defaultspeed.setText("Standard");
+		defaultspeed.setTypeface(Utils.font);
+		defaultspeed.setBackground(Utils.speedMode == SpeedMode.DEFAULT?enabledGradient:disabledGradient);
+		defaultspeed.setTextColor(android.graphics.Color.BLACK);
+		defaultspeed.setOnClickListener(new android.view.View.OnClickListener({
+			onClick:function(v){
+				Utils.speedMode = SpeedMode.DEFAULT;
+				defaultspeed.setBackground(Utils.speedMode == SpeedMode.DEFAULT?enabledGradient:disabledGradient);
+				bhop.setBackground(Utils.speedMode == SpeedMode.BHOP?enabledGradient:disabledGradient);
+				bunny.setBackground(Utils.speedMode == SpeedMode.LONGJUMP?enabledGradient:disabledGradient);
+			}
+		}));
+		var bhop = new android.widget.Button(ctx);
+		bhop.setText(DragOP.getLString("hacks.jumpspeed"));
+		bhop.setBackground(Utils.speedMode == SpeedMode.BHOP?enabledGradient:disabledGradient);
+		bhop.setTextColor(android.graphics.Color.BLACK);
+		bhop.setTypeface(Utils.font);
+		
+		bhop.setOnClickListener(new android.view.View.OnClickListener({
+			onClick:function(v){
+				Utils.speedMode = SpeedMode.BHOP;
+				defaultspeed.setBackground(Utils.speedMode == SpeedMode.DEFAULT?enabledGradient:disabledGradient);
+				bhop.setBackground(Utils.speedMode == SpeedMode.BHOP?enabledGradient:disabledGradient);
+				bunny.setBackground(Utils.speedMode == SpeedMode.LONGJUMP?enabledGradient:disabledGradient);
+			}
+		}));
+		var bunny = new android.widget.Button(ctx);
+		bunny.setText(DragOP.getLString("hacks.longjump"));
+		bunny.setBackground(Utils.speedMode == SpeedMode.LONGJUMP?enabledGradient:disabledGradient);
+		bunny.setTextColor(android.graphics.Color.BLACK);
+		bunny.setTypeface(Utils.font);
+		
+		bunny.setOnClickListener(new android.view.View.OnClickListener({
+			onClick:function(v){
+				Utils.speedMode = SpeedMode.LONGJUMP;
+				defaultspeed.setBackground(Utils.speedMode == SpeedMode.DEFAULT?enabledGradient:disabledGradient);
+				bhop.setBackground(Utils.speedMode == SpeedMode.BHOP?enabledGradient:disabledGradient);
+				bunny.setBackground(Utils.speedMode == SpeedMode.LONGJUMP?enabledGradient:disabledGradient);
+			}
+		}));
+		settings.addView(defaultspeed, params);
+		settings.addView(bhop, params);
+		settings.addView(bunny, params);
+		return settings;
+	},
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
@@ -959,7 +952,62 @@ var longjump = {
 	},
 	onTick: function () {
 		if (this.state && Utils.Player.onGround()) {
-			this.extratick++;
+			switch(Utils.speedMode){
+				case SpeedMode.DEFAULT:
+					var max = Utils.bypassMode == BypassMode.LBSG?0.35:0.6;
+			var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
+			var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
+			 if(speed < 0.04){
+				setVelX(getPlayerEnt(), 0);
+				setVelZ(getPlayerEnt(), 0);
+			}
+			else if (speed >= lastSpeed-0.001 && speed < max && tick1 % 2 == 0) {
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * (1+max/2));
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * (1+max/2));
+			} else if (speed < lastSpeed-0.0001) {
+				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 1.5);
+				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.5);
+				
+			}else if(speed > max){
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())/2);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())/2);
+				//setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.1);
+			}
+					break;
+				case SpeedMode.BHOP:
+					var y = Entity.getY(getPlayerEnt());
+					while (y > 1) y -= 1;
+			if (y < 0) return;
+			var max = Utils.bypassMode == BypassMode.LBSG?0.45:0.8;
+			var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
+			var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
+			if (speed > 0.09) {
+				if (Utils.Player.onGround()) setVelY(getPlayerEnt(), 0.2);
+				else if (Math.round(y * 100) >= 70) setVelY(getPlayerEnt(), -0.15);
+
+			} else if(speed < 0.04){
+				setVelX(getPlayerEnt(), 0);
+				setVelZ(getPlayerEnt(), 0);
+			}
+			 if(speed < 0.04){
+				setVelX(getPlayerEnt(), 0);
+				setVelZ(getPlayerEnt(), 0);
+			}
+			else if (speed >= lastSpeed-0.001 && speed < max && tick1 % 1 == 0) {
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * (1+max/2));
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * (1+max/2));
+			} else if (speed < lastSpeed-0.0001) {
+				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 1.5);
+				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.5);
+				
+			}else if(speed > max){
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())/2);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())/2);
+				//setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.1);
+			}
+					break;
+				case SpeedMode.LONGJUMP:
+					this.extratick++;
 			if (this.extratick > 7) this.extratick = 0;
 			if (Utils.Vel.calculateSpeed() > 0.105 && this.extratick == 0) {
 				var vector = new Array();
@@ -967,13 +1015,20 @@ var longjump = {
 				var pitch = 0;
 				vector[0] = Math.cos(yaw) * Math.cos(pitch);
 				vector[2] = Math.sin(yaw) * Math.cos(pitch);
+				if(Utils.bypassMode == BypassMode.LBSG){
+					vector[0] = vector[0]/2.5;
+					vector[2] = vector[2]/2.5;
+				}
 				Entity.setVelX(getPlayerEnt(), vector[0]);
-				Entity.setVelY(getPlayerEnt(), 0.5);
+				Entity.setVelY(getPlayerEnt(), Utils.bypassMode == BypassMode.LBSG?0.425:0.5);
 				Entity.setVelZ(getPlayerEnt(), vector[2]);
 			} else if (this.extratick == 0 && Utils.Vel.calculateSpeed() < 0.106) {
 				Entity.setVelX(getPlayerEnt(), 0);
 				Entity.setVelZ(getPlayerEnt(), 0);
 			}
+					break;
+			}
+			
 		}
 	},
 	onClick: function (btn) {
@@ -981,10 +1036,10 @@ var longjump = {
 	},
 	onRefresh: function (btn) {
 		if (btn != null)
-			btn.setText(DragOP.getLString("hacks.longjump"));
+			btn.setText(DragOP.getLString("hacks.speed"));
 	}
 };
-DragOP.registerModule(longjump);
+DragOP.registerModule(speed);
 var flight = {
 	name: DragOP.getLString("hacks.flight"),
 	desc: "Makes you fly.",
