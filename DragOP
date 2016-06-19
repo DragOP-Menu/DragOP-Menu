@@ -583,7 +583,7 @@ var bypass = {
 		lbsg.setText("LBSG Anti-Cheat");
 		lbsg.setTypeface(Utils.font);
 
-		lbsg.setBackground(Utils.bypassMode == BypassMode.LSBG ? enabledGradient : disabledGradient);
+		lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG ? enabledGradient : disabledGradient);
 		lbsg.setTextColor(android.graphics.Color.BLACK);
 		lbsg.setOnClickListener(new android.view.View.OnClickListener({
 			onClick: function(v) {
