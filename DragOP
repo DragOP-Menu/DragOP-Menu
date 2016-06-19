@@ -1,3 +1,4 @@
+
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var LinearLayout = android.widget.LinearLayout;
 var GUI;
@@ -18,19 +19,19 @@ var ModuleType = {
 	special: 2,
 	command: 3,
 	cmd: 3,
-	toName: function(type) {
+	toName: function (type) {
 		switch (type) {
-			case ModuleType.mod:
-				return DragOP.getLString("moduletype.mod");
-				break;
-			case ModuleType.special:
-				return DragOP.getLString("moduletype.special");
-				break;
-			case ModuleType.command:
-				return DragOP.getLString("moduletype.command");
-				break;
-			default:
-				return "unknown";
+		case ModuleType.mod:
+			return DragOP.getLString("moduletype.mod");
+			break;
+		case ModuleType.special:
+			return DragOP.getLString("moduletype.special");
+			break;
+		case ModuleType.command:
+			return DragOP.getLString("moduletype.command");
+			break;
+		default:
+			return "unknown";
 		}
 	}
 };
@@ -54,52 +55,52 @@ var Utils = {
 	online: false,
 	modsCount: 0,
 	currentSearchCount: 0,
-	font: android.os.Build.VERSION.SDK_INT >= 17 ? android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL) : android.graphics.Typeface.DEFAULT,
+	font: android.os.Build.VERSION.SDK_INT>=17?android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL):android.graphics.Typeface.DEFAULT,
 	ModSettings: {
-		getSlider: function() {
+		getSlider: function(){
 			return new android.widget.SeekBar(ctx);
 		}
 	},
 	Block: {
-		isLiquid: function(id) {
-			if (id >= 8 && id <= 11) return true;
+		isLiquid: function(id){
+			if(id >= 8 && id<= 11)return true;
 			return false;
 		}
 	},
 	Player: {
-		onGround: function() {
+		onGround: function () {
 			var y = getPlayerY();
 			while (y > 1) y -= 1;
-
+			
 			if (Math.round(y * 100) == 62 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0 && !Utils.Block.isLiquid(getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()))) return true;
-			if (Math.round(y * 100) == 12 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0 && !Utils.Block.isLiquid(getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()))) return true;
+			if (Math.round(y * 100) == 12 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0 &&!Utils.Block.isLiquid(getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ())) ) return true;
 			return false;
 		},
-		isCollidedHorizontally: function() {
+		isCollidedHorizontally: function(){
 			var x = getPlayerX();
 			var z = getPlayerZ();
-			var blockX = Math.round(x - 0.5);
-			var blockZ = Math.round(z - 0.5);
-			while (x < 1) x += 1;
-			while (z < 1) z += 1;
-			while (x > 1) x -= 1;
-			while (z > 1) z -= 1;
-
-			if (Math.round(x * 100) == 31) x -= 0.01;
-			if (Math.round(z * 100) == 31) z -= 0.01;
-			if (Math.round(x * 100) == 69) x += 0.01;
-			if (Math.round(z * 100) == 69) z += 0.01;
-			if (Math.round(x * 100) == 30) blockX--;
-			if (Math.round(z * 100) == 30) blockZ--;
-			if (Math.round(x * 100) == 70) blockX++;
-			if (Math.round(z * 100) == 70) blockZ++;
+			var blockX = Math.round(x-0.5);
+			var blockZ = Math.round(z-0.5);
+			while(x < 1)x += 1;
+			while(z < 1)z += 1;
+			while(x > 1)x -= 1;
+			while(z > 1)z -= 1;
+			
+			if(Math.round(x * 100) == 31)x-=0.01;
+			if(Math.round(z * 100) == 31)z-=0.01;
+			if(Math.round(x * 100) == 69)x+=0.01;
+			if(Math.round(z * 100) == 69)z+=0.01;
+			if(Math.round(x * 100) == 30)blockX--;
+			if(Math.round(z * 100) == 30)blockZ--;
+			if(Math.round(x * 100) == 70)blockX++;
+			if(Math.round(z * 100) == 70)blockZ++;
 			//clientMessage(blockX+";"+blockZ);
-			if (getTile(blockX, getPlayerY(), blockZ) == 0 && getTile(blockX, getPlayerY() - 1, blockZ) == 0) return false;
-
-			if (Block.getDestroyTime(getTile(blockX, getPlayerY() - 1, blockZ)) <= 0.1 && Block.getDestroyTime(getTile(blockX, getPlayerY(), blockZ)) <= 0.1) return false;
-
-			if (Math.round(x * 100) == 30 || Math.round(x * 100) == 70) return true;
-			if (Math.round(z * 100) == 30 || Math.round(z * 100) == 70) return true;
+			if(getTile(blockX, getPlayerY(), blockZ) == 0 && getTile(blockX, getPlayerY()-1, blockZ)==0)return false;
+			
+			if(Block.getDestroyTime(getTile(blockX, getPlayerY()-1, blockZ)) <= 0.1 && Block.getDestroyTime(getTile(blockX, getPlayerY(), blockZ)) <= 0.1)return false;
+			
+			if(Math.round(x * 100) == 30 || Math.round(x * 100) == 70)return true;
+			if(Math.round(z * 100) == 30 || Math.round(z * 100) == 70)return true;
 			return false;
 		}
 	},
@@ -107,7 +108,7 @@ var Utils = {
 		lastX: 0,
 		lastY: 0,
 		lastZ: 0,
-		calculateSpeed: function() {
+		calculateSpeed: function () {
 			return Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
 		}
 	},
@@ -117,10 +118,9 @@ var Utils = {
 		lastZ: 0
 	},
 	Entity: {
-		targettedMobs: [true, true],
-		/*first mobs second players*/
+		targettedMobs: [true, true],/*first mobs second players*/
 		allEntitys: new Array(),
-		crosshairAimAt: function(ent, pos) {
+		crosshairAimAt: function (ent, pos) {
 			if (ent != null) {
 				var x = Entity.getX(ent) - getPlayerX();
 				var y = Entity.getY(ent) - getPlayerY();
@@ -141,13 +141,13 @@ var Utils = {
 				var pitch = Math.asin(y);
 				pitch = pitch * 180.0 / Math.PI;
 				pitch = -pitch;
-				var yaw = -Math.atan2(a - (Player.getX() + 0.5), c - (Player.getZ() + 0.5)) * (180 / Math.PI);
+				var yaw =  -Math.atan2(a - (Player.getX() + 0.5), c - (Player.getZ() + 0.5)) * (180 / Math.PI);
 				if (pitch < 89 && pitch > -89) {
-					Entity.setRot(Player.getEntity(), yaw, pitch);
+					Entity.setRot(Player.getEntity(),yaw, pitch);
 				}
 			}
 		},
-		bowAimAt: function(ent) {
+		bowAimAt: function (ent) {
 			var velocity = 1;
 			var posX = Entity.getX(ent) - Player.getX();
 			var posY = Entity.getEntityTypeId(ent) == EntityType.PLAYER ? Entity.getY(ent) - Player.getY() : Entity.getY(ent) + 1 - Player.getY();
@@ -160,11 +160,11 @@ var Utils = {
 			if (pitch < 89 && pitch > -89) {
 				setRot(Player.getEntity(), yaw, pitch);
 			}
-
+			
 		},
 		getNearestEntity(maxrange) {
 			var mobs = Utils.Entity.allEntitys;
-
+			
 			var players = Server.getAllPlayers();
 			var small = maxrange;
 			var ent = null;
@@ -173,16 +173,16 @@ var Utils = {
 				var x = Entity.getX(mobs[i]) - getPlayerX();
 				var y = Entity.getY(mobs[i]) - getPlayerY();
 				var z = Entity.getZ(mobs[i]) - getPlayerZ();
-
+				
 				var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
 				var allowed = false;
-				if (Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(mobs[i]) == 63) allowed = true;
-				if (Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(mobs[i]) < 63) allowed = true;
-
-				if (dist < small && dist > 0 && allowed == true && Entity.getHealth(mobs[i]) > 0) {
+				if(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(mobs[i]) == 63)allowed = true;
+				if(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(mobs[i]) < 63)allowed = true;
+				
+				if (dist < small && dist > 0 && allowed == true&& Entity.getHealth(mobs[i]) > 0) {
 					small = dist;
 					ent = mobs[i];
-				} else if (dist < small && dist > 0) {
+				}else if(dist < small && dist > 0){
 					//clientMessage(Entity.getEntityTypeId(mobs[i]));
 				}
 			}
@@ -191,26 +191,26 @@ var Utils = {
 				var y = Entity.getY(players[i]) - getPlayerY();
 				var z = Entity.getZ(players[i]) - getPlayerZ();
 				var allowed = false;
-				if (Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(players[i]) == 63) allowed = true;
-				if (Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(players[i]) < 63) allowed = true;
+				if(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(players[i]) == 63)allowed = true;
+				if(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(players[i]) < 63)allowed = true;
 				var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
 				if (dist < small && dist > 0 && allowed && Entity.getHealth(players[i]) >= 1) {
 					small = dist;
 					ent = players[i];
 				}
 			}
-
+			
 			return ent;
 		}
 	}
 };
 
-DragOP.addCode = function(code) {
+DragOP.addCode = function (code) {
 	l[0].push(code);
 }
-DragOP.setLString = function(code, lang, value) {
+DragOP.setLString = function (code, lang, value) {
 		var done = false;
-		l[0].forEach(function(entry, index, array) {
+		l[0].forEach(function (entry, index, array) {
 			if (entry.toLowerCase() == code.toLowerCase()) {
 				l[lang][index] = value;
 				done = true;
@@ -260,7 +260,7 @@ DragOP.setLString("hacks.autojump", lc.en_US, "AutoJump");
 DragOP.setLString("hacks.tpaura", lc.en_US, "TP-Aura");
 DragOP.setLString("hacks.bowaimbot", lc.en_US, "BowAimBot");
 DragOP.setLString("hacks.clicktp", lc.en_US, "TapTeleport");
-DragOP.setLString("hacks.longjump", lc.en_US, "BunnyHop");
+DragOP.setLString("hacks.longjump", lc.en_US, "Longjump");
 DragOP.setLString("hacks.flight", lc.en_US, "Flight");
 DragOP.setLString("hacks.step", lc.en_US, "Step");
 DragOP.setLString("hacks.jesus", lc.en_US, "Jesus");
@@ -290,14 +290,14 @@ DragOP.setLString("moduletype.command", lc.de_DE, "Befehl");
 DragOP.setLString("moddialog.description", lc.de_DE, "Beschreibung");
 DragOP.setLString("moddialog.type", lc.de_DE, "Typ");
 
-DragOP.getL = function() {
+DragOP.getL = function () {
 	//Todo
 	return l[1];
 }
 
-DragOP.getLString = function(code) {
+DragOP.getLString = function (code) {
 	var str = code;
-	l[0].forEach(function(entry, index, array) {
+	l[0].forEach(function (entry, index, array) {
 
 		if (entry.toLowerCase()
 			.indexOf(code.toLowerCase()) > -1) {
@@ -317,11 +317,11 @@ DragOP.getLString = function(code) {
 	return str;
 }
 
-DragOP.ctoast = function(text, showPrefix) {
+DragOP.ctoast = function (text, showPrefix) {
 	try {
 		var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 		ctx.runOnUiThread(new java.lang.Runnable({
-			run: function() {
+			run: function () {
 				var thetoast = android.widget.Toast.makeText(com.mojang.minecraftpe.MainActivity.currentMainActivity.get(), text, android.widget.Toast.LENGTH_LONG);
 				var layout = new android.widget.LinearLayout(ctx);
 				var msg = new android.widget.TextView(ctx);
@@ -345,12 +345,12 @@ DragOP.ctoast = function(text, showPrefix) {
 		print(e);
 	}
 }
-DragOP.loadModsAnim = function(progress) {
+DragOP.loadModsAnim = function (progress) {
 	ctx.runOnUiThread(new java.lang.Runnable({
-		run: function() {
+		run: function () {
 			new android.os.Handler()
 				.postDelayed(new java.lang.Runnable({
-					run: function() {
+					run: function () {
 						ModPE.langEdit("menu.copyright", "DragOP: " + progress + " Modules loaded");
 						if (progress < Utils.modsCount) DragOP.loadModsAnim(progress + 1);
 					}
@@ -358,7 +358,7 @@ DragOP.loadModsAnim = function(progress) {
 		}
 	}));
 }
-DragOP.getStyledBackground = function() {
+DragOP.getStyledBackground = function () {
 	var bg = android.graphics.drawable.GradientDrawable();
 	bg.setCornerRadius(1);
 	bg.setColor(android.graphics.Color.argb(90, 255, 255, 255));
@@ -366,7 +366,7 @@ DragOP.getStyledBackground = function() {
 	bg.setStroke(dip2px(2), android.graphics.Color.argb(210, 0, 0, 0));
 	return bg;
 }
-DragOP.getStyledBtnBackground = function(state, toggleable) {
+DragOP.getStyledBtnBackground = function (state, toggleable) {
 	var bg = android.graphics.drawable.GradientDrawable();
 	bg.setCornerRadius(1);
 	bg.setColor(android.graphics.Color.argb(80, 0, 0, 0));
@@ -377,9 +377,9 @@ DragOP.getStyledBtnBackground = function(state, toggleable) {
 	return bg;
 }
 
-DragOP.showModDialog = function(mod) {
+DragOP.showModDialog = function (mod) {
 	ctx.runOnUiThread(new java.lang.Runnable() {
-		run: function() {
+		run: function () {
 			try {
 				var display = new android.util.DisplayMetrics();
 				com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
@@ -422,7 +422,7 @@ DragOP.showModDialog = function(mod) {
 				//settings
 				var modSettings = new android.widget.LinearLayout(ctx);
 				modSettings.setOrientation(1);
-				if (mod.getSettingsLayout) {
+				if(mod.getSettingsLayout){
 					//modSettings = mod.Layout();
 					var params = new android.widget.LinearLayout.LayoutParams(mwidth, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
 					var line = new android.widget.TextView(ctx);
@@ -431,7 +431,7 @@ DragOP.showModDialog = function(mod) {
 					gradientLine.setShape(android.graphics.drawable.GradientDrawable.LINE);
 					gradientLine.setColor(android.graphics.Color.TRANSPARENT);
 					//gradientLine.setCornerRadius(dip2px(100));
-					gradientLine.setStroke(dip2px(1), android.graphics.Color.argb(50, 0, 0, 0));
+					gradientLine.setStroke(dip2px(1), android.graphics.Color.argb(50,0,0,0));
 					line.setBackground(gradientLine);
 					line.setGravity(android.view.Gravity.CENTER);
 					modSettings.addView(line, params);
@@ -489,7 +489,7 @@ DragOP.showModDialog = function(mod) {
 				dialog.setContentView(dialogLayout);
 				dialog.setTitle(mod.name);
 				dialog.setOnDismissListener(new android.content.DialogInterface.OnDismissListener() {
-					onDismiss: function() {
+					onDismiss: function () {
 						showMenu();
 					}
 				});
@@ -497,7 +497,7 @@ DragOP.showModDialog = function(mod) {
 				var window = dialog.getWindow();
 				window.setLayout(mwidth, display.heightPixels);
 				closeButton.setOnClickListener(new android.view.View.OnClickListener() {
-					onClick: function(view) {
+					onClick: function (view) {
 						dialog.dismiss();
 					}
 				});
@@ -508,7 +508,7 @@ DragOP.showModDialog = function(mod) {
 	});
 }
 
-DragOP.registerModule = function(mod) {
+DragOP.registerModule = function (mod) {
 
 	DragOP.mods.push(mod);
 	Utils.modsCount += 1;
@@ -518,7 +518,7 @@ var target = {
 	name: DragOP.getLString("special.target"),
 	desc: "Let you choose the type of entitys that are targetted by Modules like AimAura and BowAimBot.",
 	type: ModuleType.special,
-	getSettingsLayout: function(params) {
+	getSettingsLayout: function(params){
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
 		var players = new android.widget.CheckBox(ctx);
@@ -527,7 +527,7 @@ var target = {
 		players.setTextColor(android.graphics.Color.BLACK);
 		players.setChecked(Utils.Entity.targettedMobs[1]);
 		players.setOnClickListener(new android.view.View.OnClickListener({
-			onClick: function(v) {
+			onClick:function(v){
 				Utils.Entity.targettedMobs = [Utils.Entity.targettedMobs[0], v.isChecked()];
 			}
 		}));
@@ -537,7 +537,7 @@ var target = {
 		mobs.setTypeface(Utils.font);
 		mobs.setChecked(Utils.Entity.targettedMobs[0]);
 		mobs.setOnClickListener(new android.view.View.OnClickListener({
-			onClick: function(v) {
+			onClick:function(v){
 				Utils.Entity.targettedMobs = [v.isChecked(), Utils.Entity.targettedMobs[1]];
 			}
 		}));
@@ -545,19 +545,19 @@ var target = {
 		settings.addView(mobs, params);
 		return settings;
 	},
-	isStateMode: function() {
+	isStateMode: function () {
 		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return false; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onClick: function(btn) {
+	onClick: function (btn) {
 		DragOP.showModDialog(this);
 		menu.dismiss();
 	},
-	onRefresh: function(btn) {
+	onRefresh: function (btn) {
 		if (btn != null)
 			btn.setText(DragOP.getLString("special.target"));
 	}
@@ -568,7 +568,7 @@ var bypass = {
 	name: DragOP.getLString("special.bypass"),
 	desc: "Mods will bypass AntiCheats or disable them if they can't.",
 	type: ModuleType.special,
-	getSettingsLayout: function(params) {
+	getSettingsLayout: function(params){
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
 		var enabledGradient = new android.graphics.drawable.GradientDrawable();
@@ -576,52 +576,51 @@ var bypass = {
 		enabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
 		enabledGradient.setCornerRadius(dip2px(3));
 		var disabledGradient = new android.graphics.drawable.GradientDrawable();
-		disabledGradient.setColor(android.graphics.Color.argb(130, 200, 0, 0));
+		disabledGradient.setColor(android.graphics.Color.argb(130, 200, 0,0));
 		disabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
 		disabledGradient.setCornerRadius(dip2px(3));
 		var lbsg = new android.widget.Button(ctx);
 		lbsg.setText("LBSG Anti-Cheat");
 		lbsg.setTypeface(Utils.font);
-
-		lbsg.setBackground(Utils.bypassMode == BypassMode.LSBG ? enabledGradient : disabledGradient);
+		lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG?enabledGradient:disabledGradient);
 		lbsg.setTextColor(android.graphics.Color.BLACK);
 		lbsg.setOnClickListener(new android.view.View.OnClickListener({
-			onClick: function(v) {
+			onClick:function(v){
 				Utils.bypassMode = BypassMode.LBSG;
-				lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG ? enabledGradient : disabledGradient);
-				vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT ? enabledGradient : disabledGradient);
+				lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG?enabledGradient:disabledGradient);
+				vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT?enabledGradient:disabledGradient);
 			}
 		}));
 		var vanilla = new android.widget.Button(ctx);
 		vanilla.setText("Vanilla");
-		vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT ? enabledGradient : disabledGradient);
+		vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT?enabledGradient:disabledGradient);
 		vanilla.setTextColor(android.graphics.Color.BLACK);
 		vanilla.setTypeface(Utils.font);
-
+		
 		vanilla.setOnClickListener(new android.view.View.OnClickListener({
-			onClick: function(v) {
+			onClick:function(v){
 				Utils.bypassMode = BypassMode.DEFAULT;
-				lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG ? enabledGradient : disabledGradient);
-				vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT ? enabledGradient : disabledGradient);
+				lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG?enabledGradient:disabledGradient);
+				vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT?enabledGradient:disabledGradient);
 			}
 		}));
 		settings.addView(vanilla, params);
 		settings.addView(lbsg, params);
 		return settings;
 	},
-	isStateMode: function() {
+	isStateMode: function () {
 		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return false; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onClick: function(btn) {
+	onClick: function (btn) {
 		DragOP.showModDialog(this);
 		menu.dismiss();
 	},
-	onRefresh: function(btn) {
+	onRefresh: function (btn) {
 		if (btn != null)
 			btn.setText(DragOP.getLString("special.bypass"));
 	}
@@ -631,24 +630,24 @@ var panic = {
 	name: DragOP.getLString("special.panic"),
 	desc: "Disables all mods at once!",
 	type: ModuleType.mod,
-	isStateMode: function() {
+	isStateMode: function () {
 		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return false; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function() { /*some tick*/ },
-	onEnable: function(btn) { /*Not used*/ },
-	onDisable: function(btn) { /*Not used*/ },
-	onClick: function(btn) {
-		DragOP.mods.forEach(function(entry, index, array) {
+	onTick: function () { /*some tick*/ },
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
+		DragOP.mods.forEach(function (entry, index, array) {
 			if (entry.isStateMode() && entry.state) entry.onClick(null);
 		});
 		refreshMenu();
 	},
-	onRefresh: function(btn) {
+	onRefresh: function (btn) {
 		if (btn != null)
 			btn.setText(DragOP.getLString("special.panic"));
 	}
@@ -658,24 +657,24 @@ var gmhack = {
 	name: "Gamemode",
 	desc: "Changes your gamemode!",
 	type: ModuleType.mod,
-	isStateMode: function() {
+	isStateMode: function () {
 		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
 	extra: Level.getGameMode(),
-	onTick: function() { /*some tick*/ },
-	onEnable: function(btn) { /*Not used*/ },
-	onDisable: function(btn) { /*Not used*/ },
-	onClick: function(btn) {
+	onTick: function () { /*some tick*/ },
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
 		if (this.extra == 1) this.extra = 0;
 		else this.extra = 1;
 		Level.setGameMode(this.extra);
 	},
-	onRefresh: function(btn) {
+	onRefresh: function (btn) {
 		if (btn != null)
 			btn.setText(DragOP.getLString("hacks.gamemode") + ": " + (this.extra == 0 ? DragOP.getLString("gm.survival") : DragOP.getLString("gm.creative")));
 	}
@@ -688,11 +687,11 @@ var aimaura = {
 	type: ModuleType.mod,
 	state: false,
 	range: 7,
-	getSettingsLayout: function(params) {
+	getSettingsLayout: function(params){
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
 		var rangeText = new android.widget.TextView(ctx);
-		rangeText.setText("Range: " + this.range);
+		rangeText.setText("Range: "+this.range);
 		rangeText.setTextColor(android.graphics.Color.BLACK);
 		rangeText.setTextSize(dip2px(9));
 		rangeText.setGravity(android.view.Gravity.CENTER);
@@ -701,42 +700,42 @@ var aimaura = {
 		rangeSlider.setMax(20);
 		//rangeSlider.setMin(1);
 		rangeSlider.setProgress(this.range);
-		rangeSlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
-			onProgressChanged: function(seekBar, progress, fromUser) {
-
-				rangeText.setText("Range: " + progress);
-
-			},
-			onStopTrackingTouch: function(seekbar) {
-				aimaura.range = seekbar.getProgress();
-			}
-		});
+		rangeSlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
+		onProgressChanged:function (seekBar, progress, fromUser){
+			
+			rangeText.setText("Range: "+progress);
+			
+		},
+		onStopTrackingTouch: function(seekbar){
+			aimaura.range = seekbar.getProgress();
+		}
+});
 		settings.addView(rangeSlider, params);
 		settings.addView(rangeText, params);
-
-
+		
+		
 		return settings;
 	},
-	isStateMode: function() {
+	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function() {
+	onTick: function () {
 		if (this.state) {
 			var ent = Utils.Entity.getNearestEntity(this.range);
-			if (ent != null) Utils.Entity.crosshairAimAt(ent);
+			if(ent!=null)Utils.Entity.crosshairAimAt(ent);
 		}
 	},
-	onEnable: function(btn) { /*Not used*/ },
-	onDisable: function(btn) { /*Not used*/ },
-	onClick: function(btn) {
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
 		this.state = !this.state;
 	},
-	onRefresh: function(btn) {
+	onRefresh: function (btn) {
 		if (btn != null)
 			btn.setText(DragOP.getLString("hacks.aimaura"));
 	}
@@ -748,19 +747,19 @@ var bowaimbot = {
 	type: ModuleType.mod,
 	state: false,
 	range: 100,
-	isStateMode: function() {
+	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	getSettingsLayout: function(params) {
+	getSettingsLayout: function(params){
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
 		var rangeText = new android.widget.TextView(ctx);
-		rangeText.setText("Range: " + this.range);
+		rangeText.setText("Range: "+this.range);
 		rangeText.setTextColor(android.graphics.Color.BLACK);
 		rangeText.setTextSize(dip2px(9));
 		rangeText.setGravity(android.view.Gravity.CENTER);
@@ -769,36 +768,36 @@ var bowaimbot = {
 		rangeSlider.setMax(100);
 		//rangeSlider.setMin(1);
 		rangeSlider.setProgress(this.range);
-		rangeSlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
-			onProgressChanged: function(seekBar, progress, fromUser) {
-
-				rangeText.setText("Range: " + progress);
-
-			},
-			onStopTrackingTouch: function(seekbar) {
-				bowaimbot.range = seekbar.getProgress();
-			}
-		});
+		rangeSlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
+		onProgressChanged:function (seekBar, progress, fromUser){
+			
+			rangeText.setText("Range: "+progress);
+			
+		},
+		onStopTrackingTouch: function(seekbar){
+			bowaimbot.range = seekbar.getProgress();
+		}
+});
 		settings.addView(rangeSlider, params);
 		settings.addView(rangeText, params);
-
-
+		
+		
 		return settings;
 	},
-	onTick: function() {
+	onTick: function () {
 		if (this.state && getCarriedItem() == 261 /*No Dynamic :( */ ) {
 			var ent = Utils.Entity.getNearestEntity(this.range);
-
-			if (ent != null) Utils.Entity.bowAimAt(ent);
-
+			
+			if(ent != null)Utils.Entity.bowAimAt(ent);
+			
 		}
 	},
-	onEnable: function(btn) { /*Not used*/ },
-	onDisable: function(btn) { /*Not used*/ },
-	onClick: function(btn) {
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
 		this.state = !this.state;
 	},
-	onRefresh: function(btn) {
+	onRefresh: function (btn) {
 		if (btn != null)
 			btn.setText(DragOP.getLString("hacks.bowaimbot"));
 	}
@@ -809,18 +808,18 @@ var tpaura = {
 	desc: "Automatically teleports you around people so that they can\'t hit you.",
 	type: ModuleType.mod,
 	state: false,
-	isStateMode: function() {
+	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function() {
+	onTick: function () {
 
 	},
-	findPos: function(ent) {
+	findPos: function (ent) {
 		var Ppos = new Array(getPlayerX(), getPlayerY() + 0.5, getPlayerZ());
 		var entPos = new Array(Entity.getX(ent), Entity.getY(ent), Entity.getZ(ent));
 		var diff = new Array(entPos[0] - Ppos[0], null, entPos[2] - Ppos[2]);
@@ -829,7 +828,7 @@ var tpaura = {
 		return Ppos;
 		//just inverting pos at the moment
 	},
-	onAttack: function(att, vic) {
+	onAttack: function (att, vic) {
 		if (att == Player.getEntity() && this.state && Entity.getHealth(vic) > 0) {
 
 			var pos = this.findPos(vic);
@@ -841,12 +840,12 @@ var tpaura = {
 			Utils.Entity.crosshairAimAt(vic, pos);
 		}
 	},
-	onEnable: function(btn) { /*Not used*/ },
-	onDisable: function(btn) { /*Not used*/ },
-	onClick: function(btn) {
+	onEnable: function (btn) { /*Not used*/ },
+	onDisable: function (btn) { /*Not used*/ },
+	onClick: function (btn) {
 		this.state = !this.state;
 	},
-	onRefresh: function(btn) {
+	onRefresh: function (btn) {
 		if (btn != null)
 			btn.setText(DragOP.getLString("hacks.tpaura"));
 	}
@@ -857,23 +856,23 @@ var clicktp = {
 	desc: "Teleports you to the place where you clicked",
 	type: ModuleType.mod,
 	state: false,
-	isStateMode: function() {
+	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onUseItem: function(x, y, z, itemid, blockid, side) {
+	onUseItem: function (x, y, z, itemid, blockid, side) {
 		if (getTile(x, y + 1, z) == 0 && getTile(x, y + 2, z) == 0 && this.state) {
 			Entity.setPosition(Player.getEntity(), x + 0.5, y + 2.63 /*1.62 = eye height of steve*/ , z + 0.5);
 		}
 	},
-	onClick: function(btn) {
+	onClick: function (btn) {
 		this.state = !this.state;
 	},
-	onRefresh: function(btn) {
+	onRefresh: function (btn) {
 		if (btn != null)
 			btn.setText(DragOP.getLString("hacks.clicktp"));
 	}
@@ -881,11 +880,11 @@ var clicktp = {
 DragOP.registerModule(clicktp);
 var speed = {
 	name: DragOP.getLString("hacks.speed"),
-	desc: "Standard: Standard speed without any modifications\n" + DragOP.getLString("hacks.jumpspeed") + ": Jumps ~0.2 blocks high while walking\n" + DragOP.getLString("hacks.longjump") + ": Jumps up to 6 blocks long while walking!",
+	desc: "Standard: Standard speed without any modifications\n"+DragOP.getLString("hacks.jumpspeed")+": Jumps ~0.2 blocks high while walking\n"+DragOP.getLString("hacks.longjump")+": Jumps up to 6 blocks long while walking!",
 	type: ModuleType.mod,
 	state: false,
 	extratick: 0,
-	getSettingsLayout: function(params) {
+	getSettingsLayout: function(params){
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
 		var enabledGradient = new android.graphics.drawable.GradientDrawable();
@@ -893,48 +892,48 @@ var speed = {
 		enabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
 		enabledGradient.setCornerRadius(dip2px(3));
 		var disabledGradient = new android.graphics.drawable.GradientDrawable();
-		disabledGradient.setColor(android.graphics.Color.argb(130, 200, 0, 0));
+		disabledGradient.setColor(android.graphics.Color.argb(130, 200, 0,0));
 		disabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
 		disabledGradient.setCornerRadius(dip2px(3));
 		var defaultspeed = new android.widget.Button(ctx);
 		defaultspeed.setText("Standard");
 		defaultspeed.setTypeface(Utils.font);
-		defaultspeed.setBackground(Utils.speedMode == SpeedMode.DEFAULT ? enabledGradient : disabledGradient);
+		defaultspeed.setBackground(Utils.speedMode == SpeedMode.DEFAULT?enabledGradient:disabledGradient);
 		defaultspeed.setTextColor(android.graphics.Color.BLACK);
 		defaultspeed.setOnClickListener(new android.view.View.OnClickListener({
-			onClick: function(v) {
+			onClick:function(v){
 				Utils.speedMode = SpeedMode.DEFAULT;
-				defaultspeed.setBackground(Utils.speedMode == SpeedMode.DEFAULT ? enabledGradient : disabledGradient);
-				bhop.setBackground(Utils.speedMode == SpeedMode.BHOP ? enabledGradient : disabledGradient);
-				bunny.setBackground(Utils.speedMode == SpeedMode.LONGJUMP ? enabledGradient : disabledGradient);
+				defaultspeed.setBackground(Utils.speedMode == SpeedMode.DEFAULT?enabledGradient:disabledGradient);
+				bhop.setBackground(Utils.speedMode == SpeedMode.BHOP?enabledGradient:disabledGradient);
+				bunny.setBackground(Utils.speedMode == SpeedMode.LONGJUMP?enabledGradient:disabledGradient);
 			}
 		}));
 		var bhop = new android.widget.Button(ctx);
 		bhop.setText(DragOP.getLString("hacks.jumpspeed"));
-		bhop.setBackground(Utils.speedMode == SpeedMode.BHOP ? enabledGradient : disabledGradient);
+		bhop.setBackground(Utils.speedMode == SpeedMode.BHOP?enabledGradient:disabledGradient);
 		bhop.setTextColor(android.graphics.Color.BLACK);
 		bhop.setTypeface(Utils.font);
-
+		
 		bhop.setOnClickListener(new android.view.View.OnClickListener({
-			onClick: function(v) {
+			onClick:function(v){
 				Utils.speedMode = SpeedMode.BHOP;
-				defaultspeed.setBackground(Utils.speedMode == SpeedMode.DEFAULT ? enabledGradient : disabledGradient);
-				bhop.setBackground(Utils.speedMode == SpeedMode.BHOP ? enabledGradient : disabledGradient);
-				bunny.setBackground(Utils.speedMode == SpeedMode.LONGJUMP ? enabledGradient : disabledGradient);
+				defaultspeed.setBackground(Utils.speedMode == SpeedMode.DEFAULT?enabledGradient:disabledGradient);
+				bhop.setBackground(Utils.speedMode == SpeedMode.BHOP?enabledGradient:disabledGradient);
+				bunny.setBackground(Utils.speedMode == SpeedMode.LONGJUMP?enabledGradient:disabledGradient);
 			}
 		}));
 		var bunny = new android.widget.Button(ctx);
 		bunny.setText(DragOP.getLString("hacks.longjump"));
-		bunny.setBackground(Utils.speedMode == SpeedMode.LONGJUMP ? enabledGradient : disabledGradient);
+		bunny.setBackground(Utils.speedMode == SpeedMode.LONGJUMP?enabledGradient:disabledGradient);
 		bunny.setTextColor(android.graphics.Color.BLACK);
 		bunny.setTypeface(Utils.font);
-
+		
 		bunny.setOnClickListener(new android.view.View.OnClickListener({
-			onClick: function(v) {
+			onClick:function(v){
 				Utils.speedMode = SpeedMode.LONGJUMP;
-				defaultspeed.setBackground(Utils.speedMode == SpeedMode.DEFAULT ? enabledGradient : disabledGradient);
-				bhop.setBackground(Utils.speedMode == SpeedMode.BHOP ? enabledGradient : disabledGradient);
-				bunny.setBackground(Utils.speedMode == SpeedMode.LONGJUMP ? enabledGradient : disabledGradient);
+				defaultspeed.setBackground(Utils.speedMode == SpeedMode.DEFAULT?enabledGradient:disabledGradient);
+				bhop.setBackground(Utils.speedMode == SpeedMode.BHOP?enabledGradient:disabledGradient);
+				bunny.setBackground(Utils.speedMode == SpeedMode.LONGJUMP?enabledGradient:disabledGradient);
 			}
 		}));
 		settings.addView(defaultspeed, params);
@@ -942,97 +941,99 @@ var speed = {
 		settings.addView(bunny, params);
 		return settings;
 	},
-	isStateMode: function() {
+	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function() {
+	onTick: function () {
 		if (this.state && Utils.Player.onGround()) {
-			switch (Utils.speedMode) {
+			switch(Utils.speedMode){
 				case SpeedMode.DEFAULT:
-					var max = Utils.bypassMode == BypassMode.LBSG ? 0.35 : 0.6;
-					var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
-					var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
-					if (speed < 0.04) {
-						setVelX(getPlayerEnt(), 0);
-						setVelZ(getPlayerEnt(), 0);
-					} else if (speed >= lastSpeed - 0.001 && speed < max && tick1 % 2 == 0) {
-						setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * (1 + max / 2));
-						setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * (1 + max / 2));
-					} else if (speed < lastSpeed - 0.0001) {
-						setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 1.5);
-						setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.5);
-
-					} else if (speed > max) {
-						setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) / 2);
-						setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) / 2);
-						//setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.1);
-					}
+					var max = Utils.bypassMode == BypassMode.LBSG?0.35:0.6;
+			var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
+			var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
+			 if(speed < 0.04){
+				setVelX(getPlayerEnt(), 0);
+				setVelZ(getPlayerEnt(), 0);
+			}
+			else if (speed >= lastSpeed-0.001 && speed < max && tick1 % 2 == 0) {
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * (1+max/2));
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * (1+max/2));
+			} else if (speed < lastSpeed-0.0001) {
+				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 1.5);
+				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.5);
+				
+			}else if(speed > max){
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())/2);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())/2);
+				//setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.1);
+			}
 					break;
 				case SpeedMode.BHOP:
 					var y = Entity.getY(getPlayerEnt());
 					while (y > 1) y -= 1;
-					if (y < 0) return;
-					var max = Utils.bypassMode == BypassMode.LBSG ? 0.45 : 0.8;
-					var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
-					var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
-					if (speed > 0.09) {
-						if (Utils.Player.onGround()) setVelY(getPlayerEnt(), 0.2);
-						else if (Math.round(y * 100) >= 70) setVelY(getPlayerEnt(), -0.15);
+			if (y < 0) return;
+			var max = Utils.bypassMode == BypassMode.LBSG?0.45:0.8;
+			var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
+			var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
+			if (speed > 0.09) {
+				if (Utils.Player.onGround()) setVelY(getPlayerEnt(), 0.2);
+				else if (Math.round(y * 100) >= 70) setVelY(getPlayerEnt(), -0.15);
 
-					} else if (speed < 0.04) {
-						setVelX(getPlayerEnt(), 0);
-						setVelZ(getPlayerEnt(), 0);
-					}
-					if (speed < 0.04) {
-						setVelX(getPlayerEnt(), 0);
-						setVelZ(getPlayerEnt(), 0);
-					} else if (speed >= lastSpeed - 0.001 && speed < max && tick1 % 1 == 0) {
-						setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * (1 + max / 2));
-						setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * (1 + max / 2));
-					} else if (speed < lastSpeed - 0.0001) {
-						setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 1.5);
-						setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.5);
-
-					} else if (speed > max) {
-						setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) / 2);
-						setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) / 2);
-						//setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.1);
-					}
+			} else if(speed < 0.04){
+				setVelX(getPlayerEnt(), 0);
+				setVelZ(getPlayerEnt(), 0);
+			}
+			 if(speed < 0.04){
+				setVelX(getPlayerEnt(), 0);
+				setVelZ(getPlayerEnt(), 0);
+			}
+			else if (speed >= lastSpeed-0.001 && speed < max && tick1 % 1 == 0) {
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * (1+max/2));
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * (1+max/2));
+			} else if (speed < lastSpeed-0.0001) {
+				setVelX(getPlayerEnt(), (getPlayerX() - Utils.Pos.lastX) / 1.5);
+				setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.5);
+				
+			}else if(speed > max){
+				setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt())/2);
+				setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt())/2);
+				//setVelZ(getPlayerEnt(), (getPlayerZ() - Utils.Pos.lastZ) / 1.1);
+			}
 					break;
 				case SpeedMode.LONGJUMP:
 					this.extratick++;
-					if (this.extratick > 7) this.extratick = 0;
-					if (Utils.Vel.calculateSpeed() > 0.105 && this.extratick == 0) {
-						var vector = new Array();
-						var yaw = (getYaw(getPlayerEnt()) + 90) * (Math.PI / 180);
-						var pitch = 0;
-						vector[0] = Math.cos(yaw) * Math.cos(pitch);
-						vector[2] = Math.sin(yaw) * Math.cos(pitch);
-						if (Utils.bypassMode == BypassMode.LBSG) {
-							vector[0] = vector[0] / 2.5;
-							vector[2] = vector[2] / 2.5;
-						}
-						Entity.setVelX(getPlayerEnt(), vector[0]);
-						Entity.setVelY(getPlayerEnt(), Utils.bypassMode == BypassMode.LBSG ? 0.425 : 0.5);
-						Entity.setVelZ(getPlayerEnt(), vector[2]);
-					} else if (this.extratick == 0 && Utils.Vel.calculateSpeed() < 0.106) {
-						Entity.setVelX(getPlayerEnt(), 0);
-						Entity.setVelZ(getPlayerEnt(), 0);
-					}
+			if (this.extratick > 7) this.extratick = 0;
+			if (Utils.Vel.calculateSpeed() > 0.105 && this.extratick == 0) {
+				var vector = new Array();
+				var yaw = (getYaw(getPlayerEnt()) + 90) * (Math.PI / 180);
+				var pitch = 0;
+				vector[0] = Math.cos(yaw) * Math.cos(pitch);
+				vector[2] = Math.sin(yaw) * Math.cos(pitch);
+				if(Utils.bypassMode == BypassMode.LBSG){
+					vector[0] = vector[0]/2.5;
+					vector[2] = vector[2]/2.5;
+				}
+				Entity.setVelX(getPlayerEnt(), vector[0]);
+				Entity.setVelY(getPlayerEnt(), Utils.bypassMode == BypassMode.LBSG?0.425:0.5);
+				Entity.setVelZ(getPlayerEnt(), vector[2]);
+			} else if (this.extratick == 0 && Utils.Vel.calculateSpeed() < 0.106) {
+				Entity.setVelX(getPlayerEnt(), 0);
+				Entity.setVelZ(getPlayerEnt(), 0);
+			}
 					break;
 			}
-
+			
 		}
 	},
-	onClick: function(btn) {
+	onClick: function (btn) {
 		this.state = !this.state;
 	},
-	onRefresh: function(btn) {
+	onRefresh: function (btn) {
 		if (btn != null)
 			btn.setText(DragOP.getLString("hacks.speed"));
 	}
@@ -1043,25 +1044,25 @@ var flight = {
 	desc: "Makes you fly.",
 	type: ModuleType.mod,
 	state: false,
-	isStateMode: function() {
+	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function() {
+	onTick: function () {
 		if (this.state)
 			Player.setFlying(1);
-
+		
 	},
-	onClick: function(btn) {
+	onClick: function (btn) {
 		this.state = !this.state;
-		Player.setFlying(this.state ? 1 : 0);
-		Player.setCanFly(this.state ? 1 : Level.getGameMode());
+		Player.setFlying(this.state?1:0);
+		Player.setCanFly(this.state?1:Level.getGameMode());
 	},
-	onRefresh: function(btn) {
+	onRefresh: function (btn) {
 		if (btn != null)
 			btn.setText(DragOP.getLString("hacks.flight"));
 	}
@@ -1072,25 +1073,23 @@ var step = {
 	desc: "Steps on full blocks like you will on a half slap",
 	type: ModuleType.mod,
 	state: false,
-	isStateMode: function() {
+	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-
-	onTick: function() {
-		if (this.state && Utils.Player.isCollidedHorizontally()) {
+	
+	onTick: function () { 
+		if(this.state && Utils.Player.isCollidedHorizontally()){
 			Entity.setPositionRelative(getPlayerEnt(), 0, 1.6, 0);
 		}
 	},
-	onClick: function(btn) {
-		this.state = !this.state;
-	},
-	onRefresh: function(btn) {
-		if (btn != null)
+	onClick: function (btn) {this.state=!this.state;},
+	onRefresh: function (btn) {
+		if(btn != null)
 			btn.setText(DragOP.getLString("hacks.step"));
 	}
 };
@@ -1101,30 +1100,28 @@ var jesus = {
 	desc: "Jesus used this hack 2000 years ago",
 	type: ModuleType.mod,
 	state: false,
-	isStateMode: function() {
+	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function() {
-		if (this.state) {
-			if ((getTile(getPlayerX(), getPlayerY() - 0.8, getPlayerZ() - 1) >= 8 && getTile(getPlayerX(), getPlayerY() - 0.8, getPlayerZ() - 1) <= 11)) {
+	onTick: function () {
+		if(this.state ){
+			if((getTile(getPlayerX(), getPlayerY()-0.8, getPlayerZ()-1)>=8 && getTile(getPlayerX(), getPlayerY()-0.8, getPlayerZ()-1)<=11)){
 				setVelY(getPlayerEnt(), 0.2);
-			} else if ((getTile(getPlayerX(), getPlayerY() - 1.3, getPlayerZ() - 1) >= 8 && getTile(getPlayerX(), getPlayerY() - 1.3, getPlayerZ() - 1) <= 11)) {
+			}else if((getTile(getPlayerX(), getPlayerY()-1.3, getPlayerZ()-1)>=8 && getTile(getPlayerX(), getPlayerY()-1.3, getPlayerZ()-1)<=11)){
 				setVelY(getPlayerEnt(), 0.05);
-			} else if ((getTile(getPlayerX(), getPlayerY() - 1.68, getPlayerZ() - 1) >= 8 && getTile(getPlayerX(), getPlayerY() - 1.68, getPlayerZ() - 1) <= 11)) {
+			}else if((getTile(getPlayerX(), getPlayerY()-1.68, getPlayerZ()-1)>=8 && getTile(getPlayerX(), getPlayerY()-1.68, getPlayerZ()-1)<=11)){
 				setVelY(getPlayerEnt(), 0.015);
 			}
 		}
 	},
-	onClick: function(btn) {
-		this.state = !this.state;
-	},
-	onRefresh: function(btn) {
-		if (btn != null)
+	onClick: function (btn) {this.state=!this.state;},
+	onRefresh: function (btn) {
+		if(btn!=null)
 			btn.setText(DragOP.getLString("hacks.jesus"));
 	}
 };
@@ -1135,26 +1132,23 @@ var nodownglide = {
 	type: ModuleType.mod,
 	state: false,
 	startY: -1,
-	isStateMode: function() {
+	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function() {
-		if (this.state) {
+	onTick: function () {
+		if(this.state){
 			setVelY(getPlayerEnt(), -0.000000000001);
-			Entity.setPositionRelative(getPlayerEnt(), 0, this.startY - getPlayerY(), 0);
+			Entity.setPositionRelative(getPlayerEnt(), 0, this.startY-getPlayerY(), 0);
 		}
 	},
-	onClick: function(btn) {
-		this.startY = getPlayerY();
-		this.state = !this.state;
-	},
-	onRefresh: function(btn) {
-		if (btn != null)
+	onClick: function (btn) {this.startY = getPlayerY();this.state=!this.state;},
+	onRefresh: function (btn) {
+		if(btn != null)
 			btn.setText(DragOP.getLString("hacks.nodownglide"));
 	}
 };
@@ -1164,32 +1158,31 @@ var glide = {
 	desc: "Let you glide through the air. Sometimes good to bypass anti cheats",
 	type: ModuleType.mod,
 	state: false,
-	isStateMode: function() {
+	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
-	isToggleAble: function() {
+	isToggleAble: function () {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function() {
-		if (this.state && Entity.getVelY(getPlayerEnt()) < 0 && !Player.isFlying()) {
-			switch (Utils.bypassMode) {
+	onTick: function () {
+		if(this.state && Entity.getVelY(getPlayerEnt()) < 0&& !Player.isFlying()){
+			switch(Utils.bypassMode){
 				case BypassMode.DEFAULT:
-					setVelY(getPlayerEnt(), -0.001);
+				    setVelY(getPlayerEnt(), -0.001);
 					break;
 				case BypassMode.LBSG:
-					setVelY(getPlayerEnt(), -0.001);
+					if(tick1 % 2 == 0)
+						setVelY(getPlayerEnt(), -0.01);
 					break;
 			}
-
+			
 		}
 	},
-	onClick: function(btn) {
-		this.state = !this.state;
-	},
-	onRefresh: function(btn) {
-		if (btn != null)
+	onClick: function (btn) {this.state = !this.state;},
+	onRefresh: function (btn) {
+		if(btn!=null)
 			btn.setText(DragOP.getLString("hacks.glide"));
 	}
 };
@@ -1231,13 +1224,13 @@ var mwidth = ctx.getWindowManager()
 	.getWidth() / 100 * 70;
 var menu;
 
-var styledBtn = function() {
+var styledBtn = function () {
 	var defaultBtn = new android.widget.Button(ctx);
 	defaultBtn.setBackgroundDrawable(DragOP.getStyledBackground());
 	return defaultBtn;
 }
 
-var modBtn = function(mod) {
+var modBtn = function (mod) {
 	var btn = new android.widget.Button(ctx);
 	btn.setTransformationMethod(null);
 	btn.setBackground(null);
@@ -1245,7 +1238,7 @@ var modBtn = function(mod) {
 	btn.setTextColor(android.graphics.Color.WHITE);
 	btn.setTypeface(Utils.font);
 	btn.setOnClickListener(new android.view.View.OnClickListener({
-		onClick: function(viewarg) {
+		onClick: function (viewarg) {
 			mod.onClick(btn);
 			mod.onRefresh(btn);
 			if (mod.isStateMode()) modButtonLayout.setBackground(DragOP.getStyledBtnBackground(mod.state, true));
@@ -1261,7 +1254,7 @@ var modBtn = function(mod) {
 	//btn1.setBackground(null);
 	btn1.setBackgroundColor(android.graphics.Color.argb(100, 0, 0, 0));
 	btn1.setOnClickListener(new android.view.View.OnClickListener({
-		onClick: function(viewarg) {
+		onClick: function (viewarg) {
 			DragOP.showModDialog(mod);
 			menu.dismiss();
 
@@ -1298,10 +1291,10 @@ function dip2px(dips) {
 		.getDisplayMetrics()
 		.density);
 }
-DragOP.generateMenu = function(keyword) {
+DragOP.generateMenu = function (keyword) {
 	var lay = new android.widget.TableLayout(ctx);
 	var currow;
-	DragOP.mods.forEach(function(entry, index, array) {
+	DragOP.mods.forEach(function (entry, index, array) {
 		if ((entry.name.toString()
 				.toLowerCase()
 				.indexOf(keyword.toString()
@@ -1329,7 +1322,7 @@ DragOP.generateMenu = function(keyword) {
 
 function showMenu() {
 	ctx.runOnUiThread(new java.lang.Runnable({
-		run: function() {
+		run: function () {
 			try {
 
 				var sbar = new android.widget.LinearLayout(ctx);
@@ -1348,7 +1341,7 @@ function showMenu() {
 				search.setTextColor(android.graphics.Color.BLACK);
 				search.setGravity(android.view.Gravity.CENTER);
 				search.addTextChangedListener(new android.text.TextWatcher() {
-					afterTextChanged: function(text) {
+					afterTextChanged: function (text) {
 						updateMenu(text, toplayout);
 						searchQ = text;
 					}
@@ -1377,7 +1370,7 @@ function showMenu() {
 				//toplayout.setBackground(null);
 				toplayout.setGravity(android.view.Gravity.CENTER);
 				toplayout.setOnClickListener(new android.view.View.OnClickListener({
-					onClick: function(viewarg) {
+					onClick: function (viewarg) {
 						menu.dismiss();
 						showMenuBtn();
 						searchQ = "";
@@ -1410,10 +1403,10 @@ function updateMenu(keyword, toplayout) {
 	if (Utils.currentSearchCount > 999) Utils.currentSearchCount = 0;
 	var myNum = Utils.currentSearchCount;
 	var r = new java.lang.Runnable({
-		run: function() {
+		run: function () {
 			var newList = DragOP.generateMenu(keyword);
 			ctx.runOnUiThread(new java.lang.Runnable({
-				run: function() {
+				run: function () {
 					try {
 						if (myNum == Utils.currentSearchCount) {
 							var mlist = toplayout.getChildAt(1);
@@ -1437,7 +1430,7 @@ function showMenuBtn() {
 
 	menuBtn = new android.widget.Button(ctx);
 	ctx.runOnUiThread(new java.lang.Runnable({
-		run: function() {
+		run: function () {
 			try {
 				if (GUI != null && GUI.isShowing()) GUI.dismiss();
 				/*if(ghost) {
@@ -1452,7 +1445,7 @@ function showMenuBtn() {
 				menuBtn.setTypeface(Utils.font);
 				//menuBtn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(bg));
 				menuBtn.setOnClickListener(new android.view.View.OnClickListener({
-					onClick: function(viewarg) {
+					onClick: function (viewarg) {
 						//mainMenu();
 						//windowMenu();
 						/*exit();*/
@@ -1462,21 +1455,21 @@ function showMenuBtn() {
 					}
 				}));
 				menuBtn.setOnTouchListener(new android.view.View.OnTouchListener() {
-					onTouch: function(view, motionEvent) {
+					onTouch: function (view, motionEvent) {
 						try {
 							if (!moving) return false;
 							switch (motionEvent.getAction()) {
-								case android.view.MotionEvent.ACTION_DOWN:
-									dx = mPosX - motionEvent.getRawX();
-									break;
-								case android.view.MotionEvent.ACTION_MOVE:
-									mPosX = (motionEvent.getRawX() + dx);
-									GUI.update(mPosX, 0, -1, -1);
-									break;
-								case android.view.MotionEvent.ACTION_UP:
-								case android.view.MotionEvent.ACTION_CANCEL:
-									moving = false;
-									break;
+							case android.view.MotionEvent.ACTION_DOWN:
+								dx = mPosX - motionEvent.getRawX();
+								break;
+							case android.view.MotionEvent.ACTION_MOVE:
+								mPosX = (motionEvent.getRawX() + dx);
+								GUI.update(mPosX, 0, -1, -1);
+								break;
+							case android.view.MotionEvent.ACTION_UP:
+							case android.view.MotionEvent.ACTION_CANCEL:
+								moving = false;
+								break;
 							}
 						} catch (e) {
 							DragOP.ctoast("Error: " + e);
@@ -1486,7 +1479,7 @@ function showMenuBtn() {
 					}
 				});
 				menuBtn.setOnLongClickListener(new android.view.View.OnLongClickListener() {
-					onLongClick: function(v, t) {
+					onLongClick: function (v, t) {
 						ctx.getSystemService(android.content.Context.VIBRATOR_SERVICE)
 							.vibrate(60);
 						/*gad();
@@ -1515,19 +1508,19 @@ showMenuBtn();
 
 function rptask() {
 	ctx.runOnUiThread(new java.lang.Runnable({
-		run: function() {
+		run: function () {
 			new android.os.Handler()
 				.postDelayed(new java.lang.Runnable({
-					run: function() {
+					run: function () {
 
 						nx = getPlayerX();
 						ny = getPlayerY();
 						nz = getPlayerZ();
-						DragOP.mods.forEach(function(entry, index, array) {
-							try {
+						DragOP.mods.forEach(function (entry, index, array) {
+							try{
 								if (entry.onTick) entry.onTick();
-							} catch (e) {}
-
+							}catch(e){}
+							
 						});
 						if ((GUI != null && GUI.isShowing()) && (menu != null && menu.isShowing())) GUI.dismiss();
 						if ((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing()) && (dialog == null || !dialog.isShowing())) {
@@ -1561,38 +1554,38 @@ function rptask() {
 rptask();
 DragOP.loadModsAnim(0);
 
-DragOP.commandManager = function(cmd) {
+DragOP.commandManager = function (cmd) {
 	var commandSplit = cmd.split(" ");
 	switch (commandSplit[0]) {
-		case "help":
-			clientMessage("[DragOP] Help command is coming soon!");
-			break;
-		case "t":
-			if (cmd.substring(2, cmd.length) != null && cmd.substring(2, cmd.length) != undefined) {
-				var shouldReturn = false;
-				DragOP.mods.forEach(function(entry, index, array) {
-					if (entry.name.toLowerCase() == cmd.substring(2, cmd.length)
-						.toLowerCase() && !shouldReturn) {
-						if (entry.isStateMode()) {
-							DragOP.mods[index].state = !DragOP.mods[index].state;
-							DragOP.mods[index].onRefresh(null);
-							DragOP.ctoast("Sucessfully toggled module " + entry.name);
-						} else if (entry.isToggleAble()) {
-							DragOP.mods[index].onClick(null);
-							DragOP.mods[index].onRefresh(null);
-							DragOP.ctoast("Sucessfully toggled module " + entry.name);
-						} else {
-							DragOP.ctoast(entry.name + "can't be toggled!");
-						}
-						shouldReturn = true;
+	case "help":
+		clientMessage("[DragOP] Help command is coming soon!");
+		break;
+	case "t":
+		if (cmd.substring(2, cmd.length) != null && cmd.substring(2, cmd.length) != undefined) {
+			var shouldReturn = false;
+			DragOP.mods.forEach(function (entry, index, array) {
+				if (entry.name.toLowerCase() == cmd.substring(2, cmd.length)
+					.toLowerCase() && !shouldReturn) {
+					if (entry.isStateMode()) {
+						DragOP.mods[index].state = !DragOP.mods[index].state;
+						DragOP.mods[index].onRefresh(null);
+						DragOP.ctoast("Sucessfully toggled module " + entry.name);
+					} else if (entry.isToggleAble()) {
+						DragOP.mods[index].onClick(null);
+						DragOP.mods[index].onRefresh(null);
+						DragOP.ctoast("Sucessfully toggled module " + entry.name);
+					} else {
+						DragOP.ctoast(entry.name + "can't be toggled!");
 					}
-				});
-				if (shouldReturn) return;
-				DragOP.ctoast("Module " + cmd.substring(2, cmd.length) + " can't be found/toggled!");
-			} else {
-				DragOP.ctoast("Syntax error!");
-			}
-			break;
+					shouldReturn = true;
+				}
+			});
+			if (shouldReturn) return;
+			DragOP.ctoast("Module " + cmd.substring(2, cmd.length) + " can't be found/toggled!");
+		} else {
+			DragOP.ctoast("Syntax error!");
+		}
+		break;
 	}
 }
 
@@ -1610,7 +1603,7 @@ function chatHook(text) {
 		DragOP.commandManager(text.substring(1, text.length));
 	}
 }
-this.Item.getEnchantType = function(id) {
+this.Item.getEnchantType = function (id) {
 	if (id == 340) return 0;
 	if (Item.getUseAnimation(id) == UseAnimation.bow) return 1;
 	if (id == 258 || id == 271 || id == 275 || id == 279 || id == 286) return 2;
@@ -1624,35 +1617,32 @@ this.Item.getEnchantType = function(id) {
 };
 
 function attackHook(att, vic) {
-	DragOP.mods.forEach(function(entry, index, array) {
-		try {
+	DragOP.mods.forEach(function (entry, index, array) {
+		try{
 			entry.onAttack(att, vic);
-		} catch (e) {}
-
+		}catch(e){}
+		
 	});
 }
 
 function useItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage) {
-	DragOP.mods.forEach(function(entry, index, array) {
-		try {
+	DragOP.mods.forEach(function (entry, index, array) {
+		try{
 			entry.onUseItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage);
-		} catch (e) {}
-
+		}catch(e){}
+		
 	});
 }
-
-function leaveGame() {
+function leaveGame(){
 	Utils.Entity.allEntitys = new Array();
 }
-
-function entityAddedHook(ent) {
+function entityAddedHook(ent){
 	Utils.Entity.allEntitys.push(ent);
 	//clientMessage("Entity added count:"+Utils.Entity.allEntitys.length);
 }
-
-function entityRemovedHook(ent) {
-
-	Utils.Entity.allEntitys.forEach(function(entry, index, array) {
-		if (entry == ent) Utils.Entity.allEntitys.splice(index, 1);
+function entityRemovedHook(ent){
+	
+	Utils.Entity.allEntitys.forEach(function(entry, index, array){
+		if(entry == ent)Utils.Entity.allEntitys.splice(index, 1);
 	});
 }
