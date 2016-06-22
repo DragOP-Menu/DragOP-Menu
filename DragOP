@@ -11,6 +11,13 @@ var DragOP = {
 };
 var FriendManager= {
 	all: new org.json.JSONArray(),
+	isFriend: function(name){
+		var is = false;
+		for(var i = 0; i<this.all.length();i++){
+			if(name.toString().toLowerCase()==this.all.getString(i).toLowerCase())is = true;
+		}
+		return is;
+	},
 	loadFromFile: function(){
 		try{
 		var file = new java.io.File(android.os.Environment.getExternalStorageDirectory()+"/DragOP/", "friends.dat");
@@ -44,6 +51,15 @@ var FriendManager= {
 	},
 	addFriend: function(name){
 		this.all.put(name);
+		this.saveToFile();
+	},
+	removeFriend: function(name){
+		var tempall = new org.json.JSONArray();
+		for(var i = 0; i < this.all.length();i++){
+			if(this.all.getString(i).toLowerCase() != name.toString().toLowerCase())tempall.put(this.all.getString(i));
+		}
+		this.all = tempall;
+		this.saveToFile();
 	}
 };
 FriendManager.loadFromFile();
@@ -197,7 +213,7 @@ var Utils = {
 			var posZ = Entity.getZ(ent) - Player.getZ();
 			var yaw = (Math.atan2(posZ, posX) * 180 / Math.PI) - 90;
 			var y2 = Math.sqrt(posX * posX + posZ * posZ);
-			var g = 0.006;
+			var g = 0.007;
 			var tmp = (velocity * velocity * velocity * velocity - g * (g * (y2 * y2) + 2 * posY * (velocity * velocity)));
 			var pitch = -(180 / Math.PI) * (Math.atan((velocity * velocity - Math.sqrt(tmp)) / (g * y2)));
 			if (pitch < 89 && pitch > -89) {
@@ -221,11 +237,7 @@ var Utils = {
 				var allowed = false;
 				if (Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(mobs[i]) == 63) allowed = true;
 				if (Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(mobs[i]) < 63) allowed = true;
-				FriendManager.all.join(";").split(";").forEach(function(entry, index, array){
-					
-					if(entry.toString().split("\"").join("").toLowerCase().equals( Entity.getNameTag(mobs[i]).toString().toLowerCase()))allowed = false;
-					
-				});
+				if(FriendManager.isFriend(Entity.getNameTag(mobs[i]))==true)allowed = false;
 				if (dist < small && dist > 0 && allowed == true && Entity.getHealth(mobs[i]) > 0) {
 					small = dist;
 					ent = mobs[i];
@@ -241,11 +253,7 @@ var Utils = {
 				if (Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(players[i]) == 63) allowed = true;
 				if (Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(players[i]) < 63) allowed = true;
 				var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
-				FriendManager.all.join(";").split(";").forEach(function(entry, index, array){
-					
-					if(entry.toString().split("\"").join("").toLowerCase().equals( Entity.getNameTag(players[i]).toString().toLowerCase()))allowed = false;
-					
-				});
+				if(FriendManager.isFriend(Entity.getNameTag(players[i]))==true)allowed = false;
 				if (dist < small && dist > 0 && allowed == true&& Entity.getHealth(players[i]) >= 1) {
 					small = dist;
 					ent = players[i];
@@ -275,6 +283,7 @@ DragOP.setLString = function(code, lang, value) {
 	//DragOP.addCode(code);
 DragOP.addCode("special.panic");
 DragOP.addCode("special.target");
+DragOP.addCode("special.friend_manager");
 DragOP.addCode("special.bypass");
 DragOP.addCode("hacks.gamemode");
 DragOP.addCode("hacks.speed");
@@ -303,6 +312,7 @@ DragOP.addCode("state.off");
 //DragOP.setLString(code, lc.en_US, value);
 DragOP.setLString("special.bypass", lc.en_US, "Bypass");
 DragOP.setLString("special.target", lc.en_US, "Target");
+DragOP.setLString("special.friend_manager", lc.en_US, "Friend-Manager");
 DragOP.setLString("special.panic", lc.en_US, "Panic");
 DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
 DragOP.setLString("hacks.speed", lc.en_US, "Speed");
@@ -368,7 +378,9 @@ DragOP.getLString = function(code) {
 	});
 	return str;
 }
-
+DragOP.cmsg = function(text){
+	clientMessage(ChatColor.GREEN+"["+ChatColor.BLUE+"Drag"+ChatColor.GOLD+"OP"+ChatColor.GREEN+"]"+ChatColor.GRAY+": "+ChatColor.YELLOW+text);
+}
 DragOP.ctoast = function(text, showPrefix) {
 	try {
 		var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
@@ -579,12 +591,52 @@ var friendMgr= {
 					.getWindowManager()
 					.getDefaultDisplay()
 					.getMetrics(display);
+				var refresh = function(){
+					list.removeAllViews();
+					for(var i = 0; i < FriendManager.all.length();i++){
+					var layout = new android.widget.RelativeLayout(ctx);
+					var params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+					
+					var Fname = new android.widget.TextView(ctx);
+					Fname.setText(FriendManager.all.get(i));
+					Fname.setTypeface(Utils.font);
+					Fname.setTextColor(android.graphics.Color.BLACK);
+					Fname.setTextSize(dip2px(13));
+					Fname.setPadding(10, 0, 10, 0);
+					Fname.setId(395957372);
+					
+					var del = new android.widget.Button(ctx);
+					del.setText("X");
+					del.setTypeface(Utils.font);
+					del.setId(38473727);
+					del.setTextColor(android.graphics.Color.RED);
+					del.setOnClickListener(new android.view.View.OnClickListener(){
+						onClick: function(v){
+							DragOP.ctoast("Friend removed!");
+							FriendManager.removeFriend(v.getParent().getChildAt(0).getText().toString());
+							refresh();
+						}
+					});
+					params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+					params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+					params.addRule(android.widget.RelativeLayout.LEFT_OF, del.getId());
+					params.addRule(android.widget.RelativeLayout.ALIGN_BOTTOM, del.getId());
+					layout.addView(Fname, params);
+					params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+					params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+					
+					params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+					//params.addRule(android.widget.RelativeLayout.RIGHT_OF, Fname.getId());
+					layout.addView(del, params);
+					list.addView(layout);
+				}
+				};
 				var content = new android.widget.LinearLayout(ctx);
 				content.setId(9472729);
 				content.setOrientation(1);
 				var contentScroll = new android.widget.ScrollView(ctx);
 				contentScroll.setId(492628);
-				DragOP.ctoast(FriendManager.all.join(";"));
+				
 				FriendManager.loadFromFile();
 				//default content
 				var title = new android.widget.TextView(ctx);
@@ -613,6 +665,7 @@ var friendMgr= {
 						name.setText("");
 						FriendManager.saveToFile();
 						FriendManager.loadFromFile();
+						refresh();
 					}
 				}));
 				
@@ -629,11 +682,48 @@ var friendMgr= {
 				//dynamic friend layout
 				var list = new android.widget.LinearLayout(ctx);
 				list.setOrientation(1);
+				
 				for(var i = 0; i < FriendManager.all.length();i++){
-					var btn = new android.widget.Button(ctx);
-					btn.setText(FriendManager.all.get(i));
-					list.addView(btn);
+					var layout = new android.widget.RelativeLayout(ctx);
+					var params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+					
+					var Fname = new android.widget.TextView(ctx);
+					Fname.setText(FriendManager.all.get(i));
+					Fname.setTypeface(Utils.font);
+					Fname.setTextColor(android.graphics.Color.BLACK);
+					Fname.setTextSize(dip2px(13));
+					Fname.setPadding(10, 0, 10, 0);
+					Fname.setId(395957372);
+					
+					var del = new android.widget.Button(ctx);
+					del.setText("X");
+					del.setTypeface(Utils.font);
+					del.setId(38473727);
+					del.setTextColor(android.graphics.Color.RED);
+					
+					del.setOnClickListener(new android.view.View.OnClickListener(){
+						onClick: function(v){
+							DragOP.ctoast("Friend removed!");
+							FriendManager.removeFriend(v.getParent().getChildAt(0).getText().toString());
+							
+							
+							refresh();
+						}
+					});
+					params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+					params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+					params.addRule(android.widget.RelativeLayout.LEFT_OF, del.getId());
+					params.addRule(android.widget.RelativeLayout.ALIGN_BOTTOM, del.getId());
+					layout.addView(Fname, params);
+					params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+					params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+					
+					params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+					//params.addRule(android.widget.RelativeLayout.RIGHT_OF, Fname.getId());
+					layout.addView(del, params);
+					list.addView(layout);
 				}
+				
 				content.addView(list);
 				//footer
 				var closeButton = new styledBtn();
@@ -686,20 +776,7 @@ var friendMgr= {
 		}
 	});
 	},
-	getSettingsLayout: function(params) {
-		var root = new android.widget.LinearLayout(ctx);
-		root.setOrientation(1);
-		var open = new android.widget.CheckBox(ctx);
-		open.setText("Open "+DragOP.getLString("special.friend_manager"));
-		open.setTypeface(Utils.font);
-		open.setTextColor(android.graphics.Color.BLACK);
-		open.setOnClickListener(new android.view.View.OnClickListener({
-			onClick: function(v) {
-				
-			}
-		}));
-		return root;
-	},
+	
 	isStateMode: function() {
 		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
@@ -1787,12 +1864,16 @@ rptask();
 DragOP.loadModsAnim(0);
 
 DragOP.commandManager = function(cmd) {
-	var commandSplit = cmd.split(" ");
-	switch (commandSplit[0]) {
+	cmd = cmd.split(" ");
+	var command = cmd.shift();
+	var args = cmd;
+	
+	switch (command) {
 		case "help":
-			clientMessage("[DragOP] Help command is coming soon!");
+			DragOP.cmsg("Help command is coming soon!");
 			break;
 		case "t":
+		case "toggle":
 			if (cmd.substring(2, cmd.length) != null && cmd.substring(2, cmd.length) != undefined) {
 				var shouldReturn = false;
 				DragOP.mods.forEach(function(entry, index, array) {
@@ -1801,21 +1882,46 @@ DragOP.commandManager = function(cmd) {
 						if (entry.isStateMode()) {
 							DragOP.mods[index].state = !DragOP.mods[index].state;
 							DragOP.mods[index].onRefresh(null);
-							DragOP.ctoast("Sucessfully toggled module " + entry.name);
+							DragOP.cmsg("Sucessfully toggled module " + entry.name);
 						} else if (entry.isToggleAble()) {
 							DragOP.mods[index].onClick(null);
 							DragOP.mods[index].onRefresh(null);
-							DragOP.ctoast("Sucessfully toggled module " + entry.name);
+							DragOP.cmsg("Sucessfully toggled module " + entry.name);
 						} else {
-							DragOP.ctoast(entry.name + "can't be toggled!");
+							DragOP.cmsg(entry.name + "can't be toggled!");
 						}
 						shouldReturn = true;
 					}
 				});
 				if (shouldReturn) return;
-				DragOP.ctoast("Module " + cmd.substring(2, cmd.length) + " can't be found/toggled!");
+				DragOP.cmsg("Module " + cmd.substring(2, cmd.length) + " can't be found/toggled!");
 			} else {
-				DragOP.ctoast("Syntax error!");
+				DragOP.cmsg(".toggle <module name>");
+			}
+			break;
+		case "f":
+		case "friend":
+			switch(args[0]){
+				case "add":
+					if(args[1] != ""&&args[1]!=null){
+					FriendManager.addFriend(args[1]);
+					DragOP.cmsg("Friend "+args[1]+" added!");
+					}else
+					DragOP.cmsg(".friend add <name>");
+					break;
+				case "del":
+				case "remove":
+					if(args[1] != ""&&args[1]!=null){
+					FriendManager.removeFriend(args[1]);
+					DragOP.cmsg("Friend "+args[1]+" removed!");
+					}else
+					DragOP.cmsg(".friend remove <name>");
+					break;
+				case "list":
+					DragOP.cmsg("Your friends("+FriendManager.all.length()+"): "+FriendManager.all.join(", "));
+					break;
+				default:
+					DragOP.cmsg(".friend <add|remove|punchadd|list>");
 			}
 			break;
 	}
