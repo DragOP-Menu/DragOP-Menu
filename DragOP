@@ -9,6 +9,43 @@ var search;
 var DragOP = {
 	mods: new Array()
 };
+var FriendManager= {
+	all: new org.json.JSONArray(),
+	loadFromFile: function(){
+		try{
+		var file = new java.io.File(android.os.Environment.getExternalStorageDirectory()+"/DragOP/", "friends.dat");
+		var readed = (new java.io.BufferedReader(new java.io.FileReader(file)));
+		var data = new java.lang.StringBuilder();
+		var string;
+		while ((string = readed.readLine()) != null) {
+			data.append(string);
+			data.append('\n');
+		}
+		try{
+			this.all = new android.json.JSONArray(data.toString());
+		}catch(e){
+			DragOP.ctoast("Friend data corrupt. Deleting your friend list");
+		}
+		}catch(e){
+			//Seems like theres no file
+		}
+	}, 
+	saveToFile: function(){
+		var dir = new java.io.File(android.os.Environment.getExternalStorageDirectory()+"/DragOP");
+		if(!dir.exists())dir.mkdir();
+		var file = new java.io.File(android.os.Environment.getExternalStorageDirectory()+"/DragOP/", "friends.dat");
+		if(!file.exists())file.createNewFile();
+		var stream = new java.io.FileOutputStream(file);
+		try{
+			stream.write(this.all.toString().getBytes());
+		}finally{
+			stream.close();
+		}
+	},
+	addFriend: function(name){
+		this.all.put(name);
+	}
+};
 var lc = {
 	en_US: 1,
 	de_DE: 2
@@ -52,6 +89,7 @@ var Utils = {
 	bypassMode: BypassMode.DEFAULT,
 	speedMode: SpeedMode.DEFAULT,
 	online: false,
+	flyTick: 0,
 	modsCount: 0,
 	currentSearchCount: 0,
 	font: android.os.Build.VERSION.SDK_INT >= 17 ? android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL) : android.graphics.Typeface.DEFAULT,
@@ -67,6 +105,10 @@ var Utils = {
 		}
 	},
 	Player: {
+		isInWater: function(){
+			if(Utils.Block.isLiquid(getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ())))return true;
+			return false;
+		},
 		onGround: function() {
 			var y = getPlayerY();
 			while (y > 1) y -= 1;
@@ -514,6 +556,55 @@ DragOP.registerModule = function(mod) {
 	Utils.modsCount += 1;
 
 }
+var friendMgr= {
+	name: DragOP.getLString("special.friend_manager"),
+	desc: "Friends wont be aimed by AimAura or BowAimBot",
+	type: ModuleType.special,
+	getSettingsLayout: function(params) {
+		var settings = new android.widget.LinearLayout(ctx);
+		settings.setOrientation(1);
+		var players = new android.widget.CheckBox(ctx);
+		players.setText("Players");
+		players.setTypeface(Utils.font);
+		players.setTextColor(android.graphics.Color.BLACK);
+		players.setChecked(Utils.Entity.targettedMobs[1]);
+		players.setOnClickListener(new android.view.View.OnClickListener({
+			onClick: function(v) {
+				Utils.Entity.targettedMobs = [Utils.Entity.targettedMobs[0], v.isChecked()];
+			}
+		}));
+		var mobs = new android.widget.CheckBox(ctx);
+		mobs.setText("Mobs");
+		mobs.setTextColor(android.graphics.Color.BLACK);
+		mobs.setTypeface(Utils.font);
+		mobs.setChecked(Utils.Entity.targettedMobs[0]);
+		mobs.setOnClickListener(new android.view.View.OnClickListener({
+			onClick: function(v) {
+				Utils.Entity.targettedMobs = [v.isChecked(), Utils.Entity.targettedMobs[1]];
+			}
+		}));
+		settings.addView(players, params);
+		settings.addView(mobs, params);
+		return settings;
+	},
+	isStateMode: function() {
+		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function() {
+		return false; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onClick: function(btn) {
+		DragOP.showModDialog(this);
+		menu.dismiss();
+	},
+	onRefresh: function(btn) {
+		if (btn != null)
+			btn.setText(DragOP.getLString("special.friend_manager"));
+	}
+};
+DragOP.registerModule(friendMgr);
 var target = {
 	name: DragOP.getLString("special.target"),
 	desc: "Let you choose the type of entitys that are targetted by Modules like AimAura and BowAimBot.",
@@ -1172,14 +1263,31 @@ var glide = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
+	goDown: function(){
+		var found = false;
+		var cord = new Array(getPlayerX(), getPlayerY(), getPlayerZ());
+		
+		while(!found){
+			cord[1] = cord[1]-1;
+			if(getTile(cord[0], cord[1], cord[2]) != 0)found = true;
+		}
+		//Entity.setPosition(getPlayerEnt(), cord[0], cord[1]+2.7, cord[2]);
+		setVelY(getPlayerEnt(), -4);
+		
+	},
 	onTick: function() {
-		if (this.state && Entity.getVelY(getPlayerEnt()) < 0 && !Player.isFlying()) {
+		if (this.state && Entity.getVelY(getPlayerEnt()) < 0 && !Player.isFlying() && !Utils.Player.isInWater()) {
 			switch (Utils.bypassMode) {
 				case BypassMode.DEFAULT:
 					setVelY(getPlayerEnt(), -0.001);
 					break;
 				case BypassMode.LBSG:
-					setVelY(getPlayerEnt(), -0.001);
+					if(Utils.flyTick < 680){
+					if(tick1 % 2 == 0)setVelY(getPlayerEnt(), -0.03);
+					else setVelY(getPlayerEnt(), -0.1);
+					}else{
+						setVelY(getPlayerEnt(), -3);
+					}
 					break;
 			}
 
@@ -1523,6 +1631,9 @@ function rptask() {
 						nx = getPlayerX();
 						ny = getPlayerY();
 						nz = getPlayerZ();
+						
+						if(Utils.Player.onGround())Utils.flyTick = 0;
+						else Utils.flyTick++;
 						DragOP.mods.forEach(function(entry, index, array) {
 							try {
 								if (entry.onTick) entry.onTick();
@@ -1551,6 +1662,7 @@ function rptask() {
 
 						tick1++;
 						if (tick1 > 50) tick1 = 0;
+						
 						rptask();
 					}
 				}), 15);
