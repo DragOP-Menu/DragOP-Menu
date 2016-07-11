@@ -5,16 +5,28 @@ var dialog;
 var searchQ = ""; //Current search query
 var tick1 = 0;
 var search;
+var Launcher = {
+isBlockLauncher: function() {
+return (ctx.getPackageName() == "net.zhuoweizhang.mcpelauncher" || ctx.getPackageManager() == "net.zhuoweizhang.mcpelauncher.pro");
+},
+isToolbox: function() {
+return ctx.getPackageName() == "io.mrarm.mctoolbox";
+}
+};
 
 var DragOP = {
-	mods: new Array()
+	mods: new Array(),
+	isDev: true
 };
 var FriendManager= {
 	all: new org.json.JSONArray(),
 	isFriend: function(name){
 		var is = false;
+		if(name == null)return false;
+		var cname = Utils.Text.clean(name.toString().toLowerCase());
+		
 		for(var i = 0; i<this.all.length();i++){
-			if(name.toString().toLowerCase()==this.all.getString(i).toLowerCase())is = true;
+			if(cname.toString().toLowerCase()==this.all.getString(i).toLowerCase())is = true;
 		}
 		return is;
 	},
@@ -102,6 +114,7 @@ var SpeedMode = {
 	BHOP: 1,
 	LONGJUMP: 2
 };
+
 var Utils = {
 	bypassMode: BypassMode.DEFAULT,
 	speedMode: SpeedMode.DEFAULT,
@@ -109,18 +122,31 @@ var Utils = {
 	flyTick: 0,
 	modsCount: 0,
 	currentSearchCount: 0,
+
 	font: android.os.Build.VERSION.SDK_INT >= 17 ? android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL) : android.graphics.Typeface.DEFAULT,
+	Text: {
+		clean: function(text){
+			var allColor = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "k", "l", "m", "n", "o", "r"];
+			
+			if(text != null){
+				
+				allColor.forEach(function(entry){
+					text = text.replace(new RegExp("\u00A7"+entry, 'g'), "");
+				});
+				return text;
+			}else
+			return "";
+		}
+	},
 	Render: {
 		makeInvi: function(renderer){
-	var var2 = 0;
 	var model = renderer.getModel();
-	var bipedBody = model.getPart("body").clear().setTextureOffset(0,0);
-	bipedBody.addBox(0.0,0.0,0.0,0.0001,0.0001,0.0001, var2);
-	var bipedRightArm = model.getPart("rightArm").clear().setTextureOffset(56, 0);
-	var bipedHead = model.getPart("head").clear();
-	var bipedLeftArm = model.getPart("leftArm").clear().setTextureOffset(56, 0);
-	var bipedRightLeg = model.getPart("rightLeg").clear().setTextureOffset(56, 0);
-	var bipedLeftLeg = model.getPart("leftLeg").clear().setTextureOffset(56, 0);
+	model.getPart("body").clear();
+	model.getPart("rightArm").clear();
+	model.getPart("head").clear();
+	model.getPart("leftArm").clear();
+	model.getPart("rightLeg").clear();
+	model.getPart("leftLeg").clear();
 	renderer.name = "godsoft.de.Invi";
 }
 	},
@@ -190,9 +216,17 @@ var Utils = {
 		lastZ: 0
 	},
 	Entity: {
+		getAll: function(){
+			if(Launcher.isToolbox()){
+				return Entity.getAll();
+			}else{
+				return Utils.Entity.allEntitys;
+			}
+		},
 		targettedMobs: [true, true],
 		/*first mobs second players*/
 		allEntitys: new Array(),
+		charEnts: new Array(),
 		crosshairAimAt: function(ent, pos) {
 			if (ent != null) {
 				var x = Entity.getX(ent) - getPlayerX();
@@ -236,29 +270,38 @@ var Utils = {
 
 		},
 		getNearestEntity(maxrange) {
-			var mobs = Utils.Entity.allEntitys;
-
+			var mobs = Utils.Entity.getAll();
+//clientMessage("Im here1");
 			var players = Server.getAllPlayers();
 			var small = maxrange;
 			var ent = null;
 			/*if(mobs.length > 500)clientMessage("lag found: "+mobs.length);*/
-			for (var i = 0; i < mobs.length; i++) {
-				var x = Entity.getX(mobs[i]) - getPlayerX();
-				var y = Entity.getY(mobs[i]) - getPlayerY();
-				var z = Entity.getZ(mobs[i]) - getPlayerZ();
+			var much = 0;
+			
+			mobs.forEach(function(entry) {
+				
+				var x = Entity.getX(entry) - getPlayerX();
+				var y = Entity.getY(entry) - getPlayerY();
+				var z = Entity.getZ(entry) - getPlayerZ();
 
 				var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+			
 				var allowed = false;
-				if (Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(mobs[i]) == 63) allowed = true;
-				if (Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(mobs[i]) < 63) allowed = true;
-				if(FriendManager.isFriend(Entity.getNameTag(mobs[i]))==true)allowed = false;
-				if (dist < small && dist > 0 && allowed == true && Entity.getHealth(mobs[i]) > 0) {
+				if (Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(entry) == 63) allowed = true;
+				if (Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(entry) < 63) allowed = true;
+				//clientMessage("Im here2");
+				
+				//clientMessage("Im here3");
+				if (dist < small && dist > 0 && allowed == true && Entity.getHealth(entry) > 0) {
+					if(Entity.getNameTag(entry) == "" || FriendManager.isFriend(Entity.getNameTag(entry))==false){
 					small = dist;
-					ent = mobs[i];
-				} else if (dist < small && dist > 0) {
-					//clientMessage(Entity.getEntityTypeId(mobs[i]));
+					ent = entry;
 				}
-			}
+				}
+				
+			});
+			
+			
 			for (var i = 0; i < players.length; i++) {
 				var x = Entity.getX(players[i]) - getPlayerX();
 				var y = Entity.getY(players[i]) - getPlayerY();
@@ -273,7 +316,7 @@ var Utils = {
 					ent = players[i];
 				}
 			}
-
+			
 			return ent;
 		}
 	}
@@ -400,7 +443,7 @@ DragOP.ctoast = function(text, showPrefix) {
 		var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function() {
-				var thetoast = android.widget.Toast.makeText(com.mojang.minecraftpe.MainActivity.currentMainActivity.get(), text, android.widget.Toast.LENGTH_LONG);
+				var thetoast = android.widget.Toast.makeText(com.mojang.minecraftpe.MainActivity.currentMainActivity.get(), ""+text, android.widget.Toast.LENGTH_LONG);
 				var layout = new android.widget.LinearLayout(ctx);
 				var msg = new android.widget.TextView(ctx);
 				if (showPrefix || showPrefix == null) text = "DragOP: " + text;
@@ -529,6 +572,8 @@ DragOP.showModDialog = function(mod) {
 				closeButton.setText("Close");
 				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
 				closeButton.setId(10472);
+				closeButton.setTypeface(Utils.font);
+				closeButton.setTextColor(android.graphics.Color.BLACK);
 				closeButton.setTypeface(Utils.font);
 				//layout alignement....
 				var dialogLayout = new android.widget.RelativeLayout(ctx);
@@ -1022,7 +1067,11 @@ var aimaura = {
 	},
 	onTick: function() {
 		if (this.state) {
+			try{
 			var ent = Utils.Entity.getNearestEntity(this.range);
+			}catch(e){
+				DragOP.ctoast(e);
+			}
 			if (ent != null) Utils.Entity.crosshairAimAt(ent);
 		}
 	},
@@ -1082,6 +1131,7 @@ var bowaimbot = {
 	},
 	onTick: function() {
 		if (this.state && getCarriedItem() == 261 /*No Dynamic :( */ ) {
+		
 			var ent = Utils.Entity.getNearestEntity(this.range);
 
 			if (ent != null) Utils.Entity.bowAimAt(ent);
@@ -1551,6 +1601,14 @@ var nametag = {
 	state: false,
 	nameTagMobs: new Array(),
 	inviRenderer: null,
+	doClean: function(){
+		var all = Utils.Entity.charEnts;
+		all.forEach(function(entry){
+			if(Entity.getMobSkin(entry)=="mob/char.png" || Entity.getRenderType(entry) == nametag.inviRenderer.renderType){
+				Entity.remove(entry);
+			}
+		});
+	},
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
@@ -1560,49 +1618,320 @@ var nametag = {
 		//Call hack.onClick() to toggle
 	},
 	onTick: function () {
-		if(this.state && tick1 % 20 == 0){
+		
+		if(this.state && tick1 % 25 == 0){
 		if(this.inviRenderer == null){
 			this.inviRenderer = Renderer.createHumanoidRenderer();
 			Utils.Render.makeInvi(this.inviRenderer);
 		}
 		var r = new java.lang.Runnable(){
 			run: function(){
+				
 				try{
 				for(var i = 0; i < nametag.nameTagMobs.length; i++){
 		Entity.remove(nametag.nameTagMobs[i]);
 	}
-	nametag.nameTagMobs = new Array();
-	for(var i = 0; i < Utils.Entity.allEntitys.length; i++){
-		if(Entity.getNameTag(Utils.Entity.allEntitys[i]) != "" && Entity.getNameTag(Utils.Entity.allEntitys[i]) != null && Utils.Entity.allEntitys[i] != getPlayerEnt() && Entity.getX(Utils.Entity.allEntitys[i]) != getPlayerX() && Entity.getZ(Utils.Entity.allEntitys[i]) != getPlayerZ()){
-			var x = getPlayerX()-Entity.getX(Utils.Entity.allEntitys[i]);
-			var y = getPlayerY()-Entity.getY(Utils.Entity.allEntitys[i]);
-			var z = getPlayerZ()-Entity.getZ(Utils.Entity.allEntitys[i]);
+	var newTagMobs = new Array();
+	nametag.doClean();
+
+	var all = Utils.Entity.getAll();
+	all.forEach(function(entry, i){
+		var nt = Entity.getNameTag(all[i]);
+		if(Entity.getRenderType(all[i]) != nametag.inviRenderer.renderType && Entity.getMobSkin(all[i]) != "mob/char.png"&&nt != "" && nt != null && nt != "null" && all[i] != getPlayerEnt() && Entity.getX(all[i]) != getPlayerX() && Entity.getZ(all[i]) != getPlayerZ()){
+			var x = getPlayerX()-Entity.getX(all[i]);
+			var y = getPlayerY()-Entity.getY(all[i]);
+			var z = getPlayerZ()-Entity.getZ(all[i]);
 			while(x > 2 || x < -2 || y > 2 || y < -2 ||z > 2 || z < -2 ){
 				x = x/1.5;
 				y = y/1.5;
 				z = z/1.5;
 			}
-			var cow = spawnCow(getPlayerX()-x, getPlayerY()-y, getPlayerZ()-z, "mob/char.png");
+			
+			var cow = Level.spawnCow(getPlayerX()-x, getPlayerY()-y, getPlayerZ()-z, "mob/char.png");
 	Entity.setRenderType(cow, nametag.inviRenderer.renderType);
 	Entity.setImmobile(cow, true);
 	Entity.setCollisionSize(cow, 0,0);
-	Entity.setNameTag(cow, Entity.getNameTag(Utils.Entity.allEntitys[i]));
-	nametag.nameTagMobs.push(cow);
+	
+	Entity.setNameTag(cow, nt);
+	newTagMobs.push(cow);
+
 		}
-	}}catch(e){}
+	});
+	nametag.nameTagMobs = newTagMobs;
+	newTagMobs = null;
+}catch(e){}
 			}
 		};
 		var t = new java.lang.Thread(r);
 		t.start();
 		}
 	},
-	onClick: function (btn) {this.state = !this.state;},
+	onClick: function (btn) {
+		this.state = !this.state;
+		if(!this.state){
+			for(var i = 0; i < nametag.nameTagMobs.length; i++){
+		Entity.remove(nametag.nameTagMobs[i]);
+	}
+	var newTagMobs = new Array();
+	
+
+		}
+	},
 	onRefresh: function (btn) {
 		if(btn != null)
 			btn.setText(DragOP.getLString("hacks.nametag"));
 	}
 };
 DragOP.registerModule(nametag);
+var chesttracers = {
+	name: DragOP.getLString("hacks.chestTracer"),
+	desc: "Draws a particle trail to near chests.",
+	type: ModuleType.mod,
+	state: false,
+	findTick: 0,
+	groundMode: true,
+	ChestScan:{
+		blocks: 0,
+		finished: false,
+		scanning: false
+	},
+	getSettingsLayout: function(params) {
+		var settings = new android.widget.LinearLayout(ctx);
+		settings.setOrientation(1);
+		var rangeText = new android.widget.TextView(ctx);
+		rangeText.setText("Range: " + this.radius);
+		rangeText.setTextColor(android.graphics.Color.BLACK);
+		rangeText.setTextSize(dip2px(9));
+		rangeText.setGravity(android.view.Gravity.CENTER);
+		rangeText.setTypeface(Utils.font);
+		var rangeSlider = Utils.ModSettings.getSlider();
+		rangeSlider.setMax(100);
+		//rangeSlider.setMin(1);
+		rangeSlider.setProgress(this.radius);
+		rangeSlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+			onProgressChanged: function(seekBar, progress, fromUser) {
+
+				rangeText.setText("Range: " + progress);
+
+			},
+			onStopTrackingTouch: function(seekbar) {
+				chesttracers.radius = seekbar.getProgress();
+			}
+		});
+		var groundCheck = new android.widget.CheckBox(ctx);
+		groundCheck.setChecked(this.groundMode);
+		groundCheck.setText("Ground Mode");
+		groundCheck.setTypeface(Utils.font);
+		groundCheck.setTextSize(dip2px(8));
+		groundCheck.setTextColor(android.graphics.Color.BLACK);
+		
+		groundCheck.setOnClickListener(new android.view.View.OnClickListener(){
+			onClick:function(v){
+				chesttracers.groundMode = v.isChecked();
+				v.setChecked(chesttracers.groundMode);
+			}
+		});
+		var chestScan = new android.widget.TextView(ctx);
+		chestScan.setTypeface(Utils.font);
+		chestScan.setGravity(android.view.Gravity.CENTER);
+		chestScan.setTextSize(dip2px(9));
+		chestScan.setPadding(dip2px(5), 0,dip2px(5),0);
+		chestScan.setTextColor(android.graphics.Color.BLACK);
+		if(this.ChestScan.finished)
+			chestScan.setText("ChestScan finished. "+this.chests.length+" Chests found ("+this.ChestScan.blocks+" Blocks checked)");
+		else if(this.ChestScan.scanning)
+			chestScan.setText("Currently scanning for Chests. "+this.ChestScan.blocks+" Blocks already checked");
+		else
+			chestScan.setText("Chest Scan not started yet");
+		var refreshBG = new android.graphics.drawable.GradientDrawable();
+		refreshBG.setColor(android.graphics.Color.argb(90, 30, 30, 30));
+		refreshBG.setStroke(dip2px(2), android.graphics.Color.BLACK);
+		var refresh = new android.widget.Button(ctx);
+		refresh.setBackground(refreshBG);
+		refresh.setTypeface(Utils.font);
+		refresh.setTextColor(android.graphics.Color.WHITE);
+		refresh.setTextSize(dip2px(8));
+		refresh.setText("Refresh");
+		refresh.setOnClickListener(new android.view.View.OnClickListener(){
+			onClick: function(v){
+				if(chesttracers.ChestScan.finished){
+			chestScan.setText("ChestScan finished. "+chesttracers.chests.length+" Chests found ("+chesttracers.ChestScan.blocks+" Blocks checked)");
+		}else if(chesttracers.ChestScan.scanning){
+			chestScan.setText("Currently scanning for Chests. "+chesttracers.ChestScan.blocks+" Blocks already checked");
+		}else{
+			chestScan.setText("Chest Scan not started yet");
+		}
+			}
+		});
+		
+		settings.addView(rangeSlider, params);
+		settings.addView(rangeText, params);
+		settings.addView(groundCheck, params);
+		settings.addView(chestScan, params);
+		settings.addView(refresh, params);
+		return settings;
+	},
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	radius: 50,
+	chests: new Array(),
+	fCheckerThread: null,
+	findChests:function(){
+		this.ChestScan.finished = false;
+		this.ChestScan.scanning = true;
+		this.ChestScan.blocks = 0;
+		var startX = Math.round(getPlayerX());
+		var startZ = Math.round(getPlayerZ());
+		var startRadius = this.radius;
+		var blocks = 0;
+		var newChests = new Array();
+		var finished = [false,false,false,false];
+		var lt = new java.lang.Runnable(){
+			run:function(){
+				
+				for(var x = startX-startRadius; x < startX; x++){
+					for(var z = startZ; z < startZ+startRadius; z++){
+						for(var y = 0; y < 127; y++){
+						try{
+						if(getTile(x,y,z) == 54)newChests.push([x,y,z]);
+						blocks++;
+						//java.lang.Thread.sleep(10);
+						}catch(e){
+							cmsg("Error: "+e);
+						}}
+					}
+				}
+				//DragOP.cmsg("Thread1 finished");
+				finished[0] = true;
+			}
+		};
+		var t = new java.lang.Thread(lt);
+		t.start();
+		var rt = new java.lang.Runnable(){
+			run:function(){
+				
+				for(var x = startX; x < startX+startRadius; x++){
+					for(var z = startZ; z < startZ+startRadius; z++){
+						for(var y = 0; y < 127; y++){
+						try{
+						if(getTile(x,y,z) == 54)newChests.push([x,y,z]);
+						//java.lang.Thread.sleep(10);
+						blocks++;
+						}catch(e){
+							cmsg("Error: "+e);
+						}}
+					}
+				}
+				//DragOP.cmsg("Thread2 finished");
+				finished[1] = true;
+			}
+		};
+		var t2= new java.lang.Thread(rt);
+		t2.start();
+		var lb = new java.lang.Runnable(){
+			run:function(){
+				
+				for(var x = startX-startRadius; x < startX; x++){
+					for(var z = startZ-startRadius; z < startZ; z++){
+						for(var y = 0; y < 127; y++){
+						try{
+						if(getTile(x,y,z) == 54)newChests.push([x,y,z]);
+						//java.lang.Thread.sleep(10);
+						blocks++;
+						}catch(e){
+							cmsg("Error: "+e);
+						}}
+					}
+				}
+				//DragOP.cmsg("Thread3 finished");
+				finished[2] = true;
+			}
+		};
+		var t3= new java.lang.Thread(lb);
+		t3.start();
+		var rb= new java.lang.Runnable(){
+			run:function(){
+				
+				for(var x = startX; x < startX+startRadius; x++){
+					for(var z = startZ-startRadius; z < startZ; z++){
+						for(var y = 0; y < 127; y++){
+						try{
+						if(getTile(x,y,z) == 54)newChests.push([x,y,z]);
+						//java.lang.Thread.sleep(10);
+						blocks++;
+						}catch(e){
+							cmsg("Error: "+e);
+						}}
+					}
+				}
+				//DragOP.cmsg("Thread4 finished");
+				finished[3] = true;
+			}
+		};
+		var t4= new java.lang.Thread(rb);
+		t4.start();
+		var finishChecker = new java.lang.Runnable(){
+			run:function(){
+				var wasEmpty = false;
+				wasEmpty = chesttracers.chests.length == 0;
+				while(!finished[0] || !finished[1] || !finished[2] || !finished[3]){
+					java.lang.Thread.sleep(250);
+					chesttracers.ChestScan.blocks = blocks;
+					if(wasEmpty)chesttracers.chests = newChests;
+					//ModPE.showTipMessage("Blocks: "+blocks);
+				}
+				//DragOP.cmsg("Chest scan done. Found "+chesttracers.chests.length+" Chests ("+blocks+" Blocks scanned)");
+				chesttracers.fCheckerThread = null;
+				chesttracers.chests = newChests;
+				chesttracers.ChestScan.finished = true;
+				chesttracers.ChestScan.scanning = false;
+			}
+		};
+		this.fCheckerThread= new java.lang.Thread(finishChecker);
+		this.fCheckerThread.start();
+	},
+	onTick: function () {
+		if(this.state){
+			if(this.ChestScan.scanning == false)this.findTick++;
+			
+			if(this.findTick >= 33*this.radius/3){
+				this.findTick = 0;
+				
+				if(this.fCheckerThread == null)
+					this.findChests();
+				}
+			this.chests.forEach(function(entry){
+				var x = getPlayerX()-entry[0]-0.5;
+				var y = getPlayerY()-entry[1]-0.5;
+				var z = getPlayerZ()-entry[2]-0.5;
+				var dist = Math.sqrt(Math.pow(x,2)*Math.pow(y,2)*Math.pow(z,2));
+				while(x > 2 || x < -2 || y > 2 || y < -2 ||z > 2 || z < -2 ){
+					x /= 1.5;
+					y /= 1.5;
+					z /= 1.5;
+				}
+				Level.addParticle(ParticleType.flame, getPlayerX()-x, getPlayerY()-y-(chesttracers.groundMode?0.6:0), getPlayerZ()-z, -x/3,-y/3,-z/3, 2);
+				
+			});
+		}
+	},
+	onClick: function (btn) {
+		this.state=!this.state;
+		if(this.state)
+			this.findChests();
+	},
+	onRefresh: function (btn) {
+		if(btn != null)
+			btn.setText(DragOP.getLString("hacks.chestTracer"));
+	}
+};
+DragOP.registerModule(chesttracers);
 /*
 var statehack = {
 	name: "Hack",
@@ -2032,13 +2361,14 @@ DragOP.commandManager = function(cmd) {
 					DragOP.cmsg("Your friends("+FriendManager.all.length()+"): "+FriendManager.all.join(", "));
 					break;
 				default:
-					DragOP.cmsg(".friend <add|remove|punchadd|list>");
+					DragOP.cmsg(".friend <add|remove|list>");
 			}
 			break;
 	}
 }
 
 function chatHook(text) {
+	
 	if (text.charAt(0) == ".") {
 		preventDefault();
 		try {
@@ -2066,6 +2396,7 @@ this.Item.getEnchantType = function(id) {
 };
 
 function attackHook(att, vic) {
+	
 	DragOP.mods.forEach(function(entry, index, array) {
 		try {
 			entry.onAttack(att, vic);
@@ -2081,6 +2412,7 @@ function useItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage) {
 		} catch (e) {}
 
 	});
+	
 }
 
 function leaveGame() {
@@ -2089,12 +2421,18 @@ function leaveGame() {
 
 function entityAddedHook(ent) {
 	if(Entity.getMobSkin(ent) != "mob/char.png")Utils.Entity.allEntitys.push(ent);
-	//clientMessage("Entity added count:"+Utils.Entity.allEntitys.length);
+	else Utils.Entity.charEnts.push(ent);
+	//clientMessage("Entity added count:"+Utils.Entity.getAll().length);
 }
 
 function entityRemovedHook(ent) {
-
+	//clientMessage("Entity removed("+Entity.getNameTag(ent));
+	Utils.Entity.charEnts.forEach(function(entry, index, array) {
+		if (entry == ent) Utils.Entity.charEnts.splice(index, 1);
+		
+	});
 	Utils.Entity.allEntitys.forEach(function(entry, index, array) {
 		if (entry == ent) Utils.Entity.allEntitys.splice(index, 1);
+		
 	});
 }
