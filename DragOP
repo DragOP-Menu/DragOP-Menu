@@ -387,7 +387,7 @@ DragOP.setLString("hacks.step", lc.en_US, "Step");
 DragOP.setLString("hacks.jesus", lc.en_US, "Jesus");
 DragOP.setLString("hacks.nodownglide", lc.en_US, "NoDownGlide");
 DragOP.setLString("hacks.glide", lc.en_US, "Glide");
-DragOP.setLString("hacks.chestTracer", lc.en_US, "ChestTracer");
+DragOP.setLString("hacks.chestTracer", lc.en_US, "ChestTracers");
 DragOP.setLString("hacks.criticals", lc.en_US, "Criticals");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
@@ -405,7 +405,7 @@ DragOP.setLString("hacks.jumpspeed", lc.de_DE, "HasenTempo"); //Why not using bu
 DragOP.setLString("hacks.autojump", lc.de_DE, "Automatisches\nSpringen");
 DragOP.setLString("hacks.jesus", lc.de_DE, "Wasserlauf");
 DragOP.setLString("hacks.flight", lc.de_DE, "Fliegen");
-DragOP.setLString("gm.survival", lc.de_DE, "Ãberleben");
+DragOP.setLString("gm.survival", lc.de_DE, "Ã?berleben");
 DragOP.setLString("gm.creative", lc.de_DE, "Kreativ");
 DragOP.setLString("moduletype.mod", lc.de_DE, "Mod");
 DragOP.setLString("moduletype.special", lc.de_DE, "Spezielles");
@@ -2114,23 +2114,25 @@ DragOP.generateMenu = function(keyword) {
 	var lay = new android.widget.TableLayout(ctx);
 	var currow;
 	DragOP.mods.forEach(function(entry, index, array) {
-		if ((entry.name.toString()
+		if(entry.type != ModuleType.cmd) {
+			if ((entry.name.toString()
 				.toLowerCase()
 				.indexOf(keyword.toString()
 					.toLowerCase())) > -1 || (keyword == null || keyword == "" || keyword == undefined)) {
-			if (index % 2 == 1) {
-				if (!currow) currow = new android.widget.TableRow(ctx);
-				currow.addView(new modBtn(DragOP.mods[index]));
-				lay.addView(currow);
-				currow = null;
+				if (index % 2 == 1) {
+					if (!currow) currow = new android.widget.TableRow(ctx);
+					currow.addView(new modBtn(DragOP.mods[index]));
+					lay.addView(currow);
+					currow = null;
 
+				} else {
+					currow = new android.widget.TableRow(ctx);
+					currow.addView(new modBtn(DragOP.mods[index]));
+
+				}
 			} else {
-				currow = new android.widget.TableRow(ctx);
-				currow.addView(new modBtn(DragOP.mods[index]));
 
 			}
-		} else {
-
 		}
 	});
 	if (currow != null) lay.addView(currow);
@@ -2379,15 +2381,76 @@ function rptask() {
 rptask();
 DragOP.loadModsAnim(0);
 
+DragOP.getHighestPageNumber = function() {
+	var commands = [];
+	DragOP.mods.forEach(function(element, index, array) {
+		if(element != null && element.syntax != null && element.type == ModuleType.cmd) {
+			commands.push(element);
+		}
+	});
+	var i = 0;
+	var page = 1;
+	while(commands[i] != null) {
+		i++;
+		while(i > 8*page) {
+			page++;
+		}
+	}
+	return page;
+}
+
+DragOP.showHelpPage = function(page) {
+	var commands = [];
+	DragOP.cmsg("Showing help page " + page + "/" + DragOP.getHighestPageNumber());
+	DragOP.mods.forEach(function(element, index, array) {
+		if(element != null && element.syntax != null && element.type == ModuleType.cmd) {
+			commands.push(element);
+		}
+	});
+	commands.forEach(function(element, index, array) {
+		if(element.syntax != null) {
+			if(index >= 8*(page-1) && index <= 8*page-1) {
+				DragOP.cmsg("." + element.syntax);
+			}
+		}
+	});
+}
+
+var help = {
+	syntax: "help <page>",
+	type: ModuleType.command,
+	isStateMod: function() {
+		return false;
+	},
+	onCall: function(cmd) {
+		if(cmd[1] == undefined || cmd[1] == null || cmd[1] == "1") {
+			DragOP.showHelpPage("1");
+		} else {
+			if(cmd[1] != "1" && cmd[1] > 1 && cmd[1] <= DragOP.getHighestPageNumber()) {
+				DragOP.cmsg(cmd[1]);
+			} else if(cmd[1] <= 0) {
+				DragOP.cmsg(ChatColor.RED + "Error: page number is too low!");
+			} else {
+				DragOP.cmsg(ChatColor.RED + "Error: page number is too high!");
+			}
+		}
+	}
+}
+
+DragOP.registerModule(help);
+
 DragOP.commandManager = function(cmd) {
 	cmd = cmd.split(" ");
 	var command = cmd.shift();
 	var args = cmd;
 	
+	DragOP.mods.forEach( function(element, index, array) {
+		if(element.type == ModuleType.cmd) {
+			element.onCall(cmd);
+		}
+	});
+	
 	switch (command) {
-		case "help":
-			DragOP.cmsg("Help command is coming soon!");
-			break;
 		case "t":
 		case "toggle":
 			if (cmd.substring(2, cmd.length) != null && cmd.substring(2, cmd.length) != undefined) {
