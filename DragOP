@@ -2439,70 +2439,122 @@ var help = {
 
 DragOP.registerModule(help);
 
+var toggle = {
+	syntax: "toggle <module>",
+	type: ModuleType.command,
+	isStateMod: function() {
+		return false;
+	},
+	onCall: function(cmd) {
+		cmd = cmd.join(" ");
+		if (cmd.substring(2, cmd.length) != null && cmd.substring(2, cmd.length) != undefined) {
+			var shouldReturn = false;
+			DragOP.mods.forEach(function(entry, index, array) {
+				if (entry.name.toLowerCase() == cmd.substring(2, cmd.length)
+					.toLowerCase() && !shouldReturn) {
+					if (entry.isStateMode()) {
+						DragOP.mods[index].state = !DragOP.mods[index].state;
+						DragOP.mods[index].onRefresh(null);
+						DragOP.cmsg("Sucessfully toggled module " + entry.name);
+					} else if (entry.isToggleAble()) {
+						DragOP.mods[index].onClick(null);
+						DragOP.mods[index].onRefresh(null);
+						DragOP.cmsg("Sucessfully toggled module " + entry.name);
+					} else {
+						DragOP.cmsg(entry.name + "can't be toggled!");
+					}
+					shouldReturn = true;
+				}
+			});
+			if (shouldReturn) return;
+			DragOP.cmsg("Module " + cmd.substring(2, cmd.length) + " can't be found/toggled!");
+		} else {
+			DragOP.cmsg(".toggle <module>");
+		}
+	}
+}
+
+DragOP.registerModule(toggle);
+
+var t = {
+	syntax: "t <module>",
+	type: ModuleType.command,
+	isStateMod: function() {
+		return false;
+	},
+	onCall: function(cmd) {
+		toggle.onCall(cmd);
+	}
+}
+
+DragOP.registerModule(t);
+
+var friend = {
+	syntax: "friend <add|del|remove|list>",
+	type: ModuleType.command,
+	isStateMod: function() {
+		return false;
+	},
+	onCall: function(args) {
+		switch(args[0]){
+			case "add":
+				if(args[1] != ""&&args[1]!=null){
+				FriendManager.addFriend(args[1]);
+				DragOP.cmsg("Friend "+args[1]+" added!");
+				}else
+				DragOP.cmsg(".friend add <name>");
+				break;
+			case "del":
+			case "remove":
+				if(args[1] != ""&&args[1]!=null){
+				FriendManager.removeFriend(args[1]);
+				DragOP.cmsg("Friend "+args[1]+" removed!");
+				}else
+				DragOP.cmsg(".friend remove <name>");
+				break;
+			case "list":
+				DragOP.cmsg("Your friends("+FriendManager.all.length()+"): "+FriendManager.all.join(", "));
+				break;
+			default:
+				DragOP.cmsg(".friend <add|remove|list>");
+		}
+	}
+}
+
+DragOP.registerModule(friend);
+
+var f = {
+	syntax: "f <add|del|remove|list>",
+	type: ModuleType.command,
+	isStateMod: function() {
+		return false;
+	},
+	onCall: function(cmd) {
+		friend.onCall(cmd);
+	}
+}
+
+DragOP.registerModule(f);
+
 DragOP.commandManager = function(cmd) {
 	cmd = cmd.split(" ");
 	var command = cmd.shift();
 	var args = cmd;
 	
-	DragOP.mods.forEach( function(element, index, array) {
-		if(element.type == ModuleType.cmd) {
-			element.onCall(cmd);
+	var finished = false;
+	
+	DragOP.mods.forEach(function(element, index, array) {
+		if(element.syntax != null && element.syntax != undefined && element.type == ModuleType.cmd) {
+			if(element.syntax.split(" ")[0] == cmd[0]) {
+				element.onCall(command);
+				finished = true;
+				return;
+			}
 		}
 	});
 	
-	switch (command) {
-		case "t":
-		case "toggle":
-			if (cmd.substring(2, cmd.length) != null && cmd.substring(2, cmd.length) != undefined) {
-				var shouldReturn = false;
-				DragOP.mods.forEach(function(entry, index, array) {
-					if (entry.name.toLowerCase() == cmd.substring(2, cmd.length)
-						.toLowerCase() && !shouldReturn) {
-						if (entry.isStateMode()) {
-							DragOP.mods[index].state = !DragOP.mods[index].state;
-							DragOP.mods[index].onRefresh(null);
-							DragOP.cmsg("Sucessfully toggled module " + entry.name);
-						} else if (entry.isToggleAble()) {
-							DragOP.mods[index].onClick(null);
-							DragOP.mods[index].onRefresh(null);
-							DragOP.cmsg("Sucessfully toggled module " + entry.name);
-						} else {
-							DragOP.cmsg(entry.name + "can't be toggled!");
-						}
-						shouldReturn = true;
-					}
-				});
-				if (shouldReturn) return;
-				DragOP.cmsg("Module " + cmd.substring(2, cmd.length) + " can't be found/toggled!");
-			} else {
-				DragOP.cmsg(".toggle <module name>");
-			}
-			break;
-		case "f":
-		case "friend":
-			switch(args[0]){
-				case "add":
-					if(args[1] != ""&&args[1]!=null){
-					FriendManager.addFriend(args[1]);
-					DragOP.cmsg("Friend "+args[1]+" added!");
-					}else
-					DragOP.cmsg(".friend add <name>");
-					break;
-				case "del":
-				case "remove":
-					if(args[1] != ""&&args[1]!=null){
-					FriendManager.removeFriend(args[1]);
-					DragOP.cmsg("Friend "+args[1]+" removed!");
-					}else
-					DragOP.cmsg(".friend remove <name>");
-					break;
-				case "list":
-					DragOP.cmsg("Your friends("+FriendManager.all.length()+"): "+FriendManager.all.join(", "));
-					break;
-				default:
-					DragOP.cmsg(".friend <add|remove|list>");
-			}
-			break;
+	if(!finished) {
+		DragOP.cmsg(ChatColor.RED + "Error: command \"" + command + "\" not found!");
 	}
 }
 
