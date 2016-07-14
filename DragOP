@@ -356,6 +356,8 @@ DragOP.addCode("hacks.step");
 DragOP.addCode("hacks.jesus");
 DragOP.addCode("hacks.nodownglide");
 DragOP.addCode("hacks.glide");
+DragOP.addCode("hacks.chestTracer");
+DragOP.addCode("hacks.criticals");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
@@ -385,6 +387,8 @@ DragOP.setLString("hacks.step", lc.en_US, "Step");
 DragOP.setLString("hacks.jesus", lc.en_US, "Jesus");
 DragOP.setLString("hacks.nodownglide", lc.en_US, "NoDownGlide");
 DragOP.setLString("hacks.glide", lc.en_US, "Glide");
+DragOP.setLString("hacks.chestTracer", lc.en_US, "ChestTracer");
+DragOP.setLString("hacks.criticals", lc.en_US, "Criticals");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
@@ -475,7 +479,7 @@ DragOP.loadModsAnim = function(progress) {
 						ModPE.langEdit("menu.copyright", "DragOP: " + progress + " Modules loaded");
 						if (progress < Utils.modsCount) DragOP.loadModsAnim(progress + 1);
 					}
-				}), 70);
+				}), 100);
 		}
 	}));
 }
@@ -1166,24 +1170,43 @@ var tpaura = {
 
 	},
 	findPos: function(ent) {
-		var Ppos = new Array(getPlayerX(), getPlayerY() + 0.5, getPlayerZ());
+		var Ppos = new Array(getPlayerX(), getPlayerY() + (criticals.state&&criticals.velTick>0?0:0.5), getPlayerZ());
 		var entPos = new Array(Entity.getX(ent), Entity.getY(ent), Entity.getZ(ent));
 		var diff = new Array(entPos[0] - Ppos[0], null, entPos[2] - Ppos[2]);
-		Ppos[0] += diff[0] * 1.6;
-		Ppos[2] += diff[2] * 1.6;
+		Ppos[0] += diff[0] * 1.8;
+		Ppos[2] += diff[2] * 1.8;
 		return Ppos;
 		//just inverting pos at the moment
+	},
+	findVel: function(ent){
+		var Ppos = new Array(getPlayerX(), getPlayerY() + criticals.state&&criticals.velTick>0?0:0.5, getPlayerZ());
+		var entPos = new Array(Entity.getX(ent), Entity.getY(ent), Entity.getZ(ent));
+		var diff = new Array(entPos[0] - Ppos[0], (Utils.Player.onGround()?0.25:0), entPos[2] - Ppos[2]);
+		while(diff[0] > 1.5 || diff[0] < -1.5|| diff[2] > 1.5|| diff[2] < -1.5){
+			diff[0] = diff[0]/1.2;
+		diff[2] = diff[2]/1.2;
+		}
+		
+		return diff;
 	},
 	onAttack: function(att, vic) {
 		if (att == Player.getEntity() && this.state && Entity.getHealth(vic) > 0) {
 
 			var pos = this.findPos(vic);
+			var vel = this.findVel(vic);
 
 			if (getTile(pos[0], pos[1], pos[2]) == 0 && getTile(pos[0], pos[1] - 1, pos[2]) == 0 && getTile(pos[0], pos[1] - 2, pos[2]) == 0) {
-				Entity.setPosition(Player.getEntity(), pos[0], pos[1], pos[2]);
+				if(Utils.bypassMode == BypassMode.LBSG){
+					setVelX(getPlayerEnt(), vel[0]);
+					setVelY(getPlayerEnt(), vel[1]);
+					setVelZ(getPlayerEnt(), vel[2]);
+				}else{
+					Entity.setPosition(Player.getEntity(), pos[0], pos[1], pos[2]);
+					Utils.Entity.crosshairAimAt(vic, pos);
+				}
 			}
 
-			Utils.Entity.crosshairAimAt(vic, pos);
+			
 		}
 	},
 	onEnable: function(btn) { /*Not used*/ },
@@ -1682,7 +1705,8 @@ var nametag = {
 			btn.setText(DragOP.getLString("hacks.nametag"));
 	}
 };
-DragOP.registerModule(nametag);
+/*DragOP.registerModule(nametag);*/
+/*Removed nametag because of buggyness*/
 var chesttracers = {
 	name: DragOP.getLString("hacks.chestTracer"),
 	desc: "Draws a particle trail to near chests.",
@@ -1783,6 +1807,7 @@ var chesttracers = {
 	chests: new Array(),
 	fCheckerThread: null,
 	findChests:function(){
+		if(this.ChestScan.scanning == true)return;
 		this.ChestScan.finished = false;
 		this.ChestScan.scanning = true;
 		this.ChestScan.blocks = 0;
@@ -1797,11 +1822,12 @@ var chesttracers = {
 				
 				for(var x = startX-startRadius; x < startX; x++){
 					for(var z = startZ; z < startZ+startRadius; z++){
+						java.lang.Thread.sleep(1);
 						for(var y = 0; y < 127; y++){
 						try{
 						if(getTile(x,y,z) == 54)newChests.push([x,y,z]);
 						blocks++;
-						//java.lang.Thread.sleep(10);
+						
 						}catch(e){
 							cmsg("Error: "+e);
 						}}
@@ -1818,10 +1844,11 @@ var chesttracers = {
 				
 				for(var x = startX; x < startX+startRadius; x++){
 					for(var z = startZ; z < startZ+startRadius; z++){
+						java.lang.Thread.sleep(1);
 						for(var y = 0; y < 127; y++){
 						try{
 						if(getTile(x,y,z) == 54)newChests.push([x,y,z]);
-						//java.lang.Thread.sleep(10);
+						
 						blocks++;
 						}catch(e){
 							cmsg("Error: "+e);
@@ -1839,10 +1866,11 @@ var chesttracers = {
 				
 				for(var x = startX-startRadius; x < startX; x++){
 					for(var z = startZ-startRadius; z < startZ; z++){
+						java.lang.Thread.sleep(1);
 						for(var y = 0; y < 127; y++){
 						try{
 						if(getTile(x,y,z) == 54)newChests.push([x,y,z]);
-						//java.lang.Thread.sleep(10);
+						
 						blocks++;
 						}catch(e){
 							cmsg("Error: "+e);
@@ -1860,10 +1888,11 @@ var chesttracers = {
 				
 				for(var x = startX; x < startX+startRadius; x++){
 					for(var z = startZ-startRadius; z < startZ; z++){
+						java.lang.Thread.sleep(1);
 						for(var y = 0; y < 127; y++){
 						try{
 						if(getTile(x,y,z) == 54)newChests.push([x,y,z]);
-						//java.lang.Thread.sleep(10);
+						
 						blocks++;
 						}catch(e){
 							cmsg("Error: "+e);
@@ -1932,6 +1961,51 @@ var chesttracers = {
 	}
 };
 DragOP.registerModule(chesttracers);
+var criticals = {
+	name: DragOP.getLString("hacks.criticals"),
+	desc: "Most of your hits will be critical hits!",
+	type: ModuleType.mod,
+	state: false,
+	tick:0,
+	velTick: 0,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if(this.state && this.tick < 25){
+			this.tick++;
+			if(this.tick == 16)Entity.setPositionRelative(getPlayerEnt(), 0,0.001,0);
+			
+			
+			if(this.tick == 15){
+				this.velTick = 15;
+			}
+			if(this.velTick > 0){
+				this.velTick--;
+				setVelY(getPlayerEnt(), -0.000001);
+			}
+
+		}
+	},
+	onAttack: function(att,vic){
+		if(this.state && att == getPlayerEnt() && Entity.getVelY(getPlayerEnt()) >= -0.079 && Entity.getHealth(vic) > 0){
+			//clientMessage(this.tick);
+			if(this.tick >= 16)
+			this.tick=0;
+			
+		}
+	},
+	onClick: function (btn) {this.state=!this.state;},
+	onRefresh: function (btn) {
+		if(btn!=null)btn.setText(DragOP.getLString("hacks.criticals"));
+	}
+};
+DragOP.registerModule(criticals);
 /*
 var statehack = {
 	name: "Hack",
@@ -2252,13 +2326,10 @@ function showMenuBtn() {
 showMenuBtn();
 
 function rptask() {
-	ctx.runOnUiThread(new java.lang.Runnable({
+	var t = new java.lang.Thread(new java.lang.Runnable({
 		run: function() {
-			new android.os.Handler()
-				.postDelayed(new java.lang.Runnable({
-					run: function() {
-
-						nx = getPlayerX();
+			while(true){
+				nx = getPlayerX();
 						ny = getPlayerY();
 						nz = getPlayerZ();
 						
@@ -2266,21 +2337,10 @@ function rptask() {
 						else Utils.flyTick++;
 						DragOP.mods.forEach(function(entry, index, array) {
 							try {
-								if (entry.onTick) entry.onTick();
+								if (entry.onTick && (entry.state || entry.isStateMode() == false)) entry.onTick();
 							} catch (e) {}
 
 						});
-						if ((GUI != null && GUI.isShowing()) && (menu != null && menu.isShowing())) GUI.dismiss();
-						if ((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing()) && (dialog == null || !dialog.isShowing())) {
-							try {
-								net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote = true;
-								net.zhuoweizhang.mcpelauncher.ScriptManager.setLevelFakeCallback(true, false);
-							} catch (e) {
-								//toolbox....
-							}
-							showMenuBtn();
-						}
-						//did you know thats its eval(java.lang.String) and not eval(null)?
 						if (Player.getEntity() != -1) {
 							Utils.Vel.lastX = Entity.getVelX(Player.getEntity());
 							Utils.Vel.lastY = Entity.getVelY(Player.getEntity());
@@ -2293,11 +2353,27 @@ function rptask() {
 						tick1++;
 						if (tick1 > 50) tick1 = 0;
 						
-						rptask();
-					}
-				}), 15);
-		}
-	}))
+			ctx.runOnUiThread(new java.lang.Runnable(){
+				run:function(){
+						
+						if ((GUI != null && GUI.isShowing()) && (menu != null && menu.isShowing())) GUI.dismiss();
+						if ((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing()) && (dialog == null || !dialog.isShowing())) {
+							try {
+								net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote = true;
+								net.zhuoweizhang.mcpelauncher.ScriptManager.setLevelFakeCallback(true, false);
+							} catch (e) {
+								//toolbox....
+							}
+							showMenuBtn();
+						}
+						//did you know thats its eval(java.lang.String) and not eval(null)?
+						
+						
+						}});
+						java.lang.Thread.sleep(15);
+						}
+					}}));
+	t.start();
 }
 
 rptask();
