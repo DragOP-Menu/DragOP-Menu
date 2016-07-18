@@ -7,7 +7,7 @@ var tick1 = 0;
 var search;
 var Launcher = {
 isBlockLauncher: function() {
-return (ctx.getPackageName() == "net.zhuoweizhang.mcpelauncher" || ctx.getPackageManager() == "net.zhuoweizhang.mcpelauncher.pro");
+return (ctx.getPackageName() == "net.zhuoweizhang.mcpelauncher" || ctx.getPackageName() == "net.zhuoweizhang.mcpelauncher.pro");
 },
 isToolbox: function() {
 return ctx.getPackageName() == "io.mrarm.mctoolbox";
@@ -16,8 +16,39 @@ return ctx.getPackageName() == "io.mrarm.mctoolbox";
 
 var DragOP = {
 	mods: new Array(),
+	commands: new Array(),
 	isDev: true
 };
+var CommandManager = {
+	cmdModules: new Array(),
+	cmdNames: new Array(),
+	onCommand: function(cmd){
+		cmd = cmd.split(" ");
+		var command = cmd.shift().toLowerCase();
+		var args = cmd;
+		var module = null;
+		var found = false;
+		this.cmdNames.forEach(function(entry, index){
+			if(found == false){
+			entry.forEach(function(entry2){
+				if(entry2.toLowerCase() == command){
+					found = true;
+					module = CommandManager.cmdModules[index];
+					
+				}
+			});}
+		});
+		if(module != null)
+		module.onCall(args);
+		else
+		DragOP.cmsg("Command \""+command+"\" not found");
+	},
+	registerCommand: function(module){
+		this.cmdModules.push(module);
+		this.cmdNames.push(module.alias);
+	}
+};
+
 var FriendManager= {
 	all: new org.json.JSONArray(),
 	isFriend: function(name){
@@ -635,11 +666,13 @@ DragOP.showModDialog = function(mod) {
 	});
 }
 
-DragOP.registerModule = function(mod) {
-
-	DragOP.mods.push(mod);
+DragOP.registerModule = function(module) {
 	Utils.modsCount += 1;
-
+	if(module.type == ModuleType.command){
+		CommandManager.registerCommand(module);
+	}else{
+		DragOP.mods.push(module);
+	}
 }
 var friendMgr= {
 	name: DragOP.getLString("special.friend_manager"),
@@ -2025,8 +2058,127 @@ var statehack = {
 	onRefresh: function (btn) {}
 };
 	*/
+/*
+* Commands
+*/
+DragOP.getHighestPageNumber = function() {
+	var cmds = CommandManager.cmdModules.length;
+	var pages = 1;
+	while(cmds > 8){
+		cmds -= 8;
+		pages ++;
+	}
+	return pages;
+}
 
+DragOP.showHelpPage = function(page) {
+	DragOP.cmsg("Showing help page " + page + "/" + DragOP.getHighestPageNumber());
+	CommandManager.cmdModules.forEach(function(element, index, array) {
+		if(index >= 8*(page-1) && index <= 8*page-1) {
+			DragOP.cmsg("." + element.alias[0] + " " + element.syntax);
+		}
+	});
+}
 
+var help = {
+	syntax: "<page>",
+	alias: ["help", "h", "?", "commands"],
+	type: ModuleType.command,
+	isStateMod: function() {
+		return false;
+	},
+	onCall: function(cmd) {
+		try{
+			
+			if(cmd[0] == undefined || cmd[0] == null || cmd[0] == "1" || cmd[0] <= 0) {
+			DragOP.showHelpPage(1);
+		} else {
+			var pageInt = parseInt(cmd[0]);
+			if(pageInt <= DragOP.getHighestPageNumber()) {
+				DragOP.showHelpPage(pageInt);
+			} else if(pageInt > DragOP.getHighestPageNumber()) {
+				DragOP.showHelpPage(DragOP.getHighestPageNumber());
+			} 
+		}
+		}catch(e){
+			DragOP.showHelpPage(1);
+		}
+		
+	}
+}
+
+DragOP.registerModule(help);
+
+var toggle = {
+	syntax: "<module>",
+	alias: ["toggle", "t"],
+	type: ModuleType.command,
+	isStateMod: function() {
+		return false;
+	},
+	onCall: function(cmd) {
+		if(cmd[0] != undefined && cmd[0] != null && cmd[0] != ""){
+			var shouldReturn = false;
+			DragOP.mods.forEach(function(entry, index, array) {
+				if (entry.name.toLowerCase() == (cmd[0]+"").toLowerCase() && !shouldReturn) {
+					if (entry.isStateMode()) {
+						DragOP.mods[index].state = !DragOP.mods[index].state;
+						DragOP.mods[index].onRefresh(null);
+						DragOP.cmsg("Sucessfully toggled module " + entry.name);
+					} else if (entry.isToggleAble()) {
+						DragOP.mods[index].onClick(null);
+						DragOP.mods[index].onRefresh(null);
+						DragOP.cmsg("Sucessfully toggled module " + entry.name);
+					} else {
+						DragOP.cmsg(entry.name + "can't be toggled!");
+					}
+					shouldReturn = true;
+				}
+			});
+			if (shouldReturn) return;
+			DragOP.cmsg("Module " + cmd[0] + " can't be found!");
+		} else {
+			DragOP.cmsg(".toggle <module>");
+		}
+	}
+}
+
+DragOP.registerModule(toggle);
+
+var friend = {
+	syntax: "<add|remove|list>",
+	alias: ["friend", "f"],
+	type: ModuleType.command,
+	isStateMod: function() {
+		return false;
+	},
+	onCall: function(args) {
+		switch(args[0]){
+			case "add":
+				if(args[1] != ""&&args[1]!=null){
+				FriendManager.addFriend(args[1]);
+				DragOP.cmsg("Friend "+args[1]+" added!");
+				}else
+				DragOP.cmsg(".friend add <name>");
+				break;
+			case "del":
+			case "remove":
+				if(args[1] != ""&&args[1]!=null){
+				FriendManager.removeFriend(args[1]);
+				DragOP.cmsg("Friend "+args[1]+" removed!");
+				}else
+				DragOP.cmsg(".friend remove <name>");
+				break;
+			case "list":
+				DragOP.cmsg("Your friends("+FriendManager.all.length()+"): "+FriendManager.all.join(", "));
+				break;
+			default:
+				DragOP.cmsg("."+this.alias[0]+" "+this.syntax);
+		}
+	}
+}
+
+DragOP.registerModule(friend);
 
 
 //Menu open Button
@@ -2381,182 +2533,8 @@ function rptask() {
 rptask();
 DragOP.loadModsAnim(0);
 
-DragOP.getHighestPageNumber = function() {
-	var commands = [];
-	DragOP.mods.forEach(function(element, index, array) {
-		if(element != null && element.syntax != null && element.type == ModuleType.cmd) {
-			commands.push(element);
-		}
-	});
-	var i = 0;
-	var page = 1;
-	while(commands[i] != null) {
-		i++;
-		while(i > 8*page) {
-			page++;
-		}
-	}
-	return page;
-}
 
-DragOP.showHelpPage = function(page) {
-	var commands = [];
-	DragOP.cmsg("Showing help page " + page + "/" + DragOP.getHighestPageNumber());
-	DragOP.mods.forEach(function(element, index, array) {
-		if(element != null && element.syntax != null && element.type == ModuleType.cmd) {
-			commands.push(element);
-		}
-	});
-	commands.forEach(function(element, index, array) {
-		if(element.syntax != null) {
-			if(index >= 8*(page-1) && index <= 8*page-1) {
-				DragOP.cmsg("." + element.syntax);
-			}
-		}
-	});
-}
 
-var help = {
-	syntax: "help <page>",
-	type: ModuleType.command,
-	isStateMod: function() {
-		return false;
-	},
-	onCall: function(cmd) {
-		if(cmd[1] == undefined || cmd[1] == null || cmd[1] == "1") {
-			DragOP.showHelpPage("1");
-		} else {
-			if(cmd[1] != "1" && cmd[1] > 1 && cmd[1] <= DragOP.getHighestPageNumber()) {
-				DragOP.cmsg(cmd[1]);
-			} else if(cmd[1] <= 0) {
-				DragOP.cmsg(ChatColor.RED + "Error: page number is too low!");
-			} else {
-				DragOP.cmsg(ChatColor.RED + "Error: page number is too high!");
-			}
-		}
-	}
-}
-
-DragOP.registerModule(help);
-
-var toggle = {
-	syntax: "toggle <module>",
-	type: ModuleType.command,
-	isStateMod: function() {
-		return false;
-	},
-	onCall: function(cmd) {
-		cmd = cmd.join(" ");
-		if (cmd.substring(2, cmd.length) != null && cmd.substring(2, cmd.length) != undefined) {
-			var shouldReturn = false;
-			DragOP.mods.forEach(function(entry, index, array) {
-				if (entry.name.toLowerCase() == cmd.substring(2, cmd.length)
-					.toLowerCase() && !shouldReturn) {
-					if (entry.isStateMode()) {
-						DragOP.mods[index].state = !DragOP.mods[index].state;
-						DragOP.mods[index].onRefresh(null);
-						DragOP.cmsg("Sucessfully toggled module " + entry.name);
-					} else if (entry.isToggleAble()) {
-						DragOP.mods[index].onClick(null);
-						DragOP.mods[index].onRefresh(null);
-						DragOP.cmsg("Sucessfully toggled module " + entry.name);
-					} else {
-						DragOP.cmsg(entry.name + "can't be toggled!");
-					}
-					shouldReturn = true;
-				}
-			});
-			if (shouldReturn) return;
-			DragOP.cmsg("Module " + cmd.substring(2, cmd.length) + " can't be found/toggled!");
-		} else {
-			DragOP.cmsg(".toggle <module>");
-		}
-	}
-}
-
-DragOP.registerModule(toggle);
-
-var t = {
-	syntax: "t <module>",
-	type: ModuleType.command,
-	isStateMod: function() {
-		return false;
-	},
-	onCall: function(cmd) {
-		toggle.onCall(cmd);
-	}
-}
-
-DragOP.registerModule(t);
-
-var friend = {
-	syntax: "friend <add|del|remove|list>",
-	type: ModuleType.command,
-	isStateMod: function() {
-		return false;
-	},
-	onCall: function(args) {
-		switch(args[0]){
-			case "add":
-				if(args[1] != ""&&args[1]!=null){
-				FriendManager.addFriend(args[1]);
-				DragOP.cmsg("Friend "+args[1]+" added!");
-				}else
-				DragOP.cmsg(".friend add <name>");
-				break;
-			case "del":
-			case "remove":
-				if(args[1] != ""&&args[1]!=null){
-				FriendManager.removeFriend(args[1]);
-				DragOP.cmsg("Friend "+args[1]+" removed!");
-				}else
-				DragOP.cmsg(".friend remove <name>");
-				break;
-			case "list":
-				DragOP.cmsg("Your friends("+FriendManager.all.length()+"): "+FriendManager.all.join(", "));
-				break;
-			default:
-				DragOP.cmsg(".friend <add|remove|list>");
-		}
-	}
-}
-
-DragOP.registerModule(friend);
-
-var f = {
-	syntax: "f <add|del|remove|list>",
-	type: ModuleType.command,
-	isStateMod: function() {
-		return false;
-	},
-	onCall: function(cmd) {
-		friend.onCall(cmd);
-	}
-}
-
-DragOP.registerModule(f);
-
-DragOP.commandManager = function(cmd) {
-	cmd = cmd.split(" ");
-	var command = cmd.shift();
-	var args = cmd;
-	
-	var finished = false;
-	
-	DragOP.mods.forEach(function(element, index, array) {
-		if(element.syntax != null && element.syntax != undefined && element.type == ModuleType.cmd) {
-			if(element.syntax.split(" ")[0] == cmd[0]) {
-				element.onCall(command);
-				finished = true;
-				return;
-			}
-		}
-	});
-	
-	if(!finished) {
-		DragOP.cmsg(ChatColor.RED + "Error: command \"" + command + "\" not found!");
-	}
-}
 
 function chatHook(text) {
 	
@@ -2570,7 +2548,7 @@ function chatHook(text) {
 		} catch (e) {
 			//Not-BlockLauncher-Error
 		}
-		DragOP.commandManager(text.substring(1, text.length));
+		CommandManager.onCommand(text.substring(1, text.length));
 	}
 }
 this.Item.getEnchantType = function(id) {
