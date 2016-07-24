@@ -185,6 +185,133 @@ var Utils = {
 	modsCount: 0,
 	currentSearchCount: 0,
 	font: android.os.Build.VERSION.SDK_INT >= 17 ? android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL) : android.graphics.Typeface.DEFAULT,
+	Render:{
+		
+		getFloatBuffer: function(fArray){
+			var bBuffer = java.nio.ByteBuffer.allocateDirect(fArray.length * 4);
+			bBuffer.order(java.nio.ByteOrder.nativeOrder());
+			
+			var fBuffer = bBuffer.asFloatBuffer();
+			fBuffer.put(fArray);
+			fBuffer.position(0);
+			return fBuffer;
+		},
+		getShortBuffer: function(sArray){
+			var bBuffer = java.nio.ByteBuffer.allocateDirect(sArray.length * 2);
+			bBuffer.order(java.nio.ByteOrder.nativeOrder());
+			
+			var sBuffer = bBuffer.asShortBuffer();
+			sBuffer.put(sArray);
+			sBuffer.position(0);
+			return sBuffer;
+		},
+		renderer: null,
+		glSurface: null,
+		init: function(){
+			this.renderer = new android.opengl.GLSurfaceView.Renderer({
+				onSurfaceCreated : function(gl, config) {
+					var GL10 = javax.microedition.khronos.opengles.GL10;
+					gl.glClearColor(0, 0, 0, 0);
+					gl.glShadeModel(GL10.GL_SMOOTH);
+					gl.glClearDepthf(1.0);
+					gl.glEnable(GL10.GL_DEPTH_TEST);
+					gl.glDepthFunc(GL10.GL_LEQUAL);
+					gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
+				},
+				onSurfaceChanged : function(gl, width, height) {
+					var GL10 = javax.microedition.khronos.opengles.GL10;
+					gl.glMatrixMode(GL10.GL_PROJECTION);
+					gl.glLoadIdentity();
+					android.opengl.GLU.gluPerspective(gl, 89.0, width / height, 0.1, 100);
+					gl.glMatrixMode(GL10.GL_MODELVIEW);
+					gl.glLoadIdentity();
+				},
+				onDrawFrame : function(gl) {
+					var GL10 = javax.microedition.khronos.opengles.GL10;
+					gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+					gl.glLoadIdentity();
+					gl.glDisable(GL10.GL_LIGHTING);
+					var yaw = getYaw() % 360;
+					var pitch = getPitch() % 360;
+					var eyeX = getPlayerX();
+					var eyeY = getPlayerY()+1;
+					var eyeZ = getPlayerZ();
+				
+					var dCenterX = Math.sin(yaw / 180 * Math.PI);
+					var dCenterZ = Math.cos(yaw / 180 * Math.PI);
+					var dCenterY = Math.sqrt(dCenterX * dCenterX + dCenterZ * dCenterZ) * Math.tan((pitch - 180) / 180 * Math.PI);
+				
+					var centerX = eyeX - dCenterX;
+					var centerZ = eyeZ + dCenterZ;
+					var centerY = eyeY - dCenterY;
+				
+					android.opengl.GLU.gluLookAt(gl, eyeX, eyeY, eyeZ, centerX, centerY, centerZ, 0, 1.0, 0);
+					DragOP.mods.forEach(function(entry, index, array) {
+						try {
+							entry.onRender(gl);
+							//gl.glTranslatef(0,0,0);
+						} catch (e) {}
+					});
+				}
+			});
+			ctx.runOnUiThread(new java.lang.Runnable(){
+				run: function(){
+					Utils.Render.glSurface = new android.opengl.GLSurfaceView(ctx);
+					Utils.Render.glSurface.setZOrderOnTop(true);
+					Utils.Render.glSurface.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+					Utils.Render.glSurface.getHolder().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
+					Utils.Render.glSurface.setRenderer(Utils.Render.renderer);
+					ctx.getWindow().getDecorView().addView(Utils.Render.glSurface);
+				}
+			});
+		},
+		drawBox: function(gl, x,y,z,x2,y2,z2){
+			var GL10 = javax.microedition.khronos.opengles.GL10;
+			var size = new Array(x2,y2,z2);
+			var vertices = [
+			0,0,0,
+			size[0],0,0,
+			0,0,size[2],
+			size[0],0,size[2],
+			
+			0,size[1],0,
+			size[0],size[1],0,
+			0,size[1],size[2],
+			size[0],size[1],size[2]
+			];
+			var vertexBuffer = Utils.Render.getFloatBuffer(vertices);
+			var indices = [
+			0,1,
+			0,2,
+			0,4,
+			
+			3,1,
+			3,2,
+			3,7,
+			
+			5,4,
+			5,7,
+			5,1,
+			
+			6,4,
+			6,7,
+			6,2
+			];
+			var indexBuffer = Utils.Render.getShortBuffer(indices);
+			gl.glTranslatef(x, y, z);
+			gl.glFrontFace(GL10.GL_CCW);
+			//gl.glEnable(GL10.GL_CULL_FACE);
+			//gl.glCullFace(GL10.GL_BACK);
+			gl.glEnable(GL10.GL_BLEND);
+			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glLineWidth(4);
+			gl.glColor4f(0.0,1.0,0.0,0.4);
+			gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+			gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+			gl.glDrawElements(GL10.GL_LINES, indices.length, GL10.GL_UNSIGNED_SHORT, indexBuffer);
+			gl.glTranslatef(-x, -y, -z);
+		}
+	},
 	Theme:{
 		current: Themes.DEFAULT
 	},
@@ -239,7 +366,7 @@ var Utils = {
 			return "";
 		}
 	},
-	Render: {
+	MobRender: {
 		makeInvi: function(renderer){
 	var model = renderer.getModel();
 	model.getPart("body").clear();
@@ -372,8 +499,10 @@ var Utils = {
 		},
 		getNearestEntity(maxrange) {
 			var mobs = Utils.Entity.getAll();
+			//clientMessage(mobs.length);
 //clientMessage("Im here1");
 			var players = Server.getAllPlayers();
+			
 			var small = maxrange;
 			var ent = null;
 			/*if(mobs.length > 500)clientMessage("lag found: "+mobs.length);*/
@@ -463,6 +592,7 @@ DragOP.addCode("hacks.glide");
 DragOP.addCode("hacks.chestTracer");
 DragOP.addCode("hacks.criticals");
 DragOP.addCode("hacks.coords");
+DragOP.addCode("hacks.playerEsp");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
@@ -496,6 +626,7 @@ DragOP.setLString("hacks.glide", lc.en_US, "Glide");
 DragOP.setLString("hacks.chestTracer", lc.en_US, "ChestTracers");
 DragOP.setLString("hacks.criticals", lc.en_US, "Criticals");
 DragOP.setLString("hacks.coords", lc.en_US, "Coords");
+DragOP.setLString("hacks.playerEsp", lc.en_US, "PlayerESP");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
@@ -2177,6 +2308,50 @@ var coords = {
 	}
 };
 DragOP.registerModule(coords);
+var playerEsp = {
+	name: DragOP.getLString("hacks.playerEsp"),
+	desc: "Draws a box around players.",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onRender: function(gl){
+		if(playerEsp.state && getPlayerEnt()!= 0 && getPlayerEnt() != -1){
+			var mobs = Utils.Entity.getAll();
+			var players = Server.getAllPlayers();
+			
+			//clientMessage(mobs.length);
+			mobs.forEach(function(entry){
+				
+				if(entry!=getPlayerEnt() && Entity.getEntityTypeId(entry) == EntityType.PLAYER){
+				Utils.Render.drawBox(gl,Entity.getX(entry)-0.5, Entity.getY(entry),Entity.getZ(entry)-0.5, 1, 2, 1);
+				
+				}
+			});
+			players.forEach(function(entry){
+				if(entry!=getPlayerEnt() && Entity.getEntityTypeId(entry) == EntityType.PLAYER){
+				Utils.Render.drawBox(gl,Entity.getX(entry)-0.5, Entity.getY(entry),Entity.getZ(entry)-0.5, 1, 2, 1);
+				
+				}
+			});
+			//Utils.Render.drawBox(gl,Player.getPointedVecX()-0.5, Player.getPointedVecY()+1,Player.getPointedVecZ()-0.5, 1, 2, 1);
+			
+			}
+			
+	},
+	onClick: function (btn) {this.state=!this.state;},
+	onRefresh: function (btn) {
+		if(btn!=null)
+			btn.setText(DragOP.getLString("hacks.playerEsp"));
+	}
+};
+DragOP.registerModule(playerEsp);
 /*
 var statehack = {
 	name: "Hack",
@@ -2757,8 +2932,7 @@ function rptask() {
 rptask();
 DragOP.loadModsAnim(0);
 Shop.init();
-
-
+Utils.Render.init();
 
 function chatHook(text) {
 	
@@ -2809,6 +2983,7 @@ function useItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage) {
 }
 function newLevel(){
 	DragOP.inGame = true;
+	ModPE.setFov(90);
 }
 function leaveGame() {
 	Utils.Entity.allEntitys = new Array();
