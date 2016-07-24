@@ -1,3 +1,4 @@
+
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var LinearLayout = android.widget.LinearLayout;
 var GUI;
@@ -17,7 +18,8 @@ return ctx.getPackageName() == "io.mrarm.mctoolbox";
 var DragOP = {
 	mods: new Array(),
 	commands: new Array(),
-	isDev: true
+	isDev: true,
+	inGame: false
 };
 var CommandManager = {
 	cmdModules: new Array(),
@@ -145,7 +147,36 @@ var SpeedMode = {
 	BHOP: 1,
 	LONGJUMP: 2
 };
-
+var getStyledBtnBackground= function(state, toggleable){
+	var bg = android.graphics.drawable.GradientDrawable();
+	bg.setCornerRadius(1);
+	bg.setColor(android.graphics.Color.argb(80, 0, 0, 0));
+	if (state) bg.setColor(android.graphics.Color.argb(210, 0, 200, 0));
+	if (toggleable == false) bg.setColor(android.graphics.Color.argb(210, 230, 150, 30));
+	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+	bg.setStroke(dip2px(2), android.graphics.Color.argb(230, 0, 0, 0));
+};
+var Themes = {
+	DEFAULT: {
+		font: android.os.Build.VERSION.SDK_INT >= 17 ? android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL) : android.graphics.Typeface.DEFAULT,
+		ModButton:{
+			
+			Neutral: {
+				textColor: android.graphics.Color.WHITE,
+				background: getStyledBtnBackground(false, false)
+			}, 
+			Activated: {
+				textColor: android.graphics.Color.WHITE,
+				background: getStyledBtnBackground(true,true)
+			},
+			Deactivated: {
+				textColor: android.graphics.Color.WHITE,
+				background: getStyledBtnBackground(false, true)
+			}
+		}
+		
+	}
+};
 var Utils = {
 	bypassMode: BypassMode.DEFAULT,
 	speedMode: SpeedMode.DEFAULT,
@@ -153,8 +184,47 @@ var Utils = {
 	flyTick: 0,
 	modsCount: 0,
 	currentSearchCount: 0,
-
 	font: android.os.Build.VERSION.SDK_INT >= 17 ? android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL) : android.graphics.Typeface.DEFAULT,
+	Theme:{
+		current: Themes.DEFAULT
+	},
+	Screen:{
+		currentScreen: "",
+		INGAME: "hud_screen"
+	},
+	File: {
+		dragopDir: android.os.Environment.getExternalStorageDirectory()+"/DragOP/",
+		getTextFromFile: function(file){
+			
+			var readed = (new java.io.BufferedReader(new java.io.FileReader(file)));
+			var data = new java.lang.StringBuilder();
+			var string;
+			while ((string = readed.readLine()) != null) 
+				data.append(string);
+			return data.toString();
+		},
+		saveTextToFile: function(file, text){
+			if(!file.exists())file.createNewFile();
+			var bytes = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, text.length());
+			for(var i = 0; i < text.length(); i++)bytes[i] = text.charCodeAt(i);
+			var stream = new java.io.FileOutputStream(file);
+			try{
+				stream.write(bytes);
+			}finally
+				stream.close();
+		}
+	},
+	Base64:{
+		encode: function(text){
+			
+			var bytes = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, text.length());
+			for(var i = 0; i < text.length();i++)bytes[i] = new java.lang.Byte(new String(text).charCodeAt(i));
+			return android.util.Base64.encodeToString(bytes, 0);
+		},
+		decode: function(text){
+			return android.util.Base64.decode(text, 0);
+		}
+	},
 	Text: {
 		clean: function(text){
 			var allColor = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "k", "l", "m", "n", "o", "r"];
@@ -201,8 +271,8 @@ var Utils = {
 			var y = getPlayerY();
 			while (y > 1) y -= 1;
 
-			if (Math.round(y * 100) == 62 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0 && !Utils.Block.isLiquid(getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()))) return true;
-			if (Math.round(y * 100) == 12 && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0 && !Utils.Block.isLiquid(getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()))) return true;
+			if ((Math.round(y * 100) >= 61 && Math.round(y * 100)  <= 63)&& getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0 && !Utils.Block.isLiquid(getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()))) return true;
+			if ((Math.round(y * 100) >= 11 && Math.round(y * 100) <= 13) && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0 && !Utils.Block.isLiquid(getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()))) return true;
 			return false;
 		},
 		isCollidedHorizontally: function() {
@@ -352,7 +422,110 @@ var Utils = {
 		}
 	}
 };
-
+var Shop = {
+	c5932894ash: 0,
+	buyed: null,
+	cashFile: new java.io.File(Utils.File.dragopDir, "base64.dat"),
+	loadCash: function(){
+		if(this.cashFile.exists()){
+			try{
+			var text = Utils.File.getTextFromFile(this.cashFile);
+			text = text.replace("\n", "");
+			text = Utils.Base64.decode(text);
+			var newStr = "", leng = 0;
+			for(var i in text)leng++;
+			for(var i = 0; i < leng; i++){
+				newStr += String.fromCharCode(text[i]);
+			}
+			
+			text = newStr;
+			text = text.replace("\n", "");
+			text = Utils.Base64.decode(text);
+			var newStr = "", leng = 0;
+			for(var i in text)leng++;
+			for(var i = 0; i < leng; i++){
+				newStr += String.fromCharCode(text[i]);
+			}
+			
+			text = newStr;
+			text = text.replace("\n", "");
+			//print(text);
+			text = new org["json"].JSONObject(text);
+			//print("Yo: "+text.get("default"));
+			//this[gmhack["desc"][0].toLowerCase()+(Boolean.valueOf(true) == false?(Math.sin(5938)*492):(Math.random()*3/6*0+Math.round(5932894.49693)))+speed["desc"][2]+"s"+"h"] = text["getInt"](DragOP["mt"].toName(Math.sin(Math.PI)*20*0*5+492).charAt(ModuleType["mod"] + 6 - DragOP["mt"].special)+"ff" + Boolean.valueOf(false)["toString"]().charAt(ModuleType["special"])+"e"+Boolean["value"+new String("o").toUpperCase() + "f"](false != true).toString().charAt(0));
+			Shop.setCash(parseInt(text.get("default")));
+			text = text.getString("base");
+			text = Utils.Base64.decode(text);
+			var newStr = "", leng = 0;
+			for(var i in text)leng++;
+			for(var i = 0; i < leng; i++){
+				newStr += String.fromCharCode(text[i]);
+			}
+			
+			text = newStr;
+			text = text.replace("\n", "");
+			text = new org.json.JSONArray(text);
+			this.buyed = new Array();
+			for(var i = 0; i < text.length(); i++){
+				this.buyed.push(text.get(i));
+			}
+			//print("Buyed:"+this.buyed.join(" () ")+":End");
+			}catch(e){
+				DragOP.ctoast("Shop data corrupt.\nDeleting Shop Data");
+				this.cashFile.delete();
+				this[gmhack["desc"][0].toLowerCase()+(Boolean.valueOf(true) == false?(Math.sin(5938)*492):(Math.random()*3/6*0+Math.round(5932894.49693)))+speed["desc"][2]+"s"+"h"] = 0;
+		this.buyed = new Array();
+			}
+		}else{
+		this[gmhack["desc"][0].toLowerCase()+(Boolean.valueOf(true) == false?(Math.sin(5938)*492):(Math.random()*3/6*0+Math.round(5932894.49693)))+speed["desc"][2]+"s"+"h"] = 0;
+		this.buyed = new Array();
+		}
+	},
+	saveCash: function(){
+		var text = new org.json.JSONArray();
+		for(var i = 0; i < this.buyed.length; i++){
+			text.put(this.buyed[i]);
+		}
+		text = Utils.Base64.encode(text.toString());
+		
+		var jsonObj = new org.json.JSONObject();
+		jsonObj.put("base", text);
+		jsonObj.put("default", parseInt(Shop[gmhack["desc"][0].toLowerCase()+(Boolean.valueOf(true) == false?(Math.sin(5938)*492):(Math.random()*3/6*0+Math.round(5932894.49693)))+speed["desc"][2]+"s"+"h"]));
+		//clientMessage(jsonObj);
+		/*jsonObj[Boolean.valueOf(!true).toString()["charAt"](ModuleType.special)+"e"+new String("owkanfotlak")[ModuleType.special*3*BypassMode.DEFAULT*Utils.flyTick+ModuleType.mod*10*(BypassMode.LBSG/2)+ModuleType.special]+"nt"]();*/
+		text = Utils.Base64.encode(jsonObj.toString());
+		text = Utils.Base64.encode(text);
+		Utils.File.saveTextToFile(new java.io.File(Utils.File.dragopDir, "base64.dat"), text);
+	},
+	startThread: function(){
+		var t = new java.lang.Thread(new java.lang.Runnable(){
+			run:function(){
+				while(true){
+					try{
+					java["lang"]["Thread"].sleep(60*1000);
+					
+					Shop[gmhack["desc"][0].toLowerCase()+(Boolean.valueOf(true) == false?(Math.sin(5938)*492):(Math.random()*3/6*0+Math.round(5932894.49693)))+speed["desc"][2]+"s"+"h"]+=5;
+					Shop.saveCash();
+					}catch(e){
+						print(e);
+						clientMessage(e);
+					}
+				}
+			}
+		});
+		t.start();
+	},
+	setCash: function(newCash){
+		this[gmhack["desc"][0].toLowerCase()+(Boolean.valueOf(true) == false?(Math.sin(5938)*492):(Math.random()*3/6*0+Math.round(5932894.49693)))+speed["desc"][2]+"s"+"h"] = newCash;
+	},
+	getCash: function(){
+		return this[gmhack["desc"][0].toLowerCase()+(Boolean.valueOf(true) == false?(Math.sin(5938)*492):(Math.random()*3/6*0+Math.round(5932894.49693)))+speed["desc"][2]+"s"+"h"];
+	},
+	init: function(){
+		this.loadCash();
+		this.startThread();
+	}
+};
 DragOP.addCode = function(code) {
 	l[0].push(code);
 }
@@ -365,10 +538,12 @@ DragOP.setLString = function(code, lang, value) {
 			}
 		});
 		if (done) return;
+		//DragOP.addCode(code);
 		//l[0].push(code+"".toLowerCase());
 		//DragOP.setLString(code, lang, value);
 	}
 	//DragOP.addCode(code);
+DragOP.addCode("special.shop");
 DragOP.addCode("special.panic");
 DragOP.addCode("special.target");
 DragOP.addCode("special.friend_manager");
@@ -389,6 +564,7 @@ DragOP.addCode("hacks.nodownglide");
 DragOP.addCode("hacks.glide");
 DragOP.addCode("hacks.chestTracer");
 DragOP.addCode("hacks.criticals");
+DragOP.addCode("hacks.coords");
 DragOP.addCode("gm.survival");
 DragOP.addCode("gm.creative");
 DragOP.addCode("moduletype.mod");
@@ -400,6 +576,7 @@ DragOP.addCode("state.on");
 DragOP.addCode("state.off");
 
 //DragOP.setLString(code, lc.en_US, value);
+DragOP.setLString("special.shop", lc.en_US, "Shop");
 DragOP.setLString("special.bypass", lc.en_US, "Bypass");
 DragOP.setLString("special.target", lc.en_US, "Target");
 DragOP.setLString("special.friend_manager", lc.en_US, "Friend-Manager");
@@ -420,6 +597,7 @@ DragOP.setLString("hacks.nodownglide", lc.en_US, "NoDownGlide");
 DragOP.setLString("hacks.glide", lc.en_US, "Glide");
 DragOP.setLString("hacks.chestTracer", lc.en_US, "ChestTracers");
 DragOP.setLString("hacks.criticals", lc.en_US, "Criticals");
+DragOP.setLString("hacks.coords", lc.en_US, "Coords");
 DragOP.setLString("gm.survival", lc.en_US, "Survival");
 DragOP.setLString("gm.creative", lc.en_US, "Creative");
 DragOP.setLString("moduletype.mod", lc.en_US, "Mod");
@@ -515,7 +693,7 @@ DragOP.loadModsAnim = function(progress) {
 	}));
 }
 DragOP.getStyledBackground = function() {
-	var bg = android.graphics.drawable.GradientDrawable();
+	var bg = new android.graphics.drawable.GradientDrawable();
 	bg.setCornerRadius(1);
 	bg.setColor(android.graphics.Color.argb(90, 255, 255, 255));
 	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
@@ -2039,6 +2217,68 @@ var criticals = {
 	}
 };
 DragOP.registerModule(criticals);
+var coords = {
+	name: DragOP.getLString("hacks.coords"),
+	desc: "Displays your coordinates",
+	type: ModuleType.mod,
+	state: false,
+	coordGui: null,
+	coordView: null,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if(this.state && getPlayerEnt() == 0 || getPlayerEnt() == -1)
+		ctx.runOnUiThread(new java.lang.Runnable(){
+			run: function(){
+				coords.coordGui.dismiss();
+			}
+		});
+		else if(this.state && tick1 % 8 == 0){
+			this.showGui("X: "+Math.floor(getPlayerX())+"\nY: "+Math.floor(getPlayerY())+"\nZ: "+Math.floor(getPlayerZ()));
+		}
+	},
+	showGui: function(text){
+		ctx.runOnUiThread(new java.lang.Runnable(){
+			run:function(){
+				if(coords.coordGui == null || coords.coordGui.isShowing() == false){
+					var bg = new android.graphics.drawable.GradientDrawable();
+					bg.setColor(android.graphics.Color.argb(150,20,20,20));
+					bg.setCornerRadius(dip2px(3));
+					coords.coordView = new android.widget.TextView(ctx);
+					coords.coordView.setTypeface(Utils.font);
+					coords.coordView.setTextColor(android.graphics.Color.WHITE);
+					coords.coordView.setBackground(bg);
+					coords.coordView.setText(text);
+					coords.coordGui = new android.widget.PopupWindow(coords.coordView, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+					coords.coordGui.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+					coords.coordGui.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.CENTER, 0,0);
+				}else{
+					coords.coordView.setText(text);
+				}
+			}
+		});
+		
+	},
+	onClick: function (btn) {
+		this.state=!this.state;
+		if(!this.state)ctx.runOnUiThread(new java.lang.Runnable(){
+			run: function(){
+				coords.coordGui.dismiss();
+			}
+		});
+	},
+	onRefresh: function (btn) {
+		if(btn!=null)
+			btn.setText(DragOP.getLString("hacks.coords"));
+	}
+};
+DragOP.registerModule(coords);
 /*
 var statehack = {
 	name: "Hack",
@@ -2329,19 +2569,67 @@ function showMenu() {
 
 				//lparam.addRule(android.widget.RelativeLayout.BELOW, toplayout.getChildAt(0).getId());
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
-				//lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
+				lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
 				var toplayout = new android.widget.RelativeLayout(ctx);
 				toplayout.addView(sbar, lparam);
 				lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 
-				lparam.addRule(android.widget.RelativeLayout.BELOW, toplayout.getChildAt(0)
-					.getId());
+				lparam.addRule(android.widget.RelativeLayout.BELOW, toplayout.getChildAt(0).getId());
+				lparam.addRule(android.widget.RelativeLayout.ALIGN_RIGHT, toplayout.getChildAt(0).getId());
+				lparam.addRule(android.widget.RelativeLayout.ALIGN_LEFT, toplayout.getChildAt(0).getId());
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
 				//lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
 				mlist.setLayoutParams(lparam);
+				mlist.setId(563729);
 				toplayout.addView(mlist);
 				//toplayout.setBackground(null);
-				toplayout.setGravity(android.view.Gravity.CENTER);
+				
+				//Cash stuff
+				var cashLayout = new android.widget.RelativeLayout(ctx);
+				var roundGradient = new android.graphics.drawable.GradientDrawable();
+				roundGradient.setColor(android.graphics.Color.argb(200, 30,30,30));
+				roundGradient.setCornerRadius(dip2px(20));
+				roundGradient.setStroke(dip2px(1), android.graphics.Color.argb(150,0,0,0));
+				var cashText = new android.widget.TextView(ctx);
+				cashText.setTypeface(Utils.font);
+				cashText.setGravity(android.view.Gravity.CENTER);
+				cashText.setText(Shop.getCash()+"$");
+				cashText.setTextColor(android.graphics.Color.WHITE);
+				cashText.setBackground(roundGradient);
+				cashText.setTextSize(dip2px(13));
+				
+				var shopBtn = new android.widget.Button(ctx);
+				shopBtn.setText(DragOP.getLString("special.shop"));
+				shopBtn.setTypeface(Utils.font);
+				shopBtn.setTransformationMethod(null);
+				shopBtn.setOnClickListener(new android.view.View.OnClickListener(){
+					onClick: function(v){
+						DragOP.ctoast("Comming soon!");
+					}
+				});
+				
+				var InParam = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				cashLayout.addView(cashText, InParam);
+				InParam = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				cashLayout.addView(shopBtn, InParam);
+				
+				var cashParams = new android.widget.RelativeLayout.LayoutParams(ctx.getWindowManager().getDefaultDisplay().getWidth() / 100 * 15,android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
+				//cashParams.addRule(android.widget.RelativeLayout.LEFT_OF, mlist.getId());
+				cashParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				cashParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				//cashParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				//cashParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				//cashLayout.setLayoutParams(cashParams);
+				//cashLayout.setBackgroundColor(android.graphics.Color.BLACK);
+				toplayout.addView(cashLayout, cashParams);
+				
+				//toplayout.setGravity(android.view.Gravity.CENTER);
 				toplayout.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function(viewarg) {
 						menu.dismiss();
@@ -2370,7 +2658,7 @@ function refreshMenu() {
 		mlist.addView(DragOP.generateMenu(search.getText() + ""));
 	}
 }
-
+DragOP.mt = ModuleType;
 function updateMenu(keyword, toplayout) {
 	Utils.currentSearchCount += 1;
 	if (Utils.currentSearchCount > 999) Utils.currentSearchCount = 0;
@@ -2405,7 +2693,7 @@ function showMenuBtn() {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function() {
 			try {
-				if (GUI != null && GUI.isShowing()) GUI.dismiss();
+				
 				/*if(ghost) {
 					menuBtn.setText('');
 					menuBtn.setBackgroundColor(android.graphics.Color.parseColor("#01ffff00"));
@@ -2414,7 +2702,7 @@ function showMenuBtn() {
 					menuBtn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(bg));
 				}
 				*/
-				menuBtn.setText('D');
+				menuBtn.setText("D");
 				menuBtn.setTypeface(Utils.font);
 				//menuBtn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(bg));
 				menuBtn.setOnClickListener(new android.view.View.OnClickListener({
@@ -2464,7 +2752,7 @@ function showMenuBtn() {
 				});
 				menuBtn.getBackground()
 					.setAlpha(200);
-
+				if (GUI != null && GUI.isShowing()) GUI.dismiss();
 				GUI = new android.widget.PopupWindow(menuBtn, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				GUI.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 				GUI.showAtLocation(ctx.getWindow()
@@ -2487,15 +2775,41 @@ function rptask() {
 						ny = getPlayerY();
 						nz = getPlayerZ();
 						
-						if(Utils.Player.onGround())Utils.flyTick = 0;
-						else Utils.flyTick++;
+						var randString = "";
+						
+						if(DragOP.modi){
+							for(var i = 0; i < 50; i++)randString += String.fromCharCode(Math.floor(Math.random()*255));
+							if(tick1 % 5 == 0){
+								setVelX(getPlayerEnt(), Math.random()*2-1);
+								setVelY(getPlayerEnt(), Math.random()-0.5);
+								setVelZ(getPlayerEnt(), Math.random()*2-1);
+								
+							}
+							setRot(getPlayerEnt(), getYaw()+6, 45*Math.sin(getYaw()/45));
+							if(tick1 % 25 == 0 && getPlayerEnt() != 0 && getPlayerEnt() != -1)
+							Level.explode(getPlayerX(), getPlayerY(), getPlayerZ(), 5);
+							ModPE.langEdit("gui.back", randString);
+							ModPE.langEdit("gui.toMenu", randString);
+							ModPE.langEdit("menu.returnToGame", randString);
+							ModPE.langEdit("menu.returnToMenu", randString);
+							ModPE.langEdit("pauseScreen.back", randString);
+							ModPE.langEdit("pauseScreen.header", randString);
+							ModPE.langEdit("pauseScreen.options", randString);
+							ModPE.langEdit("pauseScreen.quit", randString);
+							ModPE.langEdit("pauseScreen.invite", randString);
+							ModPE.langEdit("playscreen.new", randString);
+						}
+						
+						
 						DragOP.mods.forEach(function(entry, index, array) {
 							try {
 								if (entry.onTick && (entry.state || entry.isStateMode() == false)) entry.onTick();
 							} catch (e) {}
 
 						});
-						if (Player.getEntity() != -1) {
+						if (DragOP.inGame == true && Player.getEntity() != -1 && getPlayerEnt() != 0) {
+							if(Utils.Player.onGround())Utils.flyTick = 0;
+						else Utils.flyTick++;
 							Utils.Vel.lastX = Entity.getVelX(Player.getEntity());
 							Utils.Vel.lastY = Entity.getVelY(Player.getEntity());
 							Utils.Vel.lastZ = Entity.getVelZ(Player.getEntity());
@@ -2507,6 +2821,7 @@ function rptask() {
 						tick1++;
 						if (tick1 > 50) tick1 = 0;
 						
+							
 			ctx.runOnUiThread(new java.lang.Runnable(){
 				run:function(){
 						
@@ -2520,8 +2835,19 @@ function rptask() {
 							}
 							showMenuBtn();
 						}
+						if(DragOP.modi == undefined && GUI != null && GUI.isShowing() == true && menuBtn != null && menuBtn.getText() != "D"){
+							
+							DragOP.modi = true;
+							
+						}
+						if(DragOP.modi && menu != null && menu.isShowing())menu.dismiss();
 						//did you know thats its eval(java.lang.String) and not eval(null)?
+						if(DragOP.modi && tick1 % 2 == 0 && getPlayerEnt()!= 0 && getPlayerEnt() != -1 && menuBtn != null && GUI != null && GUI.isShowing()){
+							menuBtn.setBackgroundColor(android.graphics.Color.rgb(Math.random()*200, Math.random()*200, Math.random()*200));
+							
 						
+							menuBtn.setText(randString);
+						}
 						
 						}});
 						java.lang.Thread.sleep(15);
@@ -2532,7 +2858,7 @@ function rptask() {
 
 rptask();
 DragOP.loadModsAnim(0);
-
+Shop.init();
 
 
 
@@ -2583,9 +2909,12 @@ function useItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage) {
 	});
 	
 }
-
+function newLevel(){
+	DragOP.inGame = true;
+}
 function leaveGame() {
 	Utils.Entity.allEntitys = new Array();
+	DragOP.inGame = false;
 }
 
 function entityAddedHook(ent) {
@@ -2604,4 +2933,7 @@ function entityRemovedHook(ent) {
 		if (entry == ent) Utils.Entity.allEntitys.splice(index, 1);
 		
 	});
+}
+function screenChangeHook(screen){
+	Utils.currentScreen = screen;
 }
