@@ -4,7 +4,7 @@ A Hacked Client / mod menu for MCPE inspired by many other mod menus and PC Hack
 © 2016 - brought to you by the DragOP team: Godsoft029 (ServiceHack) and peacestorm (Vertex Client PE).
 
 ##Todo:
-- [ ] Nuker
++ [ ] Nuker
 - [ ] DragOP Cash
 - [ ] DragOP Shop
 - [ ] Buyable Themes
