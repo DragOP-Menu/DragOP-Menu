@@ -1885,7 +1885,7 @@ var glide = {
 		}));
 		if(Utils.bypassMode == BypassMode.MINIBOX){
 			gmSlider.setEnabled(false);
-			gmText.setText("Settings not available in Miniboc bypass mode!");
+			gmText.setText("Settings not available in MiniBox bypass mode!");
 		}
 		settings.addView(gmSlider, params);
 		settings.addView(gmText, params);
@@ -1923,7 +1923,7 @@ var glide = {
 				break;
 			case BypassMode.MINIBOX:
 				if(tick1 % 5 == 0){
-					setVelY(getPlayerEnt(), 0.035);
+					setVelY(getPlayerEnt(), 0.0375);
 					
 				}
 				if(tick1 == 0 && Utils.Player.isCollidedHorizontally())
