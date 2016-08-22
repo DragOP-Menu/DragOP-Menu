@@ -2514,7 +2514,51 @@ var nuker = {
 	}
 };
 DragOP.registerModule(nuker)
-
+var velocity = {
+	name: "Velocity",
+	desc: "Disables knockback",
+	type: ModuleType.mod,
+	state: false,
+	attackTick: 0,
+	lastHealth: 0,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onModTick: function () {
+		if(!this.state || Entity.getHealth(getPlayerEnt()) <= 0)
+			return
+		if(this.attackTick > 0)
+			this.attackTick--;
+		else
+			Entity.setImmobile(getPlayerEnt(), false);
+		
+		if(this.lastHealth > Entity.getHealth(getPlayerEnt())){
+			Entity.setImmobile(getPlayerEnt(), true);
+			this.attackTick = 2;
+		}
+			
+		this.lastHealth = Entity.getHealth(getPlayerEnt());
+	},
+	onHurt: function(att, vic, hearts){
+		if(!this.state || ( vic != getPlayerEnt()))
+			return;
+		Entity.setImmobile(getPlayerEnt(), true);
+		this.attackTick = 2;
+	},
+	onClick: function (btn) {
+		this.state = !this.state
+		this.lastHealth = Entity.getHealth(getPlayerEnt());
+	},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(velocity);
 /*
 var statehack = {
 	name: "Hack",
@@ -2530,11 +2574,12 @@ var statehack = {
 		//Call hack.onClick() to toggle
 	},
 	onTick: function () {
-		
+		if(!this.state)
+			return
 	},
 	onClick: function (btn) {this.state = !this.state},
 	onRefresh: function (btn) {
-		if(btn != null)btn.setText(DragOP.getLString(""));
+		if(btn != null)btn.setText(this.name);
 	}
 };
 	*/
@@ -3178,7 +3223,22 @@ function entityRemovedHook(ent) {
 
 	});
 }
+function entityHurtHook(att, vic, hearts){
+	DragOP.mods.forEach(function (entry, index, array) {
+		try {
+			entry.onHurt(att, vic, hearts);
+		} catch(e) {}
 
+	});
+}
+function modTick(){
+	DragOP.mods.forEach(function (entry, index, array) {
+		try {
+			entry.onModTick();
+		} catch(e) {}
+
+	});
+}
 function screenChangeHook(screen) {
 	Utils.currentScreen = screen;
 	//DragOP.ctoast(screen);
