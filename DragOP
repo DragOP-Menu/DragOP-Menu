@@ -250,7 +250,7 @@ var Utils = {
 					gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 					gl.glLoadIdentity();
 					gl.glDisable(GL10.GL_LIGHTING);
-					if(playerEsp.state == true) {
+					if(playerEsp.state == true || chesttracers.state == true) {
 						var yaw = getYaw() % 360;
 						var pitch = getPitch() % 360;
 						var eyeX = getPlayerX();
@@ -2106,11 +2106,12 @@ var nametag = {
 /*Removed nametag because of buggyness*/
 var chesttracers = {
 	name: DragOP.getLString("hacks.chestTracer"),
-	desc: "Draws a particle trail to near chests.",
+	desc: "Makes chests better visible",
 	type: ModuleType.mod,
 	state: false,
 	findTick: 0,
 	groundMode: true,
+	drawBox: false,
 	ChestScan: {
 		blocks: 0,
 		finished: false,
@@ -2152,6 +2153,19 @@ var chesttracers = {
 				v.setChecked(chesttracers.groundMode);
 			}
 		}));
+		var drawEspBox = new android.widget.CheckBox(ctx);
+		drawEspBox.setChecked(this.drawBox);
+		drawEspBox.setText("Draw ESPBox around Chests");
+		drawEspBox.setTypeface(Utils.font);
+		drawEspBox.setTextSize(dip2px(8));
+		drawEspBox.setTextColor(android.graphics.Color.BLACK);
+
+		drawEspBox.setOnClickListener(new android.view.View.OnClickListener( {
+			onClick: function (v) {
+				chesttracers.drawBox = v.isChecked();
+				v.setChecked(chesttracers.drawBox);
+			}
+		}));
 		var chestScan = new android.widget.TextView(ctx);
 		chestScan.setTypeface(Utils.font);
 		chestScan.setGravity(android.view.Gravity.CENTER);
@@ -2188,6 +2202,7 @@ var chesttracers = {
 		settings.addView(rangeSlider, params);
 		settings.addView(rangeText, params);
 		settings.addView(groundCheck, params);
+		settings.addView(drawEspBox, params);
 		settings.addView(chestScan, params);
 		settings.addView(refresh, params);
 		return settings;
@@ -2347,7 +2362,14 @@ var chesttracers = {
 					z /= 1.5;
 				}
 				Level.addParticle(ParticleType.flame, getPlayerX() - x, getPlayerY() - y - (chesttracers.groundMode ? 0.6 : 0), getPlayerZ() - z, -x / 3, -y / 3, -z / 3, 2);
-
+				
+			});
+		}
+	},
+	onRender: function(gl){
+		if(chesttracers.drawBox){
+			chesttracers.chests.forEach(function (entry) {
+				Utils.Render.drawBox(gl, entry[0] + 1 / 16, entry[1]+1, entry[2] + 1 / 16, 1 / 16 * 15, 0.875, 1 / 16 * 15);
 			});
 		}
 	},
