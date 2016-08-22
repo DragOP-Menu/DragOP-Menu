@@ -1774,12 +1774,16 @@ var step = {
 	}
 };
 DragOP.registerModule(step);
-
+var JesusMode = {
+	FLOAT: 0,
+	Solid: 1
+};
 var jesus = {
 	name: DragOP.getLString("hacks.jesus"),
-	desc: "Jesus used this hack 2000 years ago",
+	desc: "Jesus used this hack 2000 years ago to walk over water\nFloat: Floats over water\nSolid: Makes liquids solid",
 	type: ModuleType.mod,
 	state: false,
+	mode: JesusMode.FLOAT,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
@@ -1788,8 +1792,63 @@ var jesus = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
+	getSettingsLayout: function (params) {
+		var settings = new android.widget.LinearLayout(ctx);
+		settings.setOrientation(1);
+		var enabledGradient = new android.graphics.drawable.GradientDrawable();
+		enabledGradient.setColor(android.graphics.Color.argb(150, 0, 200, 0));
+		enabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
+		enabledGradient.setCornerRadius(dip2px(3));
+		var disabledGradient = new android.graphics.drawable.GradientDrawable();
+		disabledGradient.setColor(android.graphics.Color.argb(130, 200, 0, 0));
+		disabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
+		disabledGradient.setCornerRadius(dip2px(3));
+		var float = new android.widget.Button(ctx);
+		float.setText("Float");
+		float.setTypeface(Utils.font);
+
+		float.setBackground(this.mode == JesusMode.FLOAT ? enabledGradient : disabledGradient);
+		float.setTextColor(android.graphics.Color.BLACK);
+		float.setOnClickListener(new android.view.View.OnClickListener({
+			onClick: function (v) {
+				Block.defineLiquidBlock(8, "Water", [["still_water", 0], ["still_water", 0]], 8);
+				Block.defineLiquidBlock(10, "Lava", [["still_lava", 0], ["still_lava", 0]], 10);
+				jesus.mode = JesusMode.FLOAT;
+				float.setBackground(this.mode == JesusMode.FLOAT ? enabledGradient : disabledGradient);
+				solid.setBackground(this.mode == JesusMode.SOLID ? enabledGradient : disabledGradient);
+			}
+		}));
+		var solid = new android.widget.Button(ctx);
+		solid.setText("Solid");
+		solid.setTypeface(Utils.font);
+
+		solid.setBackground(this.mode == JesusMode.SOLID ? enabledGradient : disabledGradient);
+		solid.setTextColor(android.graphics.Color.BLACK);
+		solid.setOnClickListener(new android.view.View.OnClickListener({
+			onClick: function (v) {
+				jesus.mode = JesusMode.SOLID;
+				solid.setBackground(this.mode == JesusMode.SOLID ? enabledGradient : disabledGradient);
+				float.setBackground(this.mode == JesusMode.FLOAT ? enabledGradient : disabledGradient);
+				if(jesus.state){
+					Block.defineBlock(8, "Water", [["still_water", 0]], 8, false, 4);
+					Block.defineBlock(9, "Stationary Water", [["still_water", 0]], 9, false, 4);
+					Block.setShape(8, 0, 0, 0, 1, 0.7, 1);
+					Block.setShape(9, 0, 0, 0, 1, 0.7, 1);
+					Block.defineBlock(10, "Lava", [["still_lava", 0]], 10, false, 4);
+					Block.defineBlock(11, "Stationary Lava", [["still_lava", 0]], 11, false, 4);
+					Block.setShape(10, 0, 0, 0, 1, 0.7, 1);
+					Block.setShape(11, 0, 0, 0, 1, 0.7, 1);
+				}
+				
+				
+			}
+		}));
+		settings.addView(float, params);
+		settings.addView(solid, params);
+		return settings;
+	},
 	onTick: function () {
-		if(this.state) {
+		if(this.state && this.mode == JesusMode.FLOAT) {
 			if((getTile(getPlayerX(), getPlayerY() - 0.8, getPlayerZ() - 1) >= 8 && getTile(getPlayerX(), getPlayerY() - 0.8, getPlayerZ() - 1) <= 11)) {
 				setVelY(getPlayerEnt(), 0.2);
 			} else if((getTile(getPlayerX(), getPlayerY() - 1.3, getPlayerZ() - 1) >= 8 && getTile(getPlayerX(), getPlayerY() - 1.3, getPlayerZ() - 1) <= 11)) {
@@ -1801,6 +1860,19 @@ var jesus = {
 	},
 	onClick: function (btn) {
 		this.state = !this.state;
+		if(jesus.state && jesus.mode == JesusMode.SOLID){
+			Block.defineBlock(8, "Water", [["still_water", 0]], 8, false, 4);
+			Block.defineBlock(9, "Stationary Water", [["still_water", 0]], 9, false, 4);
+			Block.setShape(8, 0, 0, 0, 1, 0.7, 1);
+			Block.setShape(9, 0, 0, 0, 1, 0.7, 1);
+			Block.defineBlock(10, "Lava", [["still_lava", 0]], 10, false, 4);
+			Block.defineBlock(11, "Stationary Lava", [["still_lava", 0]], 11, false, 4);
+			Block.setShape(10, 0, 0, 0, 1, 0.7, 1);
+			Block.setShape(11, 0, 0, 0, 1, 0.7, 1);
+		}else{
+			Block.defineLiquidBlock(8, "Water", [["still_water", 0], ["still_water", 0]], 8);
+			Block.defineLiquidBlock(10, "Lava", [["still_lava", 0], ["still_lava", 0]], 10);
+		}
 	},
 	onRefresh: function (btn) {
 		if(btn != null)
