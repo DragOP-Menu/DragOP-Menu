@@ -1,4 +1,6 @@
-
+/*
+ * © 2016 - brought to you by the DragOP team: Godsoft029 and peacestorm.
+ */
 var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var LinearLayout = android.widget.LinearLayout;
 var GUI;
@@ -141,7 +143,8 @@ l.push(new Array()); //German
 //Multi Language Support
 var BypassMode = {
 	DEFAULT: 0,
-	LBSG: 1
+	LBSG: 1,
+	MINIBOX: 2
 };
 var SpeedMode = {
 	DEFAULT: 0,
@@ -451,7 +454,7 @@ var Utils = {
 			if(Math.round(x * 100) == 70) blockX++;
 			if(Math.round(z * 100) == 70) blockZ++;
 			//clientMessage(blockX+";"+blockZ);
-			if(getTile(blockX, getPlayerY(), blockZ) == 0 && getTile(blockX, getPlayerY() - 1, blockZ) == 0) return false;
+			if(getTile(blockX, getPlayerY(), blockZ) == 0 && getTile(blockX, getPlayerY() - 1, blockZ) == 0 && getTile(blockX, getPlayerY() - 0.5, blockZ) == 0 && getTile(blockX, getPlayerY() + 0.2, blockZ) == 0 && getTile(blockX, getPlayerY() - 1.6, blockZ) == 0) return false;
 
 			if(Block.getDestroyTime(getTile(blockX, getPlayerY() - 1, blockZ)) <= 0.1 && Block.getDestroyTime(getTile(blockX, getPlayerY(), blockZ)) <= 0.1) return false;
 
@@ -1224,6 +1227,7 @@ var bypass = {
 		lbsg.setOnClickListener(new android.view.View.OnClickListener({
 			onClick: function (v) {
 				Utils.bypassMode = BypassMode.LBSG;
+				minibox.setBackground(Utils.bypassMode == BypassMode.MINIBOX ? enabledGradient : disabledGradient);
 				lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG ? enabledGradient : disabledGradient);
 				vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT ? enabledGradient : disabledGradient);
 			}
@@ -1237,12 +1241,28 @@ var bypass = {
 		vanilla.setOnClickListener(new android.view.View.OnClickListener({
 			onClick: function (v) {
 				Utils.bypassMode = BypassMode.DEFAULT;
+				minibox.setBackground(Utils.bypassMode == BypassMode.MINIBOX ? enabledGradient : disabledGradient);
+				lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG ? enabledGradient : disabledGradient);
+				vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT ? enabledGradient : disabledGradient);
+			}
+		}));
+		var minibox = new android.widget.Button(ctx);
+		minibox.setText("MiniBoxPE Anti-Cheat");
+		minibox.setTypeface(Utils.font);
+
+		minibox.setBackground(Utils.bypassMode == BypassMode.MINIBOX ? enabledGradient : disabledGradient);
+		minibox.setTextColor(android.graphics.Color.BLACK);
+		minibox.setOnClickListener(new android.view.View.OnClickListener({
+			onClick: function (v) {
+				Utils.bypassMode = BypassMode.MINIBOX;
+				minibox.setBackground(Utils.bypassMode == BypassMode.MINIBOX ? enabledGradient : disabledGradient);
 				lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG ? enabledGradient : disabledGradient);
 				vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT ? enabledGradient : disabledGradient);
 			}
 		}));
 		settings.addView(vanilla, params);
 		settings.addView(lbsg, params);
+		settings.addView(minibox, params);
 		return settings;
 	},
 	isStateMode: function () {
@@ -1863,6 +1883,10 @@ var glide = {
 				glide.motion = pro;
 			}
 		}));
+		if(Utils.bypassMode == BypassMode.MINIBOX){
+			gmSlider.setEnabled(false);
+			gmText.setText("Settings not available in Miniboc bypass mode!");
+		}
 		settings.addView(gmSlider, params);
 		settings.addView(gmText, params);
 
@@ -1882,18 +1906,28 @@ var glide = {
 
 	},
 	onTick: function () {
-		if(this.state && Entity.getVelY(getPlayerEnt()) < 0 && !Player.isFlying() && !Utils.Player.isInWater()) {
+		if(this.state && !Player.isFlying() && !Utils.Player.isInWater()) {
 			switch(Utils.bypassMode) {
 			case BypassMode.DEFAULT:
-				setVelY(getPlayerEnt(), this.motion);
+				if(Entity.getVelY(getPlayerEnt()) < 0)
+					setVelY(getPlayerEnt(), this.motion);
 				break;
 			case BypassMode.LBSG:
+				if(Entity.getVelY(getPlayerEnt()) < 0)
 				if(Utils.flyTick < 680) {
 					if(tick1 % 2 == 0) setVelY(getPlayerEnt(), -0.03);
 					else setVelY(getPlayerEnt(), -0.1);
 				} else {
 					setVelY(getPlayerEnt(), -3);
 				}
+				break;
+			case BypassMode.MINIBOX:
+				if(tick1 % 5 == 0){
+					setVelY(getPlayerEnt(), 0.035);
+					
+				}
+				if(tick1 == 0 && Utils.Player.isCollidedHorizontally())
+					Entity.setPositionRelative(getPlayerEnt(), 0, 1, 0);
 				break;
 			}
 
