@@ -250,7 +250,7 @@ var Utils = {
 					gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 					gl.glLoadIdentity();
 					gl.glDisable(GL10.GL_LIGHTING);
-					if(true) {
+					if(getPlayerEnt() < -1 && getPlayerEnt() > 1) {
 						var yaw = getYaw() % 360;
 						var pitch = getPitch() % 360;
 						var eyeX = getPlayerX();
@@ -2930,6 +2930,47 @@ var tracers = {
 	}
 };
 DragOP.registerModule(tracers);
+var fastbridge = {
+	name: "FastBridge",
+	desc: "You will be teleport to the block you placed",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onUseItem: function(x, y, z, itemid, blockid, side, itemDamage, blockDamage){
+		if(!this.state)
+			return;
+		
+		switch(side){
+		case BlockFace.NORTH:
+			Entity.setPositionRelative(getPlayerEnt(), 0, 0, -1);
+			break;
+		case BlockFace.SOUTH:
+			Entity.setPositionRelative(getPlayerEnt(), 0, 0, 1);
+			break;
+		case BlockFace.WEST:
+			Entity.setPositionRelative(getPlayerEnt(), -1, 0, 0);
+			break;
+		case BlockFace.EAST:
+			Entity.setPositionRelative(getPlayerEnt(), 1, 0, 0);
+			break;
+		case BlockFace.UP:
+			Entity.setPositionRelative(getPlayerEnt(), 0, 1, 0);
+			break;
+		}
+	},
+	onClick: function (btn) {this.state = !this.state},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(fastbridge);
 /*
 var statehack = {
 	name: "Hack",
