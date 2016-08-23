@@ -280,12 +280,14 @@ var Utils = {
 				run: function () {
 					Utils.Render.glSurface = new android.opengl.GLSurfaceView(ctx);
 					Utils.Render.glSurface.setZOrderOnTop(true);
+					
+					
 					Utils.Render.glSurface.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 					Utils.Render.glSurface.getHolder().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
 					Utils.Render.glSurface.setRenderer(Utils.Render.renderer);
+					Utils.Render.glSurface.setRenderMode(0);
 					new java.lang.Thread(new java.lang.Runnable( {
 						run: function() {
-							java.lang.Thread.sleep(1000);
 							ctx.runOnUiThread(new java.lang.Runnable( {
 								run: function () {
 									ctx.getWindow().getDecorView().addView(Utils.Render.glSurface);
@@ -2907,15 +2909,18 @@ var tracers = {
 		if(!this.state)
 			return
 		var all = Utils.Entity.getAll();
+		var px = getPlayerX();
+		var py = getPlayerY();
+		var pz = getPlayerZ();
 		all.forEach(function(entry){
-			var x = Entity.getX(entry) - getPlayerX();
-			var y = Entity.getY(entry) - getPlayerY();
-			var z = Entity.getZ(entry) - getPlayerZ();
+			var x = Entity.getX(entry) - px;
+			var y = Entity.getY(entry) - py;
+			var z = Entity.getZ(entry) - pz;
 
 			var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
 			
 			if(dist <= 200 && dist > 0.1)
-				Utils.Render.drawLine(gl, getPlayerX(), getPlayerY()+0.8, getPlayerZ(), Entity.getX(entry), Entity.getY(entry)+1, Entity.getZ(entry));
+				Utils.Render.drawLine(gl, px,py+0.8, pz, Entity.getX(entry), Entity.getY(entry)+1, Entity.getZ(entry));
 		});
 		
 	},
@@ -3451,8 +3456,8 @@ function rptask() {
 					ModPE.langEdit("pauseScreen.invite", randString);
 					ModPE.langEdit("playscreen.new", randString);
 				}
-
-
+				if(Utils.Render.glSurface != null)
+					Utils.Render.glSurface.requestRender();
 				DragOP.mods.forEach(function (entry, index, array) {
 					try {
 						if(entry.onTick && (entry.state || entry.isStateMode() == false)) entry.onTick();
