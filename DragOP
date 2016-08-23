@@ -250,29 +250,34 @@ var Utils = {
 					gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 					gl.glLoadIdentity();
 					gl.glDisable(GL10.GL_LIGHTING);
-					if(getPlayerEnt() < -1 && getPlayerEnt() > 1) {
-						var yaw = getYaw() % 360;
-						var pitch = getPitch() % 360;
-						var eyeX = getPlayerX();
-						var eyeY = getPlayerY() + 1;
-						var eyeZ = getPlayerZ();
+					if(playerEsp.state || chesttracers.state || tracers.state) {
+						try{
+							var yaw = getYaw() % 360;
+							var pitch = getPitch() % 360;
+							var eyeX = getPlayerX();
+							var eyeY = getPlayerY() + 1;
+							var eyeZ = getPlayerZ();
 
-						var dCenterX = Math.sin(yaw / 180 * Math.PI);
-						var dCenterZ = Math.cos(yaw / 180 * Math.PI);
-						var dCenterY = Math.sqrt(dCenterX * dCenterX + dCenterZ * dCenterZ) * Math.tan((pitch - 180) / 180 * Math.PI);
+							var dCenterX = Math.sin(yaw / 180 * Math.PI);
+							var dCenterZ = Math.cos(yaw / 180 * Math.PI);
+							var dCenterY = Math.sqrt(dCenterX * dCenterX + dCenterZ * dCenterZ) * Math.tan((pitch - 180) / 180 * Math.PI);
 
-						var centerX = eyeX - dCenterX;
-						var centerZ = eyeZ + dCenterZ;
-						var centerY = eyeY - dCenterY;
+							var centerX = eyeX - dCenterX;
+							var centerZ = eyeZ + dCenterZ;
+							var centerY = eyeY - dCenterY;
 
-						android.opengl.GLU.gluLookAt(gl, eyeX, eyeY, eyeZ, centerX, centerY, centerZ, 0, 1.0, 0);
+							android.opengl.GLU.gluLookAt(gl, eyeX, eyeY, eyeZ, centerX, centerY, centerZ, 0, 1.0, 0);
 
-						DragOP.mods.forEach(function (entry, index, array) {
-							try {
-								entry.onRender(gl);
-								//gl.glTranslatef(0,0,0);
-							} catch(e) {}
-						});
+							DragOP.mods.forEach(function (entry, index, array) {
+								try {
+									entry.onRender(gl);
+									//gl.glTranslatef(0,0,0);
+								} catch(e) {}
+							});
+						}catch(e){
+							DragOP.ctoast("RenderProblem: "+e);
+						}
+						
 					}
 				}
 			});
@@ -2433,7 +2438,7 @@ var chesttracers = {
 		}
 	},
 	onRender: function(gl){
-		if(chesttracers.drawBox){
+		if(this.state && chesttracers.drawBox){
 			chesttracers.chests.forEach(function (entry) {
 				Utils.Render.drawBox(gl, entry[0] + 1 / 16, entry[1]+1, entry[2] + 1 / 16, 1 / 16 * 15, 0.875, 1 / 16 * 15);
 			});
@@ -2909,6 +2914,7 @@ var tracers = {
 		if(!this.state)
 			return
 		var all = Utils.Entity.getAll();
+		var players = Server.getAllPlayers();
 		var px = getPlayerX();
 		var py = getPlayerY();
 		var pz = getPlayerZ();
@@ -2922,7 +2928,16 @@ var tracers = {
 			if(dist <= 200 && dist > 0.1)
 				Utils.Render.drawLine(gl, px,py+0.8, pz, Entity.getX(entry), Entity.getY(entry)+1, Entity.getZ(entry));
 		});
-		
+		players.forEach(function(entry){
+			var x = Entity.getX(entry) - px;
+			var y = Entity.getY(entry) - py;
+			var z = Entity.getZ(entry) - pz;
+
+			var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+			
+			if(dist <= 200 && dist > 0.1)
+				Utils.Render.drawLine(gl, px,py+0.8, pz, Entity.getX(entry), Entity.getY(entry)+1, Entity.getZ(entry));
+		});
 	},
 	onClick: function (btn) {this.state = !this.state},
 	onRefresh: function (btn) {
