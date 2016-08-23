@@ -2701,6 +2701,7 @@ var webbrowser = {
 		browser: null,
 		view: null,
 		address: null,
+		lastUrl: "",
 		showBrowser: function(){
 			ctx.runOnUiThread(new java.lang.Runnable({
 				run:function(){
@@ -2710,8 +2711,10 @@ var webbrowser = {
 				    webbrowser.view.setWebChromeClient(new android.webkit.WebChromeClient());
 				    webbrowser.view.setWebViewClient(new android.webkit.WebViewClient());
 				    webbrowser.view.setId(502103);
-				    webbrowser.view.loadUrl("https://www.google.com");
-				    
+				    if(webbrowser.lastUrl == "")
+				    	webbrowser.view.loadUrl("https://www.google.com");
+				    else
+				    	webbrowser.view.loadUrl(webbrowser.lastUrl);
 					webbrowser.address = new android.widget.EditText(ctx);
 					webbrowser.address.setHint("Enter URL or search something");
 					webbrowser.address.setId(598258);
@@ -2753,6 +2756,7 @@ var webbrowser = {
 					webbrowser.browser.setContentView(layout1);
 					webbrowser.browser.setOnDismissListener(new android.content.DialogInterface.OnDismissListener( {
 						onDismiss: function () {
+							webbrowser.lastUrl = webbrowser.view.getUrl();
 							showMenu();
 						}
 					}));
@@ -2764,18 +2768,7 @@ var webbrowser = {
 						.getDefaultDisplay()
 						.getMetrics(display);
 					window.setLayout(mwidth, display.heightPixels);
-					var thread = new java.lang.Thread(new java.lang.Runnable({
-						run:function(){
-							while(webbrowser.browser != null && webbrowser.browser.isShowing()){
-								ctx.runOnUiThread(new java.lang.Runnable({
-									run:function(){
-										webbrowser.address.setText(webbrowser.view.getUrl());
-									}
-								}));
-								java.lang.Thread.sleep(250);
-							}
-						}
-					}));
+					
 				}
 			}));
 		},
