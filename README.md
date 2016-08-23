@@ -9,7 +9,7 @@ A Hacked Client / mod menu for MCPE inspired by many other mod menus and PC Hack
 - [ ] DragOP Shop
 - [ ] Buyable Themes
 - [ ] Entity Tracer
-- [ ] Web browser
+- [x] Web browser
 
 
 Hey, why the fuck are you looking here?  
