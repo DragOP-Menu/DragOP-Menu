@@ -2695,99 +2695,177 @@ var velocity = {
 };
 DragOP.registerModule(velocity);
 var webbrowser = {
-		name: "Webbrowser",
-		desc: "Opens the webbrowser",
-		type: ModuleType.special,
-		browser: null,
-		view: null,
-		address: null,
-		lastUrl: "",
-		showBrowser: function(){
-			ctx.runOnUiThread(new java.lang.Runnable({
-				run:function(){
-					var layout1 = new android.widget.RelativeLayout(ctx);
-					webbrowser.view = new android.webkit.WebView(ctx);
-				    webbrowser.view.getSettings().setJavaScriptEnabled(true);
-				    webbrowser.view.setWebChromeClient(new android.webkit.WebChromeClient());
-				    webbrowser.view.setWebViewClient(new android.webkit.WebViewClient());
-				    webbrowser.view.setId(502103);
-				    if(webbrowser.lastUrl == "")
-				    	webbrowser.view.loadUrl("https://www.google.com");
-				    else
-				    	webbrowser.view.loadUrl(webbrowser.lastUrl);
-					webbrowser.address = new android.widget.EditText(ctx);
-					webbrowser.address.setHint("Enter URL or search something");
-					webbrowser.address.setId(598258);
-					//webbrowser.address.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
-					webbrowser.address.setSingleLine(true);
-					webbrowser.address.setText(webbrowser.view.getUrl());
-					webbrowser.address.setOnKeyListener(new android.view.View.OnKeyListener({
-						onKey: function(view, keycode, event) {
-							if(keycode == android.view.KeyEvent.KEYCODE_ENTER && event.getAction() == android.view.KeyEvent.ACTION_DOWN){
-								var url = webbrowser.address.getText().toString();
-								if(android.util.Patterns.WEB_URL.matcher(url).matches()){
-									if(url.indexOf("http") == -1)
-										url = "http://" + url;
-									webbrowser.view.loadUrl(url);
-								}else{
-									webbrowser.view.loadUrl("https://www.google.de/#q="+(new String(url).replace(new RegExp(" ", 'g'),"+")));
-								}
-								
-								
-								return true;
-							}
+	name: "Webbrowser",
+	desc: "Opens the webbrowser",
+	type: ModuleType.special,
+	browser: null,
+	view: null,
+	address: null,
+	lastUrl: "",
+	showBrowser: function(){
+		ctx.runOnUiThread(new java.lang.Runnable({
+			run:function(){
+				var layout1 = new android.widget.RelativeLayout(ctx);
+				webbrowser.view = new android.webkit.WebView(ctx);
+			    webbrowser.view.getSettings().setJavaScriptEnabled(true);
+			    webbrowser.view.setWebChromeClient(new android.webkit.WebChromeClient());
+			    webbrowser.view.setWebViewClient(new android.webkit.WebViewClient());
+			    webbrowser.view.setId(502103);
+			    if(webbrowser.lastUrl == "")
+			    	webbrowser.view.loadUrl("https://www.google.com");
+			    else
+			    	webbrowser.view.loadUrl(webbrowser.lastUrl);
+				webbrowser.address = new android.widget.EditText(ctx);
+				webbrowser.address.setHint("Enter URL or search something");
+				webbrowser.address.setId(598258);
+				//webbrowser.address.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
+				webbrowser.address.setSingleLine(true);
+				webbrowser.address.setText(webbrowser.view.getUrl());
+				webbrowser.address.setOnKeyListener(new android.view.View.OnKeyListener({
+					onKey: function(view, keycode, event) {
+						if(keycode == android.view.KeyEvent.KEYCODE_ENTER && event.getAction() == android.view.KeyEvent.ACTION_DOWN){
+							var url = webbrowser.address.getText().toString();
+							if(android.util.Patterns.WEB_URL.matcher(url).matches()){
+								if(url.indexOf("http") == -1)
+									url = "http://" + url;
+								webbrowser.view.loadUrl(url);
+							}else{
+								webbrowser.view.loadUrl("https://www.google.de/#q="+(new String(url).replace(new RegExp(" ", 'g'),"+")));
+							}	
 							return true;
 						}
-					}));
-					var param = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-					param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
-					param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
-					param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
-					layout1.addView(webbrowser.address, param);
-					param = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-					param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
-					param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
-					param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
-					param.addRule(android.widget.RelativeLayout.BELOW, webbrowser.address.getId());
-					layout1.addView(webbrowser.view, param);
-					webbrowser.browser = new android.app.Dialog(ctx);
-					webbrowser.browser.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
-					webbrowser.browser.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-					webbrowser.browser.setContentView(layout1);
-					webbrowser.browser.setOnDismissListener(new android.content.DialogInterface.OnDismissListener( {
-						onDismiss: function () {
-							webbrowser.lastUrl = webbrowser.view.getUrl();
-							showMenu();
-						}
-					}));
-					webbrowser.browser.show();
-					var window = webbrowser.browser.getWindow();
-					var display = new android.util.DisplayMetrics();
-					com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
-						.getWindowManager()
-						.getDefaultDisplay()
-						.getMetrics(display);
-					window.setLayout(mwidth, display.heightPixels);
-					
-				}
-			}));
-		},
-		isStateMode: function () {
-			return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
-			//Call hack.state = !hack.state; to toggle 
-		},
-		isToggleAble: function () {
-			return true;
-		},
-		onClick: function (btn) {
-			menu.dismiss();
-			this.showBrowser();
-		},
-		onRefresh: function (btn) {
-			if(btn != null)btn.setText(this.name);
-		}
-	};
+						return true;
+					}
+				}));
+				var param = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				layout1.addView(webbrowser.address, param);
+				param = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				param.addRule(android.widget.RelativeLayout.BELOW, webbrowser.address.getId());
+				layout1.addView(webbrowser.view, param);
+				webbrowser.browser = new android.app.Dialog(ctx);
+				webbrowser.browser.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+				webbrowser.browser.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				webbrowser.browser.setContentView(layout1);
+				webbrowser.browser.setOnDismissListener(new android.content.DialogInterface.OnDismissListener( {
+					onDismiss: function () {
+						webbrowser.lastUrl = webbrowser.view.getUrl();
+						showMenu();
+					}
+				}));
+				webbrowser.browser.show();
+				var window = webbrowser.browser.getWindow();
+				var display = new android.util.DisplayMetrics();
+				com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+					.getWindowManager()
+					.getDefaultDisplay()
+					.getMetrics(display);
+				window.setLayout(mwidth, display.heightPixels);			
+			}
+		}));
+	},
+	isStateMode: function () {
+		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true;
+	},
+	onClick: function (btn) {
+		menu.dismiss();
+		this.showBrowser();
+	},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
 DragOP.registerModule(webbrowser);
+var items = "Ww0KICB7DQogICAgIm5hbWUiOiAiYXBwbGUiLA0KICAgICJpZCI6IDQsDQogICAgImljb24iOiAiYXBwbGUiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDQsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJsb3ciLA0KICAgICAgImlzX21lYXQiOiBmYWxzZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImdvbGRlbl9hcHBsZSIsDQogICAgImlkIjogNjYsDQogICAgImljb24iOiAiYXBwbGVfZ29sZGVuIiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQogICAgInN0YWNrX2J5X2RhdGEiOiB0cnVlLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJmb2lsIjogZmFsc2UsDQogICAgImhvdmVyX3RleHRfY29sb3IiOiAiYXF1YSIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA0LCANCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInN1cGVybmF0dXJhbCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlLCANCiAgICAgICJlZmZlY3RzIjogWw0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAicmVnZW5lcmF0aW9uIiwNCiAgICAgICAgICAiY2hhbmNlIjogMS4wLA0KICAgICAgICAgICJkdXJhdGlvbiI6IDUsDQogICAgICAgICAgImFtcGxpZmllciI6IDENCiAgICAgICAgfSwNCiAgICAgICAgew0KICAgICAgICAgICJuYW1lIjogImFic29ycHRpb24iLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMTIwLCANCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9DQogICAgICBdLA0KICAgICAgImVuY2hhbnRlZF9lZmZlY3RzIjogWw0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAicmVnZW5lcmF0aW9uIiwNCiAgICAgICAgICAiY2hhbmNlIjogMC42NiwNCiAgICAgICAgICAiZHVyYXRpb24iOiAzMCwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogNA0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiYWJzb3JwdGlvbiIsDQogICAgICAgICAgImNoYW5jZSI6IDAuNjYsDQogICAgICAgICAgImR1cmF0aW9uIjogMTIwLCANCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAicmVzaXN0YW5jZSIsIA0KICAgICAgICAgICJjaGFuY2UiOiAwLjY2LA0KICAgICAgICAgICJkdXJhdGlvbiI6IDMwMCwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiZmlyZV9yZXNpc3RhbmNlIiwNCiAgICAgICAgICAiY2hhbmNlIjogMC42NiwNCiAgICAgICAgICAiZHVyYXRpb24iOiAzMDAsDQogICAgICAgICAgImFtcGxpZmllciI6IDANCiAgICAgICAgfQ0KICAgICAgXQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImFwcGxlRW5jaGFudGVkIiwgDQogICAgImlkIjogMjEwLA0KICAgICJpY29uIjogImFwcGxlX2dvbGRlbiIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KICAgICJoYW5kX2VxdWlwcGVkIjogZmFsc2UsDQogICAgInN0YWNrX2J5X2RhdGEiOiB0cnVlLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJmb2lsIjogdHJ1ZSwNCiAgICAiaG92ZXJfdGV4dF9jb2xvciI6ICJsaWdodF9wdXJwbGUiLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogNCwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInN1cGVybmF0dXJhbCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlLA0KICAgICAgImVmZmVjdHMiOiBbDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJyZWdlbmVyYXRpb24iLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMzAsDQogICAgICAgICAgImFtcGxpZmllciI6IDQNCiAgICAgICAgfSwNCiAgICAgICAgew0KICAgICAgICAgICJuYW1lIjogImFic29ycHRpb24iLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMTIwLCANCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAicmVzaXN0YW5jZSIsIA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMzAwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0sDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJmaXJlX3Jlc2lzdGFuY2UiLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMzAwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0NCiAgICAgIF0NCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJtdXNocm9vbV9zdGV3IiwNCiAgICAiaWQiOiAyNiwNCiAgICAiaWNvbiI6ICJtdXNocm9vbV9zdGV3IiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQogICAgIm1heF9zdGFja19zaXplIjogMSwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDYsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiBmYWxzZSwNCiAgICAgICJ1c2luZ19jb252ZXJ0c190byI6ICJpdGVtLmJvd2wiDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiYnJlYWQiLA0KICAgICJpZCI6IDQxLA0KICAgICJpY29uIjogImJyZWFkIiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA1LA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibm9ybWFsIiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJwb3JrY2hvcCIsDQogICAgImlkIjogNjMsDQogICAgImljb24iOiAicG9ya2Nob3BfcmF3IiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDMsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJsb3ciLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicG9ya2Nob3BfY29va2VkIiwNCiAgICAiaWQiOiA2NCwNCiAgICAiaWNvbiI6ICJwb3JrY2hvcF9jb29rZWQiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDgsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJnb29kIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImZpc2giLA0KICAgICJpZCI6IDkzLA0KICAgICJpY29uIjogImZpc2giLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJtYXhfZGFtYWdlIjogMCwNCiAgICAic3RhY2tlZF9ieV9kYXRhIjogdHJ1ZSwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDIsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJwb29yIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogInNhbG1vbiIsDQogICAgImlkIjogMjA0LA0KICAgICJpY29uIjogInNhbG1vbiIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQogICAgIm1heF9kYW1hZ2UiOiAwLA0KICAgICJzdGFja2VkX2J5X2RhdGEiOiB0cnVlLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogMiwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInBvb3IiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY2xvd25maXNoIiwNCiAgICAiaWQiOiAyMDUsDQogICAgImljb24iOiAiY2xvd25maXNoIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCiAgICAibWF4X2RhbWFnZSI6IDAsDQogICAgInN0YWNrZWRfYnlfZGF0YSI6IHRydWUsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAxLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAicG9vciIsDQogICAgICAiaXNfbWVhdCI6IHRydWUNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJwdWZmZXJmaXNoIiwNCiAgICAiaWQiOiAyMDYsDQogICAgImljb24iOiAicHVmZmVyZmlzaCIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQogICAgIm1heF9kYW1hZ2UiOiAwLA0KICAgICJzdGFja2VkX2J5X2RhdGEiOiB0cnVlLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogMSwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInBvb3IiLA0KICAgICAgImlzX21lYXQiOiB0cnVlLA0KICAgICAgImVmZmVjdHMiOiBbDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJwb2lzb24iLA0KICAgICAgICAgICJkdXJhdGlvbiI6IDYwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAzDQogICAgICAgIH0sDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJuYXVzZWEiLCANCiAgICAgICAgICAiZHVyYXRpb24iOiAxNSwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogMQ0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiaHVuZ2VyIiwNCiAgICAgICAgICAiZHVyYXRpb24iOiAxNSwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogMg0KICAgICAgICB9DQogICAgICBdDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY29va2VkX2Zpc2giLA0KICAgICJpZCI6IDk0LA0KICAgICJpY29uIjogImNvb2tlZF9maXNoIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCiAgICAibWF4X2RhbWFnZSI6IDAsDQogICAgInN0YWNrZWRfYnlfZGF0YSI6IHRydWUsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA1LA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibm9ybWFsIiwNCiAgICAgICJlYXRfc291bmQiOiAicmFuZG9tLmJ1cnAiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY29va2VkX3NhbG1vbiIsDQogICAgImlkIjogMjA3LA0KICAgICJpY29uIjogImNvb2tlZF9zYWxtb24iLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJtYXhfZGFtYWdlIjogMCwNCiAgICAic3RhY2tlZF9ieV9kYXRhIjogdHJ1ZSwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDYsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJnb29kIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImNvb2tpZSIsDQogICAgImlkIjogMTAxLA0KICAgICJpY29uIjogImNvb2tpZSIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAicG9vciIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAibWVsb24iLA0KICAgICJpZCI6IDEwNCwNCiAgICAiaWNvbiI6ICJtZWxvbiIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJiZWVmIiwNCiAgICAiaWQiOiAxMDcsDQogICAgImljb24iOiAiYmVlZl9yYXciLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogMywNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogImxvdyIsDQogICAgICAiaXNfbWVhdCI6IHRydWUNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJzdGVhayIsDQogICAgImlkIjogMTA4LA0KICAgICJpY29uIjogImJlZWZfY29va2VkIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDgsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJnb29kIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImNoaWNrZW4iLA0KICAgICJpZCI6IDEwOSwNCiAgICAiaWNvbiI6ICJjaGlja2VuX3JhdyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZSwNCiAgICAgICJlZmZlY3RzIjogWw0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiaHVuZ2VyIiwNCiAgICAgICAgICAiY2hhbmNlIjogMC4zLA0KICAgICAgICAgICJkdXJhdGlvbiI6IDMwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0NCiAgICAgIF0NCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJjb29rZWRfY2hpY2tlbiIsDQogICAgImlkIjogMTEwLA0KICAgICJpY29uIjogImNoaWNrZW5fY29va2VkIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDYsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAibXV0dG9uUmF3IiwNCiAgICAiaWQiOiAxNjcsDQogICAgImljb24iOiAibXV0dG9uX3JhdyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogIm11dHRvbkNvb2tlZCIsDQogICAgImlkIjogMTY4LA0KICAgICJpY29uIjogIm11dHRvbl9jb29rZWQiLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogNiwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogImdvb2QiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicm90dGVuX2ZsZXNoIiwNCiAgICAiaWQiOiAxMTEsDQogICAgImljb24iOiAicm90dGVuX2ZsZXNoIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDQsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJwb29yIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZSwNCiAgICAgICJlZmZlY3RzIjogWw0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiaHVuZ2VyIiwNCiAgICAgICAgICAiY2hhbmNlIjogMC4zLA0KICAgICAgICAgICJkdXJhdGlvbiI6IDMwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0NCiAgICAgIF0NCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJzcGlkZXJfZXllIiwNCiAgICAiaWQiOiAxMTksDQogICAgImljb24iOiAic3BpZGVyX2V5ZSIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAiZ29vZCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlLA0KICAgICAgImVmZmVjdHMiOiBbDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJwb2lzb24iLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogNSwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9DQogICAgICBdDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY2Fycm90IiwNCiAgICAiaWQiOiAxMzUsDQogICAgImljb24iOiAiY2Fycm90IiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDMsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiBmYWxzZQ0KICAgIH0sDQogICAgInNlZWQiOiB7DQogICAgICAiY3JvcF9yZXN1bHQiOiAiY2Fycm90cyIsDQogICAgICAicGxhbnRfYXQiOiAiZmFybWxhbmQiDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicG90YXRvIiwNCiAgICAiaWQiOiAxMzYsDQogICAgImljb24iOiAicG90YXRvIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDEsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJsb3ciLA0KICAgICAgImlzX21lYXQiOiBmYWxzZQ0KICAgIH0sDQogICAgInNlZWQiOiB7DQogICAgICAiY3JvcF9yZXN1bHQiOiAicG90YXRvZXMiLA0KICAgICAgInBsYW50X2F0IjogImZhcm1sYW5kIg0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImJha2VkX3BvdGF0byIsDQogICAgImlkIjogMTM3LA0KICAgICJpY29uIjogInBvdGF0b19iYWtlZCIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA1LA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibm9ybWFsIiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJwb2lzb25vdXNfcG90YXRvIiwNCiAgICAiaWQiOiAxMzgsDQogICAgImljb24iOiAicG90YXRvX3BvaXNvbm91cyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UsDQogICAgICAiZWZmZWN0cyI6IFsNCiAgICAgICAgew0KICAgICAgICAgICJuYW1lIjogInBvaXNvbiIsDQogICAgICAgICAgImNoYW5jZSI6IDAuNiwNCiAgICAgICAgICAiZHVyYXRpb24iOiA1LA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0NCiAgICAgIF0NCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJnb2xkZW5fY2Fycm90IiwNCiAgICAiaWQiOiAxNDAsDQogICAgImljb24iOiAiY2Fycm90X2dvbGRlbiIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogNiwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInN1cGVybmF0dXJhbCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicHVtcGtpbl9waWUiLA0KICAgICJpZCI6IDE0NCwNCiAgICAiaWNvbiI6ICJwdW1wa2luX3BpZSIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA4LA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJyYWJiaXQiLA0KICAgICJpZCI6IDE1NSwNCiAgICAiaWNvbiI6ICJyYWJiaXQiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDMsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJsb3ciLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY29va2VkX3JhYmJpdCIsDQogICAgImlkIjogMTU2LA0KICAgICJpY29uIjogInJhYmJpdF9jb29rZWQiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDUsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicmFiYml0X3N0ZXciLA0KICAgICJpZCI6IDE1NywNCiAgICAiaWNvbiI6ICJyYWJiaXRfc3RldyIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJtYXhfc3RhY2tfc2l6ZSI6IDEsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAxMCwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogIm5vcm1hbCIsDQogICAgICAidXNpbmdfY29udmVydHNfdG8iOiAiYm93bCIsDQogICAgICAiaXNfbWVhdCI6IHRydWUNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJiZWV0cm9vdCIsDQogICAgImlkIjogMjAxLA0KICAgICJpY29uIjogImJlZXRyb290IiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDEsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiBmYWxzZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImJlZXRyb290X3NvdXAiLA0KICAgICJpZCI6IDIwMywNCiAgICAiaWNvbiI6ICJiZWV0cm9vdF9zb3VwIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCiAgICAibWF4X3N0YWNrX3NpemUiOiAxLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogNiwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogIm5vcm1hbCIsDQogICAgICAidXNpbmdfY29udmVydHNfdG8iOiAiYm93bCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAid2hlYXRfc2VlZHMiLCANCiAgICAiaWQiOiAzOSwNCiAgICAiaWNvbiI6ICJzZWVkc193aGVhdCIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KDQogICAgInNlZWQiOiB7DQogICAgICAiY3JvcF9yZXN1bHQiOiAid2hlYXQiLCANCiAgICAgICJwbGFudF9hdCI6ICJmYXJtbGFuZCINCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJwdW1wa2luX3NlZWRzIiwNCiAgICAiaWQiOiAxMDUsDQogICAgImljb24iOiAic2VlZHNfcHVtcGtpbiIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KDQogICAgInNlZWQiOiB7DQogICAgICAiY3JvcF9yZXN1bHQiOiAicHVtcGtpbl9zdGVtIiwNCiAgICAgICJwbGFudF9hdCI6ICJmYXJtbGFuZCINCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJtZWxvbl9zZWVkcyIsDQogICAgImlkIjogMTA2LA0KICAgICJpY29uIjogInNlZWRzX21lbG9uIiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQoNCiAgICAic2VlZCI6IHsNCiAgICAgICJjcm9wX3Jlc3VsdCI6ICJtZWxvbl9zdGVtIiwNCiAgICAgICJwbGFudF9hdCI6ICJmYXJtbGFuZCINCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJuZXRoZXJfd2FydCIsDQogICAgImlkIjogMTE2LA0KICAgICJpY29uIjogIm5ldGhlcl93YXJ0IiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQoNCiAgICAic2VlZCI6IHsNCiAgICAgICJjcm9wX3Jlc3VsdCI6ICJuZXRoZXJfd2FydCIsDQogICAgICAicGxhbnRfYXQiOiAic291bF9zYW5kIg0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImJlZXRyb290X3NlZWRzIiwNCiAgICAiaWQiOiAyMDIsDQogICAgImljb24iOiAic2VlZHNfYmVldHJvb3QiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCg0KICAgICJzZWVkIjogew0KICAgICAgImNyb3BfcmVzdWx0IjogImJlZXRyb290IiwNCiAgICAgICJwbGFudF9hdCI6ICJmYXJtbGFuZCINCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJjYW1lcmEiLA0KICAgICJpZCI6IDI0MiwNCiAgICAiaWNvbiI6ICJjYW1lcmEiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJjYW1lcmEiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAxMDAwMDAsDQogICAgImJsb2NrIjogImNhbWVyYSIsDQoNCiAgICAiY2FtZXJhIjogew0KICAgICAgImJsYWNrX2JhcnNfZHVyYXRpb24iOiAwLjIsDQogICAgICAiYmxhY2tfYmFyc19zY3JlZW5fcmF0aW8iOiAwLjA4LA0KICAgICAgInNodXR0ZXJfZHVyYXRpb24iOiAwLjIsDQogICAgICAicGljdHVyZV9kdXJhdGlvbiI6IDEuMCwNCiAgICAgICJzbGlkZV9hd2F5X2R1cmF0aW9uIjogMC4yDQoNCiAgICB9DQogIH0NCl0NCg";
+items = Utils.Base64.decode(items);
+var newStr = "", leng = 0;
+for(var i in items)
+	leng++;
+for(var i = 0; i < leng; i++)
+	newStr += String.fromCharCode(items[i]);
+items = newStr;
+var fasteat = {
+	name: "FastEat",
+	desc: "You eat faster.\nEatTime: Time in ticks you need to eat one food Item",
+	type: ModuleType.mod,
+	state: false,
+	eatTime: 4,
+	refreshFEat: function(eatTime){
+		var t = new java.lang.Thread(new java.lang.Runnable({
+			run:function(){
+				try{
+					items = new org.json.JSONArray(items.toString());
+					var curr;
+					for(var i = 0; i < items.length();i++)
+						if((curr = items.optJSONObject(i)) && curr.has("use_duration") && curr.getInt("use_duration") <= 32)
+							if(curr.put("use_duration", eatTime))
+								Item.setProperties(256+parseInt(curr.getInt("id")), curr.toString()+"");
+				}catch(e){
+					DragOP.ctoast("Error!: "+e);
+				}
+			}
+		}));
+		t.start();
+	},
+	getSettingsLayout: function (params) {
+		var settings = new android.widget.LinearLayout(ctx);
+		settings.setOrientation(1);
+		var timeText = new android.widget.TextView(ctx);
+		timeText.setText("EatTime: " + (this.eatTime));
+		timeText.setTextColor(android.graphics.Color.BLACK);
+		timeText.setTextSize(dip2px(9));
+		timeText.setGravity(android.view.Gravity.CENTER);
+		timeText.setTypeface(Utils.font);
+		var timeSlider = Utils.ModSettings.getSlider();
+		timeSlider.setMax(31);
+		//rangeSlider.setMin(1);
+		timeSlider.setProgress(this.eatTime-1);
+		timeSlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener( {
+			onProgressChanged: function (seekBar, progress, fromUser) {
+
+				timeText.setText("EatTime: " + (progress+1));
+
+			},
+			onStopTrackingTouch: function (seekbar) {
+				fasteat.eatTime = seekbar.getProgress()+1;
+				fasteat.refreshFEat(fasteat.eatTime);
+			}
+		}));
+		settings.addView(timeSlider, params);
+		settings.addView(timeText, params);
+
+
+		return settings;
+	},
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onClick: function (btn) {
+		this.state = !this.state
+		if(this.state)
+			this.refreshFEat(this.eatTime);
+		else
+			this.refreshFEat(32);
+	},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(fasteat);
 /*
 var statehack = {
 	name: "Hack",
