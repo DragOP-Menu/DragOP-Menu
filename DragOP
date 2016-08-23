@@ -1916,6 +1916,7 @@ var glide = {
 	type: ModuleType.mod,
 	state: false,
 	motion: 0.001,
+	glideGui: null,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
@@ -1965,6 +1966,41 @@ var glide = {
 
 		return settings;
 	},
+	showGui: function () {
+		ctx.runOnUiThread(new java.lang.Runnable( {
+			run: function () {
+				if(glide.glideGui == null || glide.glideGui.isShowing() == false) {
+					var glideUpBtn = new android.widget.Button(ctx);
+					glideUpBtn.setTypeface(Utils.font);
+					glideUpBtn.setText("UP");
+					glideUpBtn.getBackground().setAlpha(200);
+					glideUpBtn.setPadding(10,10,10,10);
+					glideUpBtn.setOnClickListener(new android.view.View.OnClickListener({
+						onClick: function(btn){
+							Entity.setPositionRelative(getPlayerEnt(), 0, 1.01, 0);
+						}
+					}));
+					var glideDownBtn = new android.widget.Button(ctx);
+					glideDownBtn.setTypeface(Utils.font);
+					glideDownBtn.setText("DOWN");
+					glideDownBtn.getBackground().setAlpha(200);
+					glideDownBtn.setPadding(10,10,10,10);
+					glideDownBtn.setOnClickListener(new android.view.View.OnClickListener({
+						onClick: function(btn){
+							Entity.setPositionRelative(getPlayerEnt(), 0, -1.01, 0);
+						}
+					}));
+					var layout = new android.widget.LinearLayout(ctx);
+					layout.setOrientation(1);
+					layout.addView(glideUpBtn);
+					layout.addView(glideDownBtn);
+					glide.glideGui = new android.widget.PopupWindow(layout, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+					glide.glideGui.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.RIGHT | android.view.Gravity.CENTER, 0, 0);
+				}
+			}
+		}));
+
+	},
 	goDown: function () {
 		var found = false;
 		var cord = new Array(getPlayerX(), getPlayerY(), getPlayerZ());
@@ -1978,7 +2014,7 @@ var glide = {
 
 	},
 	onTick: function () {
-		if(this.state && !Player.isFlying() && !Utils.Player.isInWater()) {
+		if(this.state && !Player.isFlying() && !Utils.Player.isInWater()) {				
 			switch(Utils.bypassMode) {
 			case BypassMode.DEFAULT:
 				if(Entity.getVelY(getPlayerEnt()) < 0)
@@ -1995,7 +2031,7 @@ var glide = {
 				break;
 			case BypassMode.MINIBOX:
 				if(tick1 % 5 == 0){
-					setVelY(getPlayerEnt(), 0.0375);
+					setVelY(getPlayerEnt(), 0.036);
 					
 				}
 				if(tick1 == 0 && Utils.Player.isCollidedHorizontally())
@@ -2007,6 +2043,10 @@ var glide = {
 	},
 	onClick: function (btn) {
 		this.state = !this.state;
+		if(!this.state && glide.glideGui != null && glide.glideGui.isShowing() != false) 
+			glide.glideGui.dismiss();
+		else if(this.state)
+			this.showGui();
 	},
 	onRefresh: function (btn) {
 		if(btn != null)
