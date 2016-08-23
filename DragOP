@@ -2629,12 +2629,13 @@ var nuker = {
 			var t = new java.lang.Thread(new java.lang.Runnable({
 				run: function(){
 					nuker.done = false;
-					for(var x = -nuker.radius; x < nuker.radius; x++) 
+					for(var x = -nuker.radius; x < nuker.radius; x++) {
+						java.lang.Thread.sleep(20);
 						for(var y = -nuker.radius; y < nuker.radius; y++)
-							for(var z = -nuker.radius; z < nuker.radius; z++){
-								java.lang.Thread.sleep(5);
+							for(var z = -nuker.radius; z < nuker.radius; z++)
 								Level.destroyBlock(Math.floor(getPlayerX() + x), Math.floor(getPlayerY() + y), Math.floor(getPlayerZ() + z), false);
-							}
+					}
+						
 					java.lang.Thread.sleep(50);
 					nuker.done = true;
 				}
@@ -2693,6 +2694,107 @@ var velocity = {
 	}
 };
 DragOP.registerModule(velocity);
+var webbrowser = {
+		name: "Webbrowser",
+		desc: "Opens the webbrowser",
+		type: ModuleType.special,
+		browser: null,
+		view: null,
+		address: null,
+		showBrowser: function(){
+			ctx.runOnUiThread(new java.lang.Runnable({
+				run:function(){
+					var layout1 = new android.widget.RelativeLayout(ctx);
+					webbrowser.view = new android.webkit.WebView(ctx);
+				    webbrowser.view.getSettings().setJavaScriptEnabled(true);
+				    webbrowser.view.setWebChromeClient(new android.webkit.WebChromeClient());
+				    webbrowser.view.setWebViewClient(new android.webkit.WebViewClient());
+				    webbrowser.view.setId(502103);
+				    webbrowser.view.loadUrl("https://www.google.com");
+				    
+					webbrowser.address = new android.widget.EditText(ctx);
+					webbrowser.address.setHint("Enter URL or search something");
+					webbrowser.address.setId(598258);
+					//webbrowser.address.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
+					webbrowser.address.setSingleLine(true);
+					webbrowser.address.setText(webbrowser.view.getUrl());
+					webbrowser.address.setOnKeyListener(new android.view.View.OnKeyListener({
+						onKey: function(view, keycode, event) {
+							if(keycode == android.view.KeyEvent.KEYCODE_ENTER && event.getAction() == android.view.KeyEvent.ACTION_DOWN){
+								var url = webbrowser.address.getText().toString();
+								if(android.util.Patterns.WEB_URL.matcher(url).matches()){
+									if(url.indexOf("http") == -1)
+										url = "http://" + url;
+									webbrowser.view.loadUrl(url);
+								}else{
+									webbrowser.view.loadUrl("https://www.google.de/#q="+(new String(url).replace(new RegExp(" ", 'g'),"+")));
+								}
+								
+								
+								return true;
+							}
+							return true;
+						}
+					}));
+					var param = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+					param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+					param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+					param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+					layout1.addView(webbrowser.address, param);
+					param = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+					param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+					param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+					param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+					param.addRule(android.widget.RelativeLayout.BELOW, webbrowser.address.getId());
+					layout1.addView(webbrowser.view, param);
+					webbrowser.browser = new android.app.Dialog(ctx);
+					webbrowser.browser.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+					webbrowser.browser.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+					webbrowser.browser.setContentView(layout1);
+					webbrowser.browser.setOnDismissListener(new android.content.DialogInterface.OnDismissListener( {
+						onDismiss: function () {
+							showMenu();
+						}
+					}));
+					webbrowser.browser.show();
+					var window = webbrowser.browser.getWindow();
+					var display = new android.util.DisplayMetrics();
+					com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+						.getWindowManager()
+						.getDefaultDisplay()
+						.getMetrics(display);
+					window.setLayout(mwidth, display.heightPixels);
+					var thread = new java.lang.Thread(new java.lang.Runnable({
+						run:function(){
+							while(webbrowser.browser != null && webbrowser.browser.isShowing()){
+								ctx.runOnUiThread(new java.lang.Runnable({
+									run:function(){
+										webbrowser.address.setText(webbrowser.view.getUrl());
+									}
+								}));
+								java.lang.Thread.sleep(250);
+							}
+						}
+					}));
+				}
+			}));
+		},
+		isStateMode: function () {
+			return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+			//Call hack.state = !hack.state; to toggle 
+		},
+		isToggleAble: function () {
+			return true;
+		},
+		onClick: function (btn) {
+			menu.dismiss();
+			this.showBrowser();
+		},
+		onRefresh: function (btn) {
+			if(btn != null)btn.setText(this.name);
+		}
+	};
+DragOP.registerModule(webbrowser);
 /*
 var statehack = {
 	name: "Hack",
