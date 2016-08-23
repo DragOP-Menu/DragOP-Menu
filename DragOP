@@ -250,7 +250,7 @@ var Utils = {
 					gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 					gl.glLoadIdentity();
 					gl.glDisable(GL10.GL_LIGHTING);
-					if(playerEsp.state == true || chesttracers.state == true) {
+					if(true) {
 						var yaw = getYaw() % 360;
 						var pitch = getPitch() % 360;
 						var eyeX = getPlayerX();
@@ -297,9 +297,9 @@ var Utils = {
 			}));
 			
 		},
-		drawBox: function (gl, x, y, z, x2, y2, z2) {
+		drawBox: function (gl, x, y, z, xsize, ysize, zsize) {
 			var GL10 = javax.microedition.khronos.opengles.GL10;
-			var size = new Array(x2, y2, z2);
+			var size = new Array(xsize, ysize, zsize);
 			var vertices = [
 				0, 0, 0,
 				size[0], 0, 0,
@@ -342,6 +342,30 @@ var Utils = {
 			gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
 			gl.glDrawElements(GL10.GL_LINES, indices.length, GL10.GL_UNSIGNED_SHORT, indexBuffer);
 			gl.glTranslatef(-x, -y, -z);
+		},
+		drawLine: function (gl, x, y, z, x2, y2, z2) {
+			var GL10 = javax.microedition.khronos.opengles.GL10;
+			var size = new Array(x2, y2, z2);
+			var vertices = [
+			                0, 0, 0,
+			                x2-x, y2-y, z2-z
+			];
+			var vertexBuffer = Utils.Render.getFloatBuffer(vertices);
+			var indices = [
+			               0, 1
+			];
+			var indexBuffer = Utils.Render.getShortBuffer(indices);
+			gl.glTranslatef(x, y, z);
+			gl.glEnable(GL10.GL_BLEND);
+			gl.glDepthMask(false);
+			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glLineWidth(4);
+			gl.glColor4f(0.0, 1.0, 0.0, 0.4);
+			gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+			gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+			gl.glDrawElements(GL10.GL_LINES, indices.length, GL10.GL_UNSIGNED_SHORT, indexBuffer);
+			gl.glTranslatef(-x, -y, -z);
+			gl.glDepthMask(true);
 		}
 	},
 	Theme: {
@@ -2866,6 +2890,41 @@ var fasteat = {
 	}
 };
 DragOP.registerModule(fasteat);
+var tracers = {
+	name: "Tracers",
+	desc: "Draws lines from you to your enemy",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onRender: function (gl) {
+		if(!this.state)
+			return
+		var all = Utils.Entity.getAll();
+		all.forEach(function(entry){
+			var x = Entity.getX(entry) - getPlayerX();
+			var y = Entity.getY(entry) - getPlayerY();
+			var z = Entity.getZ(entry) - getPlayerZ();
+
+			var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+			
+			if(dist <= 200 && dist > 0.1)
+				Utils.Render.drawLine(gl, getPlayerX(), getPlayerY()+0.8, getPlayerZ(), Entity.getX(entry), Entity.getY(entry)+1, Entity.getZ(entry));
+		});
+		
+	},
+	onClick: function (btn) {this.state = !this.state},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(tracers);
 /*
 var statehack = {
 	name: "Hack",
