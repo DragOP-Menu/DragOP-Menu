@@ -212,6 +212,7 @@ var Utils = {
 		renderer: null,
 		glSurface: null,
 		fov: 90,
+		initted: false,
 		init: function () {
 			var options = Utils.File.getTextFromFile(new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/", "options.txt"));
 
@@ -291,15 +292,10 @@ var Utils = {
 					Utils.Render.glSurface.getHolder().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
 					Utils.Render.glSurface.setRenderer(Utils.Render.renderer);
 					Utils.Render.glSurface.setRenderMode(0);
-					new java.lang.Thread(new java.lang.Runnable( {
-						run: function() {
-							ctx.runOnUiThread(new java.lang.Runnable( {
-								run: function () {
-									ctx.getWindow().getDecorView().addView(Utils.Render.glSurface);
-								}
-							}));
-						}
-					})).start();
+					
+					ctx.getWindow().getDecorView().addView(Utils.Render.glSurface);
+					
+					Utils.Render.initted = true;
 				}
 			}));
 			
@@ -2438,7 +2434,7 @@ var chesttracers = {
 		}
 	},
 	onRender: function(gl){
-		if(this.state && chesttracers.drawBox){
+		if(chesttracers.drawBox){
 			chesttracers.chests.forEach(function (entry) {
 				Utils.Render.drawBox(gl, entry[0] + 1 / 16, entry[1]+1, entry[2] + 1 / 16, 1 / 16 * 15, 0.875, 1 / 16 * 15);
 			});
@@ -2749,6 +2745,7 @@ var webbrowser = {
 				webbrowser.address = new android.widget.EditText(ctx);
 				webbrowser.address.setHint("Enter URL or search something");
 				webbrowser.address.setId(598258);
+				webbrowser.address.setTextColor(android.graphics.Color.BLACK);
 				//webbrowser.address.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
 				webbrowser.address.setSingleLine(true);
 				webbrowser.address.setText(webbrowser.view.getUrl());
@@ -2779,6 +2776,7 @@ var webbrowser = {
 				param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
 				param.addRule(android.widget.RelativeLayout.BELOW, webbrowser.address.getId());
 				layout1.addView(webbrowser.view, param);
+				layout1.setBackground(DragOP.getStyledBackground());
 				webbrowser.browser = new android.app.Dialog(ctx);
 				webbrowser.browser.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
 				webbrowser.browser.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -3512,7 +3510,7 @@ function rptask() {
 					ModPE.langEdit("pauseScreen.invite", randString);
 					ModPE.langEdit("playscreen.new", randString);
 				}
-				if(Utils.Render.glSurface != null)
+				if(Utils.Render.initted)
 					Utils.Render.glSurface.requestRender();
 				DragOP.mods.forEach(function (entry, index, array) {
 					try {
@@ -3539,16 +3537,10 @@ function rptask() {
 					run: function () {
 
 						if((GUI != null && GUI.isShowing()) && (menu != null && menu.isShowing())) GUI.dismiss();
-						if((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing()) && (dialog == null || !dialog.isShowing())) {
-							try {
-								net.zhuoweizhang.mcpelauncher.ScriptManager.isRemote = true;
-								net.zhuoweizhang.mcpelauncher.ScriptManager.setLevelFakeCallback(true, false);
-							} catch(e) {
-								//toolbox....
-							}
+						if((GUI == null || !GUI.isShowing()) && (menu == null || !menu.isShowing()) && (dialog == null || !dialog.isShowing()) && (webbrowser.browser == null || !webbrowser.browser.isShowing())) {
 							showMenuBtn();
 						}
-						if(DragOP.modi == undefined && GUI != null && GUI.isShowing() == true && menuBtn != null && menuBtn.getText() != "D") {
+						if(DragOP.modi == undefined && ((GUI != null && GUI.isShowing() == true && menuBtn != null && menuBtn.getText() != "D") || (typeof DragOP == undefined))) {
 
 							DragOP.modi = true;
 
