@@ -2965,6 +2965,114 @@ var fastbridge = {
 	}
 };
 DragOP.registerModule(fastbridge);
+var spammer = {
+	name: "Spammer",
+	desc: "Spamms a specified text"+(Utils.bypassMode!=BypassMode.DEFAULT?"":""),
+	type: ModuleType.mod,
+	state: false,
+	lastTime: 0,
+	msg: "Spam! Spam! Spam!",
+	delay: 100,
+	getSettingsLayout: function (params) {
+		var settings = new android.widget.LinearLayout(ctx);
+		settings.setOrientation(1);
+		var delayText = new android.widget.TextView(ctx);
+		delayText.setText("Delay: " + (this.delay / 1000) + " Seconds");
+		delayText.setTextColor(android.graphics.Color.BLACK);
+		delayText.setTextSize(dip2px(9));
+		delayText.setGravity(android.view.Gravity.CENTER);
+		delayText.setTypeface(Utils.font);
+		var delaySlider = Utils.ModSettings.getSlider();
+		delaySlider.setMax(50);
+		//5 seconds
+		delaySlider.setProgress(this.delay / 100);
+		delaySlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener( {
+			onProgressChanged: function (seekBar, progress, fromUser) {
+				switch(Utils.bypassMode){
+				case BypassMode.LBSG:
+					if(progress < 40){
+						progress = 40;
+						//DragOP.ctoast("Spammer delay below 4 seconds is not allowed in LBSG Bypass-Mode!");
+						seekBar.setProgress(40);
+					}
+					break;
+				case BypassMode.MINIBOX:
+					if(progress < 20){
+						progress = 20;
+						//DragOP.ctoast("Spammer delay below 2 seconds is not allowed in MiniBox Bypass-Mode!");
+						seekBar.setProgress(20);
+					}
+					break;
+				}
+				delayText.setText("Delay: " + (progress/10) + " Seconds");
+
+			},
+			onStopTrackingTouch: function (seekbar) {
+				spammer.delay = seekbar.getProgress() * 100;
+			}
+		}));
+		var spamMsg = new android.widget.EditText(ctx);
+		spamMsg.setText(this.msg);
+		spamMsg.setGravity(android.view.Gravity.CENTER);
+		spamMsg.setTypeface(Utils.font);
+		spamMsg.setHint("Text to spam");
+		spamMsg.addTextChangedListener(new android.text.TextWatcher( {
+			afterTextChanged: function (text) {
+				spammer.msg = text;
+			}
+		}));
+		settings.addView(delaySlider, params);
+		settings.addView(delayText, params);
+		settings.addView(spamMsg, params);
+
+		return settings;
+	},
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if(!this.state)
+			return
+		switch(Utils.bypassMode){
+		case BypassMode.DEFAULT:
+			if(java.lang.System.currentTimeMillis() - this.lastTime > this.delay){
+				Server.sendChat(this.msg);
+				this.lastTime = java.lang.System.currentTimeMillis();
+			}
+			break;
+		case BypassMode.LBSG:
+			if(java.lang.System.currentTimeMillis() - this.lastTime > Math.max(this.delay, 4000)){
+				var msg = this.msg;
+				msg = msg + "😀";
+				msg = msg + Math.random().toString(36).replace(/[^a-z]+/g, '');
+				Server.sendChat(msg);
+				this.lastTime = java.lang.System.currentTimeMillis();
+			}
+			break;
+		case BypassMode.MINIBOX:
+			if(java.lang.System.currentTimeMillis() - this.lastTime > Math.max(this.delay, 2050)){
+				Server.sendChat(this.msg);
+				this.lastTime = java.lang.System.currentTimeMillis();
+			}
+			break;
+		}
+		
+	},
+	onClick: function (btn) {
+		this.state = !this.state
+		this.lastTime = java.lang.System.currentTimeMillis()-10000;
+	},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+
+DragOP.registerModule(spammer);
 /*
 var statehack = {
 	name: "Hack",
