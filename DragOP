@@ -740,15 +740,20 @@ DragOP.getLString = function (code) {
 DragOP.cmsg = function (text) {
 	clientMessage(ChatColor.GREEN + "[" + ChatColor.BLUE + "Drag" + ChatColor.GOLD + "OP" + ChatColor.GREEN + "]" + ChatColor.GRAY + ": " + ChatColor.YELLOW + text);
 }
-DragOP.ctoast = function (text, showPrefix) {
+DragOP.ctoast = function (text, showPrefix, iconName) {
 	try {
 		var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function () {
 				var thetoast = android.widget.Toast.makeText(com.mojang.minecraftpe.MainActivity.currentMainActivity.get(), "" + text, android.widget.Toast.LENGTH_LONG);
 				var layout = new android.widget.LinearLayout(ctx);
+				var icon = new android.widget.ImageView(ctx);
 				var msg = new android.widget.TextView(ctx);
 				if(showPrefix || showPrefix == null) text = "DragOP: " + text;
+				if(iconName != null) {
+					icon.setImageResource(iconName);
+					layout.addView(icon);
+				}
 				msg.setText(text);
 				msg.setGravity(android.view.Gravity.CENTER);
 				msg.setTextSize(20);
@@ -800,6 +805,28 @@ DragOP.getStyledBtnBackground = function (state, toggleable) {
 	return bg;
 }
 
+DragOP.xScrolled = 0;
+DragOP.yScrolled = 0;
+
+DragOP.pxToMeter = function(px) {
+	return px * 0.000264583;
+}
+
+DragOP.getMetersScrolled = function() {
+	return DragOP.pxToMeter(DragOP.xScrolled + DragOP.yScrolled);
+}
+
+DragOP.scrollView = function(context) {
+	var scrollView = new android.widget.ScrollView(context);
+	scrollView.setOnScrollChangeListener(new android.view.View.OnScrollChangeListener() {
+		onScrollChange: function(view, scrollX, scrollY, oldScrollX, oldScrollY) {
+			DragOP.xScrolled += Math.abs(scrollX - oldScrollX);
+			DragOP.yScrolled += Math.abs(scrollY - oldScrollY);
+		}
+	});
+	return scrollView;
+}
+
 DragOP.showModDialog = function (mod) {
 	ctx.runOnUiThread(new java.lang.Runnable( {
 		run: function () {
@@ -811,7 +838,7 @@ DragOP.showModDialog = function (mod) {
 					.getMetrics(display);
 				var content = new android.widget.RelativeLayout(ctx);
 				content.setId(9472729);
-				var contentScroll = new android.widget.ScrollView(ctx);
+				var contentScroll = new DragOP.scrollView(ctx);
 				contentScroll.setId(492628);
 				//default content
 				var modTitle = new android.widget.TextView(ctx);
@@ -997,7 +1024,7 @@ var friendMgr = {
 					var content = new android.widget.LinearLayout(ctx);
 					content.setId(9472729);
 					content.setOrientation(1);
-					var contentScroll = new android.widget.ScrollView(ctx);
+					var contentScroll = new DragOP.scrollView(ctx);
 					contentScroll.setId(492628);
 
 					FriendManager.loadFromFile();
@@ -3327,7 +3354,7 @@ DragOP.generateMenu = function (keyword) {
 		}
 	});
 	if(currow != null) lay.addView(currow);
-	var sc = new android.widget.ScrollView(ctx);
+	var sc = new DragOP.scrollView(ctx);
 	sc.addView(lay);
 	return sc;
 }
@@ -3619,6 +3646,10 @@ function rptask() {
 				Utils.Pos.lastX = getPlayerX();
 				Utils.Pos.lastY = getPlayerY();
 				Utils.Pos.lastZ = getPlayerZ();
+				
+				if(DragOP.getMetersScrolled() >= 1000) {
+					DragOP.ctoast("Achievement get: Scroll 1 km", true, android.R.drawable.star_big_off);
+				}
 
 				tick1++;
 				if(tick1 > 50) tick1 = 0;
@@ -3714,6 +3745,7 @@ function useItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage) {
 
 function newLevel() {
 	DragOP.inGame = true;
+	//DEBUG: DragOP.ctoast("Achievement get: Scroll 1 km", true, android.R.drawable.star_big_off);
 }
 
 function leaveGame() {
