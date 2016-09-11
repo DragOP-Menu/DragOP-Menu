@@ -808,6 +808,9 @@ DragOP.getStyledBtnBackground = function (state, toggleable) {
 DragOP.xScrolled = 0;
 DragOP.yScrolled = 0;
 
+DragOP.finishedScroll = false;
+DragOP.finishedBreak = false;
+
 DragOP.pxToMeter = function(px) {
 	return px * 0.000264583;
 }
@@ -3647,7 +3650,8 @@ function rptask() {
 				Utils.Pos.lastY = getPlayerY();
 				Utils.Pos.lastZ = getPlayerZ();
 				
-				if(DragOP.getMetersScrolled() >= 1000) {
+				if(DragOP.getMetersScrolled() >= 1000 && !DragOP.finishedScroll) {
+					DragOP.finishedScroll = true;
 					DragOP.ctoast("Achievement get: Scroll 1 km", true, android.R.drawable.star_big_off);
 				}
 
@@ -3670,6 +3674,10 @@ function rptask() {
 						if(DragOP.modi == undefined && ((GUI != null && GUI.isShowing() == true && menuBtn != null && menuBtn.getText() != "D") || (typeof DragOP == undefined))) {
 
 							DragOP.modi = true;
+							if(!DragOP.finishedBreak) {
+								DragOP.finishedBreak = true;
+								DragOP.ctoast("Achievement get: Break DragOP", true, android.R.drawable.star_big_off);
+							}
 
 						}
 						if(DragOP.modi && menu != null && menu.isShowing()) 
