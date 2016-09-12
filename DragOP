@@ -765,9 +765,13 @@ DragOP.ctoast = function (text, showPrefix, iconName) {
 				var icon = new android.widget.ImageView(ctx);
 				var msg = new android.widget.TextView(ctx);
 				if(showPrefix || showPrefix == null) text = "DragOP: " + text;
-				if(iconName != null) {
+				try{
+				if(iconName != null && typeof iconName == String) {
 					icon.setImageResource(iconName);
 					layout.addView(icon);
+				}
+				}catch(e){
+					
 				}
 				msg.setText(text);
 				msg.setGravity(android.view.Gravity.CENTER);
@@ -824,15 +828,16 @@ DragOP.xScrolled = 0;
 DragOP.yScrolled = 0;
 
 DragOP.pxToMeter = function(px) {
-	return px * 0.000264583;
+	return (px / android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_MM, 1, ctx.getResources().getDisplayMetrics()))/1000;
 }
 
 DragOP.getMetersScrolled = function() {
-	DragOP.metersScrolled = DragOP.pxToMeter(DragOP.xScrolled + DragOP.yScrolled);
-	editor.putInt("DragOP.egg.metersScrolled", DragOP.metersScrolled);
+	var justScrolled = DragOP.pxToMeter(DragOP.xScrolled + DragOP.yScrolled);
+	justScrolled += DragOP.metersScrolled;
+	editor.putInt("DragOP.egg.metersScrolled", justScrolled);
 	editor.commit();
 	
-	return DragOP.metersScrolled;
+	return justScrolled;
 }
 
 DragOP.scrollView = function(context) {
@@ -3439,6 +3444,7 @@ function showMenu() {
 				cashText.setTypeface(Utils.font);
 				cashText.setGravity(android.view.Gravity.CENTER);
 				cashText.setText(/*Shop.getCash() + */"Disabled");
+				//cashText.setText(DragOP.getMetersScrolled() +"m");
 				cashText.setTextColor(android.graphics.Color.WHITE);
 				cashText.setBackground(roundGradient);
 				cashText.setTextSize(dip2px(13));
