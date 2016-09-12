@@ -766,7 +766,7 @@ DragOP.ctoast = function (text, showPrefix, iconName) {
 				var msg = new android.widget.TextView(ctx);
 				if(showPrefix || showPrefix == null) text = "DragOP: " + text;
 				try{
-				if(iconName != null && typeof iconName == String) {
+				if(iconName != null) {
 					icon.setImageResource(iconName);
 					layout.addView(icon);
 				}
