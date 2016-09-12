@@ -2974,7 +2974,7 @@ var tracers = {
 DragOP.registerModule(tracers);
 var fastbridge = {
 	name: "FastBridge",
-	desc: "You will be teleport to the block you placed",
+	desc: "You will be teleported to the block you placed",
 	type: ModuleType.mod,
 	state: false,
 	isStateMode: function () {
@@ -3018,7 +3018,7 @@ var fastbridge = {
 DragOP.registerModule(fastbridge);
 var spammer = {
 	name: "Spammer",
-	desc: "Spamms a specified text"+(Utils.bypassMode!=BypassMode.DEFAULT?"":""),
+	desc: "Spams a specified text"+(Utils.bypassMode!=BypassMode.DEFAULT?"":""),
 	type: ModuleType.mod,
 	state: false,
 	lastTime: 0,
@@ -3124,6 +3124,41 @@ var spammer = {
 };
 
 DragOP.registerModule(spammer);
+var autowalk = {
+	name: "AutoWalk",
+	desc: "Makes you walk automatically.",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function(){
+		if(!this.state)
+			return;
+		var vector = new Array();
+		var yaw = (getYaw(getPlayerEnt()) + 90) * (Math.PI / 180);
+		var pitch = 0;
+		vector[0] = Math.cos(yaw) * Math.cos(pitch);
+		vector[1] = Math.sin(getPitch(getPlayerEnt()));
+		vector[2] = Math.sin(yaw) * Math.cos(pitch);
+		Entity.setVelX(getPlayerEnt(), vector[0] * 0.2);
+		if(Player.isFlying()) {
+			Entity.setVelY(getPlayerEnt(), vector[1] * 0.2);
+		}
+		Entity.setVelZ(getPlayerEnt(), vector[2] * 0.2);
+		//TODO: Fix flying compatibility
+	},
+	onClick: function (btn) {this.state = !this.state},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(autowalk);
 /*
 var statehack = {
 	name: "Hack",
