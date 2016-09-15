@@ -842,12 +842,38 @@ DragOP.getMetersScrolled = function() {
 
 DragOP.scrollView = function(context) {
 	var scrollView = new android.widget.ScrollView(context);
-	scrollView.setOnScrollChangeListener(new android.view.View.OnScrollChangeListener() {
+	/*var listener = new android.view.ViewTreeObserver.OnScrollChangedListener({
+		onScrollChanged: function(){
+			DragOP.ctoast("Changing");
+		}
+	});
+	var observer;
+	scrollView.setOnTouchListener (new android.view.View.OnTouchListener (){
+		onTouch: function ( v, event){
+			if (observer == null) {
+            observer = v.getViewTreeObserver();
+            observer.addOnScrollChangedListener(listener);
+        }
+        else if (!observer.isAlive()) {
+            observer.removeOnScrollChangedListener(listener);
+            observer = v.getViewTreeObserver();
+            observer.addOnScrollChangedListener(onScrollChangedListener);
+        }
+
+        return false;
+		}
+	});*/
+	try {
+		if (android.os.Build.VERSION.SDK_INT > 22)
+ scrollView.setOnScrollChangeListener(new android.view.View.OnScrollChangeListener() {
 		onScrollChange: function(view, scrollX, scrollY, oldScrollX, oldScrollY) {
 			DragOP.xScrolled += Math.abs(scrollX - oldScrollX);
 			DragOP.yScrolled += Math.abs(scrollY - oldScrollY);
 		}
 	});
+	}catch(e){
+		
+	}
 	return scrollView;
 }
 
