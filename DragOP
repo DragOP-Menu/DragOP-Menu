@@ -3170,7 +3170,7 @@ var autowalk = {
 		var yaw = (getYaw(getPlayerEnt()) + 90) * (Math.PI / 180);
 		var pitch = 0;
 		vector[0] = Math.cos(yaw) * Math.cos(pitch);
-		vector[1] = Math.sin(getPitch(getPlayerEnt()));
+		vector[1] = Math.sin(getPitch(getPlayerEnt()) * (Math.PI / 180) * -1);
 		vector[2] = Math.sin(yaw) * Math.cos(pitch);
 		Entity.setVelX(getPlayerEnt(), vector[0] * 0.2);
 		if(Player.isFlying()) {
