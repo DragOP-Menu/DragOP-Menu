@@ -23,7 +23,7 @@ var DragOP = {
 	isDev: true,
 	inGame: false,
 	lightMode: false,
-	ghostMode: true
+	ghostMode: false
 };
 
 var sharedPref = ctx.getPreferences(ctx.MODE_PRIVATE);
