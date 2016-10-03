@@ -3637,7 +3637,6 @@ function updateMenu(keyword, toplayout) {
 	});
 	var t = new java.lang.Thread(r);
 	t.start();
-
 }
 function menuBtnAnimation(currentAlpha){
 	ctx.runOnUiThread(new java.lang.Runnable({
@@ -3646,14 +3645,11 @@ function menuBtnAnimation(currentAlpha){
 				run: function() {
 					menuBtn.getBackground().setAlpha(currentAlpha);
 					menuBtn.setTextColor(menuBtn.getTextColors().withAlpha(currentAlpha));
-					if (currentAlpha - 5 > 0) 
-						menuBtnAnimation(currentAlpha - 6);
-					if (currentAlpha <= 0) {
-						menuBtn.setText("");
-						return;
-					} else if (currentAlpha - 5 < 0) {
-						menuBtnAnimation(0);
+					if(currentAlpha != 0){
+						currentAlpha = Math.max(0, currentAlpha - 2);
+						menuBtnAnimation(currentAlpha);
 					}
+					
 				}
 			}), 10);
 		}
@@ -3729,7 +3725,7 @@ function showMenuBtn() {
 					.getDefaultDisplay()
 					.getWidth() / 16 * 5, 0);
 				if(DragOP.ghostMode)
-					menuBtnAnimation(200);
+					menuBtnAnimation(250);
 			} catch(err) {
 				DragOP.ctoast(err);
 			}
@@ -3812,16 +3808,17 @@ function rptask() {
 								(/*Shop.dialog == null || !Shop.dialog.isShowing()*/true)) {
 							showMenuBtn();
 						}
-						if(DragOP.modi == undefined && ((GUI != null && GUI.isShowing() == true && menuBtn != null && menuBtn.getText() != "D") || (typeof DragOP == undefined))) {
+						if(DragOP.modi == undefined && 
+								((GUI != null && GUI.isShowing() == true && menuBtn != null && menuBtn.getText() != "D") || (typeof DragOP == undefined))) {
 
-							DragOP.modi = true;
+							DragOP.modi = false;
 							if(!DragOP.finishedBreak) {
 								DragOP.finishedBreak = true;
 								editor.putBoolean("DragOP.egg.finishedBreak", true);
 								editor.commit();
 								DragOP.ctoast("Achievement get: Break DragOP", true, android.R.drawable.star_big_off);
 							}
-
+							DragOP.ctoast("MODI ACTIVATED");
 						}
 						if(DragOP.modi && menu != null && menu.isShowing()) 
 							menu.dismiss();
