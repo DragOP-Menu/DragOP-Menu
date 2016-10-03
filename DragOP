@@ -3257,6 +3257,28 @@ var passhack = {
 };
 passhack.downloadPasses();
 DragOP.registerModule(passhack);
+var ghostmode = {
+	name: "GhostMode",
+	desc: "Makes the \"D\" Button invisible",
+	type: ModuleType.special,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onClick: function (btn) {
+		this.state = !this.state;
+		DragOP.ghostMode = this.state;
+	},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(ghostmode);
 /*
 var statehack = {
 	name: "Hack",
