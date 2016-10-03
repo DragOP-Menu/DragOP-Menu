@@ -3302,6 +3302,47 @@ var fullbright = {
 	}
 };
 DragOP.registerModule(fullbright);
+
+var follow = {
+	name: "Follow",
+	desc: "Follows the nearest entity. This works with Target",
+	type: ModuleType.mod,
+	state: false,
+	lastTime: 0,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		if(!this.state)
+			return
+//		if(this.lastTime == 0)
+//			this.lastTime = java.lang.System.currentTimeMillis() - 100;
+//		if(java.lang.System.currentTimeMillis() - this.lastTime > )
+		var target = Utils.Entity.getNearestEntity(50);
+		var x = getPlayerX();
+		var z = getPlayerZ();
+		var x2 = Entity.getX(target);
+		var z2 = Entity.getZ(target);
+		if(Utils.Player.onGround() && getPlayerY()- 1.62 - Entity.getY(target) < -0.8)
+			setVelY(getPlayerEnt(), 0.42);
+			
+		var dist = Math.sqrt(Math.pow(x - x2, 2) + Math.pow(z - z2, 2));
+		if(dist <= 2)
+			return;
+		setVelX(getPlayerEnt(), -Math.max(-0.25, Math.min(0.25, ((x - x2) / dist)/4)));
+		setVelZ(getPlayerEnt(), -Math.max(-0.25, Math.min(0.25, ((z - z2) / dist)/4)));
+	},
+	onClick: function (btn) {this.state = !this.state},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(follow);
 /*
 var statehack = {
 	name: "Hack",
@@ -3761,7 +3802,7 @@ function menuBtnAnimation(currentAlpha){
 					menuBtn.getBackground().setAlpha(currentAlpha);
 					menuBtn.setTextColor(menuBtn.getTextColors().withAlpha(currentAlpha));
 					if(currentAlpha != 0){
-						currentAlpha = Math.max(0, currentAlpha - 2);
+						currentAlpha = Math.max(0, currentAlpha - 4);
 						menuBtnAnimation(currentAlpha);
 					}
 					
