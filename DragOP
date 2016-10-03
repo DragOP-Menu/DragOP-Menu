@@ -3651,7 +3651,7 @@ function menuBtnAnimation(currentAlpha){
 					if (currentAlpha <= 0) {
 						menuBtn.setText("");
 						return;
-					} else if (alpha - 5 < 0) {
+					} else if (currentAlpha - 5 < 0) {
 						menuBtnAnimation(0);
 					}
 				}
