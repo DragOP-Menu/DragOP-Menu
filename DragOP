@@ -3331,6 +3331,29 @@ var friend = {
 
 DragOP.registerModule(friend);
 
+var vclip = {
+	syntax: "<height>",
+	alias: ["vclip"],
+	type: ModuleType.command,
+	isStateMod: function () {
+		return false;
+	},
+	onCall: function (cmd) {
+		if(cmd[0] != undefined && cmd[0] != null && cmd[0] != "") {
+			try{
+				var height = parseInt(cmd[0]);
+				Entity.setPositionRelative(getPlayerEnt(), 0, height, 0);
+				DragOP.cmsg("Moved "+height+" blocks");
+			}catch(e){
+				DragOP.cmsg(".vclip <height>")
+			}
+		} else {
+			DragOP.cmsg(".vclip <height>");
+		}
+	}
+}
+
+DragOP.registerModule(vclip);
 
 //Menu open Button
 var menuBtn;
