@@ -3279,6 +3279,29 @@ var ghostmode = {
 	}
 };
 DragOP.registerModule(ghostmode);
+
+var fullbright = {
+	name: "Fullbright",
+	desc: "",
+	type: ModuleType.mod,
+	state: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onClick: function (btn) {
+		this.state = !this.state;
+		Block.setLightLevel(0, this.state?15:0);
+	},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(fullbright);
 /*
 var statehack = {
 	name: "Hack",
