@@ -23,7 +23,7 @@ var DragOP = {
 	isDev: true,
 	inGame: false,
 	lightMode: false,
-	ghostMode: false
+	ghostMode: true
 };
 
 var sharedPref = ctx.getPreferences(ctx.MODE_PRIVATE);
@@ -3811,14 +3811,14 @@ function rptask() {
 						if(DragOP.modi == undefined && 
 								((GUI != null && GUI.isShowing() == true && menuBtn != null && menuBtn.getText() != "D") || (typeof DragOP == undefined))) {
 
-							DragOP.modi = false;
+							DragOP.modi = true;
 							if(!DragOP.finishedBreak) {
 								DragOP.finishedBreak = true;
 								editor.putBoolean("DragOP.egg.finishedBreak", true);
 								editor.commit();
 								DragOP.ctoast("Achievement get: Break DragOP", true, android.R.drawable.star_big_off);
 							}
-							DragOP.ctoast("MODI ACTIVATED");
+//							DragOP.ctoast("MODI ACTIVATED");
 						}
 						if(DragOP.modi && menu != null && menu.isShowing()) 
 							menu.dismiss();
