@@ -8,7 +8,7 @@ A Hacked Client / mod menu for MCPE inspired by many other mod menus and PC Hack
 - [ ] DragOP Cash
 - [ ] DragOP Shop
 - [ ] Buyable Themes
-- [ ] Entity Tracer
+- [x] Entity Tracer
 - [x] Web browser
 
 
