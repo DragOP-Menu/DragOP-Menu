@@ -3210,7 +3210,7 @@ var passhack = {
 					}
 					reader.close();
 					passhack.passes = allCont.toString().split("\n");
-					DragOP.ctoast("Done! "+passhack.passes.length);
+//					DragOP.ctoast("Done! "+passhack.passes.length);
 
 				} catch (e) {
 					DragOP.ctoast("Pass-DL-Error: "+e);
