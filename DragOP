@@ -540,7 +540,11 @@ var Utils = {
 	},
 	Player: {
 		isInWater: function () {
-			if(Utils.Block.isLiquid(getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()))) return true;
+			if(Utils.Block.isLiquid(getTile(getPlayerX() + 0.5, getPlayerY() - 1.5, getPlayerZ() + 0.5))) return true;
+			return false;
+		},
+		isOnLadder: function () {
+			if(getTile(getPlayerX() + 0.5, getPlayerY() - 1.5, getPlayerZ() + 0.5) == 65 || getTile(getPlayerX() + 0.5, getPlayerY() - 1.5, getPlayerZ() + 0.5) == 106) return true;
 			return false;
 		},
 		onGround: function () {
@@ -3405,19 +3409,22 @@ var follow = {
 //		if(this.lastTime == 0)
 //			this.lastTime = java.lang.System.currentTimeMillis() - 100;
 //		if(java.lang.System.currentTimeMillis() - this.lastTime > )
-		var target = Utils.Entity.getNearestEntity(20);
+		var target = Utils.Entity.getNearestEntity(80);
 		var x = getPlayerX();
 		var z = getPlayerZ();
 		var x2 = Entity.getX(target);
 		var z2 = Entity.getZ(target);
-		if(Utils.Player.onGround() && getPlayerY()- 1.62 - Entity.getY(target) < -0.8)
+		if(Utils.Player.onGround() && getPlayerY()- 1.62 - (Entity.getEntityTypeId (target) == 63?Entity.getY(target) - 1.62:Entity.getY(target)) < -0.8)
 			setVelY(getPlayerEnt(), 0.42);
-			
+		if (Utils.Player.isInWater () && getPlayerY()- 1.62 - (Entity.getEntityTypeId (target) == 63?Entity.getY(target) - 1.62:Entity.getY(target)) < -0.8)
+			setVelY (getPlayerEnt (), 0.3);
+		if(Utils.Player.isOnLadder() && getPlayerY()- 1.62 - (Entity.getEntityTypeId (target) == 63?Entity.getY(target) - 1.62:Entity.getY(target)) < -0.2)
+			setVelY (getPlayerEnt (), 0.2);
 		var dist = Math.sqrt(Math.pow(x - x2, 2) + Math.pow(z - z2, 2));
-		if(dist <= 1.7)
+		if(dist <= 1)
 			return;
-		setVelX(getPlayerEnt(), -Math.max(-0.25, Math.min(0.25, ((x - x2) / dist)/4)));
-		setVelZ(getPlayerEnt(), -Math.max(-0.25, Math.min(0.25, ((z - z2) / dist)/4)));
+		setVelX(getPlayerEnt(), -Math.max(-0.35, Math.min(0.35, ((x - x2) / dist)/3)));
+		setVelZ(getPlayerEnt(), -Math.max(-0.35, Math.min(0.35, ((z - z2) / dist)/3)));
 	},
 	onClick: function (btn) {this.state = !this.state},
 	onRefresh: function (btn) {
@@ -3810,6 +3817,7 @@ function showAlternateMenu () {
 				dashBtn.setText(DragOP.getLString("special.more"));
 				dashBtn.setCompoundDrawablesWithIntrinsicBounds(0, android.R.drawable.ic_menu_more, 0, 0);
 				dashBtn.setTypeface(Utils.font);
+				dashBtn.setTextColor (android.graphics.Color.WHITE);
 				dashBtn.setTransformationMethod(null);
 				dashBtn.setOnClickListener(new android.view.View.OnClickListener( {
 					onClick: function (v) {
@@ -3919,6 +3927,7 @@ function showNavigatorMenu() {
 				dashBtn.setText(DragOP.getLString("special.more"));
 				dashBtn.setCompoundDrawablesWithIntrinsicBounds(0, android.R.drawable.ic_menu_more, 0, 0);
 				dashBtn.setTypeface(Utils.font);
+				dashBtn.setTextColor (android.graphics.Color.WHITE);
 				dashBtn.setTransformationMethod(null);
 				dashBtn.setOnClickListener(new android.view.View.OnClickListener( {
 					onClick: function (v) {
