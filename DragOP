@@ -5,6 +5,7 @@ var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 var LinearLayout = android.widget.LinearLayout;
 var GUI;
 var dialog;
+var aboard;
 var searchQ = ""; //Current search query
 var tick1 = 0;
 var search;
@@ -23,7 +24,8 @@ var DragOP = {
 	isDev: true,
 	inGame: false,
 	lightMode: false,
-	ghostMode: false
+	ghostMode: false,
+	enableOpenGL: true
 };
 
 var sharedPref = ctx.getPreferences(ctx.MODE_PRIVATE);
@@ -39,6 +41,67 @@ DragOP.finishedBreak = false;
 	DragOP.finishedScroll = sharedPref.getBoolean("DragOP.egg.finishedScroll", false);
 	DragOP.finishedBreak = sharedPref.getBoolean("DragOP.egg.finishedBreak", false);
 })();
+
+var Settings = {
+	settings: new org.json.JSONObject (),
+	resetConfig: function (){
+		this.settings = new org.json.JSONObject ();
+		this.setString ("menu", "navigator"); //Navigator, Basic, TabGUI (Comming soon)
+		this.saveToFile ();
+	},
+	loadFromFile: function () {
+		try {
+			var file = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP/", "config.dat");
+			var readed = (new java.io.BufferedReader(new java.io.FileReader(file)));
+			var data = new java.lang.StringBuilder();
+			var string;
+			while((string = readed.readLine()) != null) {
+				data.append(string);
+
+			}
+			try {
+				this.settings = new org.json.JSONObject(data.toString());
+			} catch(e) {
+				DragOP.ctoast("Config data corrupt. Resetting your config(" + e);
+				this.resetConfig ();
+			}
+		} catch(e) {
+			//Seems like theres no file
+			
+			this.resetConfig ();
+		}
+	},
+	saveToFile: function () {
+		var dir = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP");
+		if(!dir.exists()) dir.mkdir();
+		var file = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP/", "config.dat");
+		if(!file.exists()) file.createNewFile();
+		var stream = new java.io.FileOutputStream(file);
+		try {
+			stream.write(this.settings.toString().getBytes());
+		} finally {
+			stream.close();
+		}
+	},
+	init: function (){
+		this.loadFromFile ();
+	},
+	getBoolean: function(key, _default){
+		return this.settings.optBoolean (key, _default == null ? false : _default);
+	},
+	setBoolean: function (key,value){
+		this.settings.put(key, Boolean.valueOf (value));
+		this.saveToFile();
+	},
+	getString: function (key, _default){
+		return this.settings.optString (key, _default == null ? "" : _default);
+	},
+	setString: function (key, value){
+		this.settings.put(key, value.toString ());
+		this.saveToFile ();
+	}
+};
+Settings.init ();
 
 var CommandManager = {
 	cmdModules: new Array(),
@@ -231,6 +294,9 @@ var Utils = {
 		fov: 90,
 		initted: false,
 		init: function () {
+			if (!DragOP.enableOpenGL)
+				return;
+			
 			var options = Utils.File.getTextFromFile(new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/", "options.txt"));
 
 			options = options.split("\n");
@@ -320,6 +386,8 @@ var Utils = {
 			
 		},
 		drawBox: function (gl, x, y, z, xsize, ysize, zsize) {
+			if (!DragOP.enableOpenGL)
+				return;
 			var GL10 = javax.microedition.khronos.opengles.GL10;
 			var size = new Array(xsize, ysize, zsize);
 			var vertices = [
@@ -366,6 +434,8 @@ var Utils = {
 			gl.glTranslatef(-x, -y, -z);
 		},
 		drawLine: function (gl, x, y, z, x2, y2, z2) {
+			if (!DragOP.enableOpenGL)
+				return;
 			var GL10 = javax.microedition.khronos.opengles.GL10;
 			var size = new Array(x2, y2, z2);
 			var vertices = [
@@ -654,6 +724,7 @@ DragOP.addCode("special.panic");
 DragOP.addCode("special.target");
 DragOP.addCode("special.friend_manager");
 DragOP.addCode("special.bypass");
+DragOP.addCode("special.more");
 DragOP.addCode("hacks.gamemode");
 DragOP.addCode("hacks.speed");
 DragOP.addCode("hacks.aimaura");
@@ -682,6 +753,7 @@ DragOP.addCode("moddialog.description");
 DragOP.addCode("moddialog.type");
 DragOP.addCode("state.on");
 DragOP.addCode("state.off");
+DragOP.addCode("screen.settings");
 
 //DragOP.setLString(code, lc.en_US, value);
 DragOP.setLString("special.shop", lc.en_US, "Shop");
@@ -689,6 +761,7 @@ DragOP.setLString("special.bypass", lc.en_US, "Bypass");
 DragOP.setLString("special.target", lc.en_US, "Target");
 DragOP.setLString("special.friend_manager", lc.en_US, "Friend-Manager");
 DragOP.setLString("special.panic", lc.en_US, "Panic");
+DragOP.setLString ("special.more", lc.en_US, "MORE");
 DragOP.setLString("hacks.gamemode", lc.en_US, "Gamemode");
 DragOP.setLString("hacks.speed", lc.en_US, "Speed");
 DragOP.setLString("hacks.jumpspeed", lc.en_US, "JumpSpeed");
@@ -717,6 +790,7 @@ DragOP.setLString("moddialog.description", lc.en_US, "Description");
 DragOP.setLString("moddialog.type", lc.en_US, "Type");
 DragOP.setLString("state.on", lc.en_US, "On");
 DragOP.setLString("state.off", lc.en_US, "Off");
+DragOP.setLString("screen.settings", lc.en_US, "Settings");
 //German
 DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
 /*DragOP.setLString("hacks.speed", lc.de_DE, "Schnelligkeit");Schnelligkeit is bad*/
@@ -3120,15 +3194,22 @@ var spammer = {
 		switch(Utils.bypassMode){
 		case BypassMode.DEFAULT:
 			if(java.lang.System.currentTimeMillis() - this.lastTime > this.delay){
-				Server.sendChat(this.msg);
+				var msg = this.msg;
+				if (msg.charAt(0) != "/"){
+					msg = msg + "😀";
+					msg = msg + Math.random().toString(36).replace(/[^a-z]+/g, '');
+				}
+				Server.sendChat(msg);
 				this.lastTime = java.lang.System.currentTimeMillis();
 			}
 			break;
 		case BypassMode.LBSG:
 			if(java.lang.System.currentTimeMillis() - this.lastTime > Math.max(this.delay, 4000)){
 				var msg = this.msg;
-				msg = msg + "😀";
-				msg = msg + Math.random().toString(36).replace(/[^a-z]+/g, '');
+				if (msg.charAt(0) != "/"){
+					msg = msg + "😀";
+					msg = msg + Math.random().toString(36).replace(/[^a-z]+/g, '');
+				}
 				Server.sendChat(msg);
 				this.lastTime = java.lang.System.currentTimeMillis();
 			}
@@ -3149,6 +3230,7 @@ var spammer = {
 	onRefresh: function (btn) {
 		if(btn != null)btn.setText(this.name);
 	}
+	
 };
 
 DragOP.registerModule(spammer);
@@ -3323,7 +3405,7 @@ var follow = {
 //		if(this.lastTime == 0)
 //			this.lastTime = java.lang.System.currentTimeMillis() - 100;
 //		if(java.lang.System.currentTimeMillis() - this.lastTime > )
-		var target = Utils.Entity.getNearestEntity(50);
+		var target = Utils.Entity.getNearestEntity(20);
 		var x = getPlayerX();
 		var z = getPlayerZ();
 		var x2 = Entity.getX(target);
@@ -3332,7 +3414,7 @@ var follow = {
 			setVelY(getPlayerEnt(), 0.42);
 			
 		var dist = Math.sqrt(Math.pow(x - x2, 2) + Math.pow(z - z2, 2));
-		if(dist <= 2)
+		if(dist <= 1.7)
 			return;
 		setVelX(getPlayerEnt(), -Math.max(-0.25, Math.min(0.25, ((x - x2) / dist)/4)));
 		setVelZ(getPlayerEnt(), -Math.max(-0.25, Math.min(0.25, ((z - z2) / dist)/4)));
@@ -3513,6 +3595,31 @@ var vclip = {
 
 DragOP.registerModule(vclip);
 
+var spamcmd = {
+	syntax: "<subcmd>",
+	alias: ["spammer"],
+	type: ModuleType.command,
+	isStateMod: function () {
+		return false;
+	},
+	onCall: function (args) {
+		switch (args [0].toLowerCase ()){
+			case "msg":
+			case "message":
+				args.shift ();
+				spammer.msg = args.join (" ");
+				DragOP.cmsg ("Spammer message has been set to \"" + spammer.msg + "\"");
+				break;
+			case "delay":
+				var delay = parseInt (args [1]) * 1000;
+				spammer.delay = delay;
+				DragOP.cmsg ("Spammer delay has been set to "+delay+" milliseconds");
+				break;
+		}
+	}
+}
+DragOP.registerModule (spamcmd);
+
 //Menu open Button
 var menuBtn;
 var moving = false;
@@ -3634,8 +3741,113 @@ DragOP.generateMenu = function (keyword) {
 	sc.addView(lay);
 	return sc;
 }
+function showMenu(){
+	var menu = Settings.getString ("menu", "navigator").toLowerCase ();
+	if (menu == "basic"){
+		showAlternateMenu ();
+	}else {
+		showNavigatorMenu ();
+	}
+	/*switch(menu){
+		case "basic":
+			showAlternateMenu ();
+			break;
+		case "wurst": //For better understanding of da code
+		case "navigator":
+		default:
+		DragOP.ctoast (menu);
+			showNavigatorMenu ();
+	}*/
+	//WTF why is this switch Statement not workin
+}
+function showAlternateMenu () {
+	ctx.runOnUiThread(new java.lang.Runnable({
+		run: function () {
+			try {
+				var mlist = new android.widget.LinearLayout (ctx);
+				mlist.setOrientation (1);
+				
+				DragOP.mods.forEach(function (entry, index, array) {
+					if(entry.type != ModuleType.cmd) {
+						var btn = new android.widget.Button (ctx);
+						btn.setText(entry.name);
+						btn.setTextColor (android.graphics.Color.WHITE);
+						if(entry.isStateMode() && entry.state)
+									btn.setBackgroundColor (android.graphics.Color.argb(210, 0, 200, 0));
+								else if (entry.isStateMode ())
+									btn.setBackgroundColor (android.graphics.Color.argb(80, 0, 0, 0));
+								else 
+									btn.setBackgroundColor (android.graphics.Color.argb(210, 230, 150, 30));
+						btn.setOnClickListener(new android.view.View.OnClickListener({
+							onClick: function (viewarg) {
+								entry.onClick(btn);
+								entry.onRefresh(btn);
+								if(entry.isStateMode() && entry.state)
+									btn.setBackgroundColor (android.graphics.Color.argb(210, 0, 200, 0));
+								else if (entry.isStateMode ())
+									btn.setBackgroundColor (android.graphics.Color.argb(80, 0, 0, 0));
+								else 
+									btn.setBackgroundColor (android.graphics.Color.argb(210, 230, 150, 30));
+							}
+						}));
+						btn.setOnLongClickListener(new android.view.View.OnLongClickListener( {
+					onLongClick: function (v, t) {
+						ctx.getSystemService(android.content.Context.VIBRATOR_SERVICE)
+							.vibrate(60);
+						DragOP.showModDialog(entry);
+			menu.dismiss();
+			return true;
+						}
+						}));
+						mlist.addView (btn);
+					}
+				});
+				var scroll = new android.widget.ScrollView (ctx);
+				scroll.addView(mlist);
+				scroll.setId (52991);
+				
+				var dashBtn = new android.widget.Button(ctx);
+				dashBtn.setText(DragOP.getLString("special.more"));
+				dashBtn.setCompoundDrawablesWithIntrinsicBounds(0, android.R.drawable.ic_menu_more, 0, 0);
+				dashBtn.setTypeface(Utils.font);
+				dashBtn.setTransformationMethod(null);
+				dashBtn.setOnClickListener(new android.view.View.OnClickListener( {
+					onClick: function (v) {
+						openABoard();
+						menu.dismiss ();
+					}
+				}));
 
-function showMenu() {
+				
+				var toplayout = new android.widget.RelativeLayout (ctx);
+				toplayout.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function (viewarg) {
+						menu.dismiss();
+						showMenuBtn();
+						searchQ = "";
+					}
+				}));
+				var lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
+				toplayout.addView (scroll, lparam);
+				lparam = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				lparam.addRule(android.widget.RelativeLayout.LEFT_OF, scroll.getId ());
+				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				toplayout.addView (dashBtn, lparam);
+				menu = new android.widget.PopupWindow(toplayout, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, true);
+				if(!DragOP.lightMode)
+					menu.setAnimationStyle(android.R.style.Animation_Dialog);
+				menu.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.CENTER, 0, 0);
+			}catch (e){
+				DragOP.ctoast ("Alternate Menu Error("+ e.lineNumber + "): "+e);
+			}
+		}
+	}));
+}
+
+function showNavigatorMenu() {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
 			try {
@@ -3651,6 +3863,7 @@ function showMenu() {
 				}
 				
 				search = new android.widget.EditText(ctx);
+				search.setImeOptions(/*android.view.inputmethod.EditorInfo.IME_ACTION_DONE | */android.view.inputmethod.EditorInfo.IME_FLAG_NO_EXTRACT_UI);
 				search.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 				search.setHint("Search a mod");
 				search.setTypeface(Utils.font);
@@ -3688,8 +3901,8 @@ function showMenu() {
 				toplayout.addView(mlist);
 				//toplayout.setBackground(null);
 
-				//Cash stuff
-				var cashLayout = new android.widget.RelativeLayout(ctx);
+				//Side stuff
+				var sideLayout = new android.widget.RelativeLayout(ctx);
 				var roundGradient = new android.graphics.drawable.GradientDrawable();
 				roundGradient.setColor(android.graphics.Color.argb(200, 30, 30, 30));
 				roundGradient.setCornerRadius(dip2px(20));
@@ -3698,20 +3911,19 @@ function showMenu() {
 				cashText.setTypeface(Utils.font);
 				cashText.setGravity(android.view.Gravity.CENTER);
 				cashText.setText(/*Shop.getCash() + */"Disabled");
-				//cashText.setText(DragOP.getMetersScrolled() +"m");
 				cashText.setTextColor(android.graphics.Color.WHITE);
 				cashText.setBackground(roundGradient);
 				cashText.setTextSize(dip2px(13));
 
-				var shopBtn = new android.widget.Button(ctx);
-				shopBtn.setText(DragOP.getLString("special.shop"));
-				shopBtn.setTypeface(Utils.font);
-				shopBtn.setTransformationMethod(null);
-				shopBtn.setOnClickListener(new android.view.View.OnClickListener( {
+				var dashBtn = new android.widget.Button(ctx);
+				dashBtn.setText(DragOP.getLString("special.more"));
+				dashBtn.setCompoundDrawablesWithIntrinsicBounds(0, android.R.drawable.ic_menu_more, 0, 0);
+				dashBtn.setTypeface(Utils.font);
+				dashBtn.setTransformationMethod(null);
+				dashBtn.setOnClickListener(new android.view.View.OnClickListener( {
 					onClick: function (v) {
-						//DragOP.ctoast("Comming soon!");
-						//Shop.showGui();
-						menu.dismiss();
+						openABoard();
+						menu.dismiss ();
 					}
 				}));
 
@@ -3719,24 +3931,19 @@ function showMenu() {
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
-				cashLayout.addView(cashText, InParam);
+				//sideLayout.addView(cashText, InParam);
 				InParam = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
-				cashLayout.addView(shopBtn, InParam);
+				sideLayout.addView(dashBtn, InParam);
 
-				var cashParams = new android.widget.RelativeLayout.LayoutParams(ctx.getWindowManager().getDefaultDisplay().getWidth() / 100 * 15, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
+				var sideParams = new android.widget.RelativeLayout.LayoutParams(ctx.getWindowManager().getDefaultDisplay().getWidth() / 100 * 15, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
 				//cashParams.addRule(android.widget.RelativeLayout.LEFT_OF, mlist.getId());
-				cashParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
-				cashParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
-				//cashParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
-				//cashParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
-				//cashLayout.setLayoutParams(cashParams);
-				//cashLayout.setBackgroundColor(android.graphics.Color.BLACK);
-				toplayout.addView(cashLayout, cashParams);
-
-				//toplayout.setGravity(android.view.Gravity.CENTER);
+				sideParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				sideParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				
+				toplayout.addView(sideLayout, sideParams);
 				toplayout.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (viewarg) {
 						menu.dismiss();
@@ -3747,19 +3954,290 @@ function showMenu() {
 				menu = new android.widget.PopupWindow(toplayout, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, true);
 				if(!DragOP.lightMode)
 					menu.setAnimationStyle(android.R.style.Animation_Dialog);
-				//menu.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-				//menu.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 				menu.showAtLocation(ctx.getWindow()
 					.getDecorView(), android.view.Gravity.CENTER, 0, 0 /*ctx.getWindowManager().getDefaultDisplay().getHeight()*/ );
-				//search.requestFocus();
-				//lol
 			} catch(e) {
 				DragOP.ctoast(e);
 			}
 		}
 	}));
 }
-
+var settingDialog;
+var SettingMode = {
+	MODE_TOGGLE: 1,
+	MODE_LIST: 2
+};
+//[[propertyName, fallbackValue], [value1, value2, value3, .....]] 
+function SettingEntry(name, mode, valueList, onSelect){
+	var layout = new android.widget.RelativeLayout (ctx);
+	var bg = new android.graphics.drawable.GradientDrawable ();
+	bg.setStroke (3, android.graphics.Color.BLACK);
+	var nameT = new android.widget.TextView (ctx);
+	nameT.setTypeface (Utils.font);
+	nameT.setText (" " + name);
+	nameT.setSingleLine (true);
+	nameT.setTextSize (dip2px (13));
+	nameT.setTextColor (android.graphics.Color.WHITE);
+	nameT.setGravity(android.view.Gravity.CENTER);
+	var chooser = new android.widget.Button (ctx);
+	if(mode == SettingMode.MODE_TOGGLE){
+		 chooser.setText (Settings.getBoolean (valueList [0][0], valueList [0][1] == null?false:valueList [0][1])?valueList [1][0]:valueList [1][1]);
+	}else if (mode == SettingMode.MODE_LIST){
+		var curValue = Settings.getString (valueList [0][0], valueList [0][1] == null?"":valueList [0][1]);
+		var nextValue = curValue;
+		var done = false;
+		valueList[1].forEach (function (entry, index){
+			if(entry.toLowerCase () == curValue.toLowerCase()&& done == false){
+				if(index + 1 == valueList[1].length){
+					nextValue = valueList [1][0];
+				}else {
+					nextValue = valueList [1][index + 1];
+				}
+				done= true;
+			}
+		});
+		chooser.setText(curValue);
+		chooser.setOnClickListener(new android.view.View.OnClickListener ({
+			onClick: function (v){
+				v.setText (nextValue);
+				onSelect (nextValue);
+				curValue = nextValue;
+				Settings.setString (valueList [0][0], curValue);
+				var done = false;
+				valueList[1].forEach (function (entry, index){
+					if(entry.toLowerCase () == curValue.toLowerCase() && done == false){
+						if(index + 1 == valueList[1].length){
+							nextValue = valueList [1][0];
+						}else {
+							nextValue = valueList [1][index + 1];
+						}
+						done= true;
+					}
+				});
+			}
+		}));
+	}
+	var param = new android.widget.RelativeLayout.LayoutParams (android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT,android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
+	param.addRule(android.widget.RelativeLayout.CENTER_IN_PARENT);
+	param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+	layout.addView (nameT, param);
+	param = new android.widget.RelativeLayout.LayoutParams (android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT,android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
+	param.addRule(android.widget.RelativeLayout.CENTER_IN_PARENT);
+	param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+	layout.addView (chooser, param);
+	param = new android.widget.RelativeLayout.LayoutParams (android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, dip2px (50));
+	layout.setLayoutParams (param);
+	layout.setBackground (bg);
+	return layout;
+}
+function openSettingScreen(){
+	ctx.runOnUiThread(new java.lang.Runnable( {
+		run: function () {
+			try {
+				var display = new android.util.DisplayMetrics();
+				com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+					.getWindowManager()
+					.getDefaultDisplay()
+					.getMetrics(display);
+				var content = new android.widget.LinearLayout(ctx);
+				content.setId(9472729);
+				content.setOrientation (1);
+				var contentScroll = new DragOP.scrollView(ctx);
+				contentScroll.setId(492628);
+				//default content
+				var title = new android.widget.TextView (ctx);
+				title.setText(android.text.Html.fromHtml("<u>" + DragOP.getLString ("screen.settings") + "</u>"));
+				title.setTextSize(dip2px(20));
+				title.setGravity(android.view.Gravity.CENTER);
+				title.setTextColor(android.graphics.Color.BLACK);
+				title.setTypeface(Utils.font);
+				title.setId(94771);
+				
+				var btnBg = new android.graphics.drawable.GradientDrawable ();
+				btnBg.setColor(android.graphics.Color.argb (120,255,255,255));
+				btnBg.setStroke (2, android.graphics.Color.BLACK);
+				btnBg.setCornerRadius (dip2px (5));
+				
+				var setMenu = SettingEntry ("Menu", SettingMode.MODE_LIST, [["menu", "Navigator"], ["Navigator", "Basic"]], function (item){});
+				content.addView(setMenu);
+				
+				//footer
+				var closeButton = new styledBtn();
+				closeButton.setText("Close");
+				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
+				closeButton.setId(10472);
+				closeButton.setTypeface(Utils.font);
+				closeButton.setTextColor(android.graphics.Color.BLACK);
+				closeButton.setTypeface(Utils.font);
+				//layout alignement....
+				var dialogLayout = new android.widget.RelativeLayout(ctx);
+				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
+				//dialogLayout.setGravity(android.view.Gravity.CENTER);
+				//dialogLayout.setOrientation(LinearLayout.VERTICAL);
+				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				params.addRule (android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				params.addRule (android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				dialogLayout.addView (title, params);
+				contentScroll.addView(content);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.BELOW, title.getId ());
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				params.addRule(android.widget.RelativeLayout.ABOVE, closeButton.getId());
+				contentScroll.setFillViewport(true);
+				dialogLayout.addView(contentScroll, params);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				dialogLayout.addView(closeButton, params);
+				//Dialog Stuff
+				settingDialog = new android.app.Dialog(ctx);
+				settingDialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+				settingDialog.getWindow()
+					 .setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				settingDialog.setContentView(dialogLayout);
+				settingDialog.setCanceledOnTouchOutside(true);
+				settingDialog.setTitle(DragOP.getLString ("special.aboard"));
+				settingDialog.setOnDismissListener(new android.content.DialogInterface.OnDismissListener( {
+					onDismiss: function () {
+						
+					}
+				}));
+				settingDialog.show();
+				var window = settingDialog.getWindow();
+				window.setLayout(mwidth, display.heightPixels);
+				closeButton.setOnClickListener(new android.view.View.OnClickListener( {
+					onClick: function (view) {
+						settingDialog.dismiss();
+					}
+				}));
+			} catch(e) {
+				DragOP.ctoast("Error: " + e);
+			}
+		}
+	}));
+}
+function openABoard (){
+	ctx.runOnUiThread(new java.lang.Runnable( {
+		run: function () {
+			try {
+				var display = new android.util.DisplayMetrics();
+				com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+					.getWindowManager()
+					.getDefaultDisplay()
+					.getMetrics(display);
+				var content = new android.widget.LinearLayout(ctx);
+				content.setId(9472729);
+				content.setOrientation (1);
+				var contentScroll = new DragOP.scrollView(ctx);
+				contentScroll.setId(492628);
+				//default content
+				var title = new android.widget.TextView (ctx);
+				title.setText(android.text.Html.fromHtml("<u>" + DragOP.getLString ("special.more") + "</u>"));
+				title.setTextSize(dip2px(20));
+				title.setGravity(android.view.Gravity.CENTER);
+				title.setTextColor(android.graphics.Color.BLACK);
+				title.setTypeface(Utils.font);
+				title.setId(94771);
+				
+				var btnBg = new android.graphics.drawable.GradientDrawable ();
+				btnBg.setColor(android.graphics.Color.argb (120,255,255,255));
+				btnBg.setStroke (2, android.graphics.Color.BLACK);
+				btnBg.setCornerRadius (dip2px (5));
+				
+				var btnSelected = new android.graphics.drawable.GradientDrawable ();
+				btnSelected.setColor(android.graphics.Color.argb (120,170,170,170));
+				btnSelected.setStroke (2, android.graphics.Color.BLACK);
+				btnSelected.setCornerRadius (dip2px (5));
+				
+				var settingBtn = new android.widget.Button (ctx);
+				settingBtn.setText ("Settings");
+				settingBtn.setTypeface (Utils.font);
+				settingBtn.setBackground (btnBg);
+				settingBtn.setCompoundDrawablesWithIntrinsicBounds(0,0,android.R.drawable.ic_menu_manage,0);
+				settingBtn.setOnClickListener (new android.view.View.OnClickListener ({
+					onClick: function (v){
+						aboard.dismiss ();
+						openSettingScreen ();
+					}
+				}));
+				settingBtn.setOnTouchListener(new android.view.View.OnTouchListener( {
+					onTouch: function (view, motionEvent) {
+						try {
+							switch(motionEvent.getAction()) {
+							case android.view.MotionEvent.ACTION_DOWN:
+								settingBtn.setBackground (btnSelected);
+								break;
+							case android.view.MotionEvent.ACTION_UP:
+							case android.view.MotionEvent.ACTION_CANCEL:
+								settingBtn.setBackground(btnBg);
+								break;
+							}
+							
+						}catch (e){
+							DragOP.ctoast ("Error: "+e);
+						}
+						return false;
+					}
+				}));
+				content.addView (settingBtn);
+				
+				//footer
+				var closeButton = new styledBtn();
+				closeButton.setText("Close");
+				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
+				closeButton.setId(10472);
+				closeButton.setTypeface(Utils.font);
+				closeButton.setTextColor(android.graphics.Color.BLACK);
+				closeButton.setTypeface(Utils.font);
+				//layout alignement....
+				var dialogLayout = new android.widget.RelativeLayout(ctx);
+				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
+				//dialogLayout.setGravity(android.view.Gravity.CENTER);
+				//dialogLayout.setOrientation(LinearLayout.VERTICAL);
+				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				params.addRule (android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				params.addRule (android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				dialogLayout.addView (title, params);
+				contentScroll.addView(content);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.BELOW, title.getId ());
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				params.addRule(android.widget.RelativeLayout.ABOVE, closeButton.getId());
+				contentScroll.setFillViewport(true);
+				dialogLayout.addView(contentScroll, params);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				dialogLayout.addView(closeButton, params);
+				//Dialog Stuff
+				aboard = new android.app.Dialog(ctx);
+				aboard.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+				aboard.getWindow()
+					 .setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				aboard.setContentView(dialogLayout);
+				aboard.setCanceledOnTouchOutside(true);
+				aboard.setTitle(DragOP.getLString ("special.aboard"));
+				aboard.setOnDismissListener(new android.content.DialogInterface.OnDismissListener( {
+					onDismiss: function () {
+						
+					}
+				}));
+				aboard.show();
+				var window = aboard.getWindow();
+				window.setLayout(mwidth, display.heightPixels);
+				closeButton.setOnClickListener(new android.view.View.OnClickListener( {
+					onClick: function (view) {
+						aboard.dismiss();
+					}
+				}));
+			} catch(e) {
+				DragOP.ctoast("Error: " + e);
+			}
+		}
+	}));
+}
 function refreshMenu() {
 	if(mlist != null) {
 		mlist.removeAllViewsInLayout();
@@ -3893,10 +4371,8 @@ showMenuBtn();
 function rptask() {
 	var t = new java.lang.Thread(new java.lang.Runnable({
 		run: function () {
+			
 			while(true) {
-				nx = getPlayerX();
-				ny = getPlayerY();
-				nz = getPlayerZ();
 
 				var randString = "";
 
@@ -3960,6 +4436,8 @@ function rptask() {
 						if((GUI == null || !GUI.isShowing()) && 
 								(menu == null || !menu.isShowing()) && 
 								(dialog == null || !dialog.isShowing()) && 
+								(aboard == null || !aboard.isShowing()) &&
+								(settingDialog == null || !settingDialog.isShowing ()) &&
 								(webbrowser.browser == null || !webbrowser.browser.isShowing()) &&
 								(/*Shop.dialog == null || !Shop.dialog.isShowing()*/true)) {
 							showMenuBtn();
@@ -3980,8 +4458,6 @@ function rptask() {
 							menu.dismiss();
 						if(DragOP.modi && tick1 % 2 == 0 && getPlayerEnt() != 0 && getPlayerEnt() != -1 && menuBtn != null && GUI != null && GUI.isShowing()) {
 							menuBtn.setBackgroundColor(android.graphics.Color.rgb(Math.random() * 200, Math.random() * 200, Math.random() * 200));
-
-
 							menuBtn.setText(randString);
 						}
 
