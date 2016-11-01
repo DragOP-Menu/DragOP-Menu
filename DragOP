@@ -46,7 +46,7 @@ var Settings = {
 	settings: new org.json.JSONObject (),
 	resetConfig: function (){
 		this.settings = new org.json.JSONObject ();
-		this.setString ("menu", "navigator"); //Navigator, Basic, TabGUI (Comming soon)
+		this.setString ("menu", "Navigator"); //Navigator, Basic, TabGUI (Comming soon)
 		this.saveToFile ();
 	},
 	loadFromFile: function () {
@@ -261,6 +261,47 @@ var Themes = {
 
 	}
 };
+
+DragOP.cmsg = function (text) {
+	clientMessage(ChatColor.GREEN + "[" + ChatColor.BLUE + "Drag" + ChatColor.GOLD + "OP" + ChatColor.GREEN + "]" + ChatColor.GRAY + ": " + ChatColor.YELLOW + text);
+}
+DragOP.ctoast = function (text, showPrefix, iconName) {
+	try {
+		var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+		ctx.runOnUiThread(new java.lang.Runnable({
+			run: function () {
+				var thetoast = android.widget.Toast.makeText(com.mojang.minecraftpe.MainActivity.currentMainActivity.get(), "" + text, android.widget.Toast.LENGTH_LONG);
+				var layout = new android.widget.LinearLayout(ctx);
+				var icon = new android.widget.ImageView(ctx);
+				var msg = new android.widget.TextView(ctx);
+				if(showPrefix || showPrefix == null) text = "DragOP: " + text;
+				try{
+				if(iconName != null) {
+					icon.setImageResource(iconName);
+					layout.addView(icon);
+				}
+				}catch(e){
+					
+				}
+				msg.setText(text);
+				msg.setGravity(android.view.Gravity.CENTER);
+				msg.setTextSize(20);
+				msg.setPadding(10, 10, 10, 10);
+				msg.setTextColor(android.graphics.Color.WHITE);
+				var bg = new android.graphics.drawable.GradientDrawable();
+				bg.setColor(android.graphics.Color.argb(150, 50, 50, 50));
+				bg.setStroke(dip2px(5), android.graphics.Color.argb(200, 5, 5, 5));
+				bg.setCornerRadius(dip2px(20));
+				layout.addView(msg);
+				layout.setBackground(bg);
+				thetoast.setView(layout);
+				thetoast.show();
+			}
+		}));
+	} catch(e) {
+		print(e);
+	}
+}
 var Utils = {
 	bypassMode: BypassMode.DEFAULT,
 	speedMode: SpeedMode.DEFAULT,
@@ -467,6 +508,32 @@ var Utils = {
 		currentScreen: "",
 		INGAME: "hud_screen"
 	},
+	Url: {
+		getUrlContents: function(url, result){
+			var t = new java.lang.Thread (new java.lang.Runnable ({
+				run: function (){
+					try {
+						var u = new java.net.URL(url);
+						var allCont = new java.lang.StringBuilder();
+						var con = u.openConnection ();
+						con.setIfModifiedSince(0);
+						con.setRequestProperty("User-Agent", "Mozilla/5.0");
+						con.setRequestProperty("Accept-Encoding", "UTF-8");
+						var reader = new java.io.BufferedReader(new java.io.InputStreamReader(con.getInputStream (), "UTF-8"));
+						var line = "";
+						while ((line = reader.readLine()) != null) 
+							allCont.append(line + "\n");
+						reader.close();
+						result (allCont.toString (), null);
+					}catch (e){
+						DragOP.ctoast (e);
+						result (null, e);
+					}
+				}
+			}));
+			t.start ();
+		}
+	},
 	File: {
 		dragopDir: android.os.Environment.getExternalStorageDirectory() + "/DragOP/",
 		getTextFromFile: function (file) {
@@ -650,7 +717,7 @@ var Utils = {
 			}
 
 		},
-		getNearestEntity(maxrange) {
+		getNearestEntity(maxrange, bypass) {
 			var mobs = Utils.Entity.getAll();
 			//clientMessage(mobs.length);
 			var players = Server.getAllPlayers();
@@ -665,7 +732,17 @@ var Utils = {
 				var y = Entity.getY(entry) - getPlayerY();
 				var z = Entity.getZ(entry) - getPlayerZ();
 				
+				
 				var cancel = false;
+				
+				if (bypass && y > 1){
+					var xVel = Entity.getVelX (entry);
+					var yVel = Entity.getVelY (entry);
+					var zVel = Entity.getVelZ (entry);
+					if (xVel == 0 && yVel == 0 && zVel == 0)
+						cancel = true;
+				}
+				
 				
 				if(Entity.getEntityTypeId(entry) == 63 && Entity.getNameTag(entry) == "")
 					cancel = true;
@@ -705,6 +782,58 @@ var Utils = {
 		}
 	}
 };
+
+var UpdateManager = {
+	version: "1.0.0",
+	stableVer: "Loading",
+	stableInfo: null,
+	devInfo: null,
+	scriptLoader: null,
+	init: function (){
+		if (Launcher.isBlockLauncher ()){
+			this.scriptLoader = net.zhuoweizhang.mcpelauncher.ScriptManager;
+		}else if (Launcher.isToolbox ()){
+			//this.scriptLoader = eval (ctx.getPackageName() + ".MinecraftActivity");
+			//this.scriptLoader = io.mrarm.mcpelauncher.modpe.ModPEScriptLoader;
+		}else {
+			DragOP.ctoast ("You are using an unsupported Launcher. The auto updater wont work");
+			return;
+		}
+		this.downloadStableInfo ();
+		//this.downloadDevInfo ();
+		//this.checkForUpdate();
+	},
+	downloadStableInfo: function (){
+		Utils.Url.getUrlContents ("https://api.github.com/repos/DragOP-Menu/DragOP-Menu/releases/latest", function (cont, err){
+			if (err == null && cont != ""){
+				UpdateManager.stableInfo = new org.json.JSONObject (cont);
+			}else{
+			DragOP.ctoast ("StableDownloadError: "+err);
+			
+			}
+			UpdateManager.downloadDevInfo ();
+		});
+	},
+	downloadDevInfo: function (){
+		Utils.Url.getUrlContents ("https://api.github.com/repos/DragOP-Menu/DragOP-Menu/commits", function (cont, err){
+			if (cont != null && cont != ""){
+				var arr = new org.json.JSONArray (cont);
+				UpdateManager.devInfo = arr.getJSONObject(0);
+			}else{
+			DragOP.ctoast ("DevDownloadError: "+err);
+			}
+			UpdateManager.checkForUpdate ();
+		});
+	},
+	checkForUpdate: function (){
+		if(this.stableInfo == null)
+			return;
+		if (this.stableInfo.getString ("tag_name") != UpdateManager.version){
+			DragOP.ctoast ("New stable version available: "+ this.stableInfo.getString ("tag_name")+"\nCurrent version: "+UpdateManager.version);
+		}
+	}
+};
+UpdateManager.init ();
 
 DragOP.addCode = function (code) {
 	l[0].push(code);
@@ -758,6 +887,7 @@ DragOP.addCode("moddialog.type");
 DragOP.addCode("state.on");
 DragOP.addCode("state.off");
 DragOP.addCode("screen.settings");
+DragOP.addCode ("screen.updatemgr");
 
 //DragOP.setLString(code, lc.en_US, value);
 DragOP.setLString("special.shop", lc.en_US, "Shop");
@@ -795,6 +925,7 @@ DragOP.setLString("moddialog.type", lc.en_US, "Type");
 DragOP.setLString("state.on", lc.en_US, "On");
 DragOP.setLString("state.off", lc.en_US, "Off");
 DragOP.setLString("screen.settings", lc.en_US, "Settings");
+DragOP.setLString ("screen.updatemgr", lc.en_US, "Update Manager");
 //German
 DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
 /*DragOP.setLString("hacks.speed", lc.de_DE, "Schnelligkeit");Schnelligkeit is bad*/
@@ -834,46 +965,7 @@ DragOP.getLString = function (code) {
 	});
 	return str;
 }
-DragOP.cmsg = function (text) {
-	clientMessage(ChatColor.GREEN + "[" + ChatColor.BLUE + "Drag" + ChatColor.GOLD + "OP" + ChatColor.GREEN + "]" + ChatColor.GRAY + ": " + ChatColor.YELLOW + text);
-}
-DragOP.ctoast = function (text, showPrefix, iconName) {
-	try {
-		var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
-		ctx.runOnUiThread(new java.lang.Runnable({
-			run: function () {
-				var thetoast = android.widget.Toast.makeText(com.mojang.minecraftpe.MainActivity.currentMainActivity.get(), "" + text, android.widget.Toast.LENGTH_LONG);
-				var layout = new android.widget.LinearLayout(ctx);
-				var icon = new android.widget.ImageView(ctx);
-				var msg = new android.widget.TextView(ctx);
-				if(showPrefix || showPrefix == null) text = "DragOP: " + text;
-				try{
-				if(iconName != null) {
-					icon.setImageResource(iconName);
-					layout.addView(icon);
-				}
-				}catch(e){
-					
-				}
-				msg.setText(text);
-				msg.setGravity(android.view.Gravity.CENTER);
-				msg.setTextSize(20);
-				msg.setPadding(10, 10, 10, 10);
-				msg.setTextColor(android.graphics.Color.WHITE);
-				var bg = new android.graphics.drawable.GradientDrawable();
-				bg.setColor(android.graphics.Color.argb(150, 50, 50, 50));
-				bg.setStroke(dip2px(5), android.graphics.Color.argb(200, 5, 5, 5));
-				bg.setCornerRadius(dip2px(20));
-				layout.addView(msg);
-				layout.setBackground(bg);
-				thetoast.setView(layout);
-				thetoast.show();
-			}
-		}));
-	} catch(e) {
-		print(e);
-	}
-}
+
 DragOP.loadModsAnim = function (progress) {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
@@ -1546,7 +1638,7 @@ var aimaura = {
 	onTick: function () {
 		if(this.state) {
 			try {
-				var ent = Utils.Entity.getNearestEntity(this.range);
+				var ent = Utils.Entity.getNearestEntity(this.range, true);
 			} catch(e) {
 				DragOP.ctoast(e);
 			}
@@ -3284,27 +3376,14 @@ var passhack = {
 	passes: "lol",
 	usedPasses: 0,
 	downloadPasses: function(){
-		var r = new java.lang.Runnable({
-			run: function() {
-				try {
-					var u = new java.net.URL("https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/10_million_password_list_top_10000.txt");
-					var allCont = new java.lang.StringBuilder();
-					var reader = new java.io.BufferedReader(new java.io.InputStreamReader(u.openStream()));
-					var line = "";
-					while ((line = reader.readLine()) != null) {
-						allCont.append(line + "\n");
-					}
-					reader.close();
-					passhack.passes = allCont.toString().split("\n");
-//					DragOP.ctoast("Done! "+passhack.passes.length);
-
-				} catch (e) {
-					DragOP.ctoast("Pass-DL-Error: "+e);
-				}
-			}
+		var url = "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/10_million_password_list_top_10000.txt";
+		Utils.Url.getUrlContents (url, function (cont, error){
+			if (error != null && error != ""){
+				DragOP.ctoast ("Pass-DL-Error: "+error);
+			}else
+			passhack.passes = cont.split("\n");
 		});
-		var th = new java.lang.Thread(r);
-		th.start();
+		
 	},
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -3971,6 +4050,7 @@ function showNavigatorMenu() {
 		}
 	}));
 }
+var updatemgrDialog;
 var settingDialog;
 var SettingMode = {
 	MODE_TOGGLE: 1,
@@ -4039,6 +4119,7 @@ function SettingEntry(name, mode, valueList, onSelect){
 	layout.setBackground (bg);
 	return layout;
 }
+
 function openSettingScreen(){
 	ctx.runOnUiThread(new java.lang.Runnable( {
 		run: function () {
@@ -4126,6 +4207,176 @@ function openSettingScreen(){
 		}
 	}));
 }
+function openUpdateMgrScreen(){
+	ctx.runOnUiThread(new java.lang.Runnable( {
+		run: function () {
+			try {
+				var display = new android.util.DisplayMetrics();
+				com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+					.getWindowManager()
+					.getDefaultDisplay()
+					.getMetrics(display);
+				var content = new android.widget.LinearLayout(ctx);
+				content.setId(9472729);
+				content.setOrientation (1);
+				var contentScroll = new DragOP.scrollView(ctx);
+				contentScroll.setId(492628);
+				//default content
+				var title = new android.widget.TextView (ctx);
+				title.setText(android.text.Html.fromHtml("<u>" + DragOP.getLString ("screen.updatemgr") + "</u>"));
+				title.setTextSize(dip2px(20));
+				title.setGravity(android.view.Gravity.CENTER);
+				title.setTextColor(android.graphics.Color.BLACK);
+				title.setTypeface(Utils.font);
+				title.setId(94771);
+				
+				var verBg = new android.graphics.drawable.GradientDrawable ();
+				verBg.setColor(android.graphics.Color.argb (120,255,255,255));
+				verBg.setStroke (2, android.graphics.Color.BLACK);
+				verBg.setCornerRadius (dip2px (12));
+				
+				var heig = dip2px (100);
+				
+				var verParam = new android.widget.RelativeLayout.LayoutParams (android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+				//CurrentVersion
+				var currentVer = new android.widget.RelativeLayout (ctx);
+				currentVer.setBackground (verBg);
+				var currTitle = new android.widget.TextView (ctx);
+				currTitle.setTypeface (Utils.font);
+				currTitle.setTextSize(dip2px(13));
+				currTitle.setId (972404);
+				currTitle.setTextColor (android.graphics.Color.BLACK);
+				currTitle.setText ("Current Version (v"+UpdateManager.version+")");
+				var currDlBtn = new android.widget.Button (ctx);
+				currDlBtn.setText ("Installed");
+				currDlBtn.setId (535714);
+				currDlBtn.setTextColor (android.graphics.Color.BLACK);
+				currDlBtn.setEnabled (false);
+				currDlBtn.setTypeface (Utils.font);
+				currDlBtn.setTextSize (dip2px (9));
+				var desc = new android.widget.TextView (ctx);
+				desc.setTypeface (Utils.font);
+				desc.setTextColor (android.graphics.Color.BLACK);
+				desc.setPadding (dip2px (4), dip2px (2), dip2px (5), 0);
+				desc.setText ("Thats your version. ("+(DragOP.dev?"Developer":"Stable") + "-Channel)");
+				
+				verParam.addRule (android.widget.RelativeLayout.CENTER_IN_PARENT);
+				verParam.addRule (android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				currentVer.addView(currTitle, verParam);
+				verParam = new android.widget.RelativeLayout.LayoutParams (android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+				verParam.addRule (android.widget.RelativeLayout.CENTER_IN_PARENT);
+				verParam.addRule (android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				currentVer.addView(currDlBtn, verParam);
+				verParam = new android.widget.RelativeLayout.LayoutParams (android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+				verParam.addRule (android.widget.RelativeLayout.BELOW, currTitle.getId ());
+				verParam.addRule (android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				verParam.addRule (android.widget.RelativeLayout.LEFT_OF, currDlBtn.getId ());
+				currentVer.addView (desc, verParam);
+				
+				//Stable Version
+				var stableVer = new android.widget.RelativeLayout (ctx);
+				stableVer.setBackground (verBg);
+				var stableTitle = new android.widget.TextView (ctx);
+				stableTitle.setTypeface (Utils.font);
+				stableTitle.setTextSize(dip2px(13));
+				stableTitle.setId (972144);
+				stableTitle.setTextColor (android.graphics.Color.BLACK);
+				if (UpdateManager.stableInfo == null)
+					stableTitle.setText ("No Network Connection");
+				else
+					stableTitle.setText ("Stable version ("+UpdateManager.stableInfo.getString ("tag_name") + ")");
+				var stableDlBtn = new android.widget.Button (ctx);
+				stableDlBtn.setText ("WIP");
+				stableDlBtn.setId (537814);
+				stableDlBtn.setTextColor (android.graphics.Color.BLACK);
+				stableDlBtn.setEnabled (false);
+				stableDlBtn.setTypeface (Utils.font);
+				stableDlBtn.setTextSize (dip2px (9));
+				var stableDesc = new android.widget.TextView (ctx);
+				stableDesc.setTypeface (Utils.font);
+				stableDesc.setTextColor (android.graphics.Color.BLACK);
+				stableDesc.setPadding (dip2px (4), dip2px (2), dip2px (5), 0);
+				stableDesc.setVerticalScrollBarEnabled(true);
+				stableDesc.setMovementMethod(new android.text.method.ScrollingMovementMethod ());
+				stableDesc.setText ("The latest Stable version. \nRelease Notes: \n"+UpdateManager.stableInfo.getString ("body"));
+				
+				verParam = new android.widget.RelativeLayout.LayoutParams (android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+				verParam.addRule (android.widget.RelativeLayout.CENTER_IN_PARENT);
+				verParam.addRule (android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				stableVer.addView(stableTitle, verParam);
+				verParam = new android.widget.RelativeLayout.LayoutParams (android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+				verParam.addRule (android.widget.RelativeLayout.CENTER_IN_PARENT);
+				verParam.addRule (android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				stableVer.addView(stableDlBtn, verParam);
+				verParam = new android.widget.RelativeLayout.LayoutParams (android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+				verParam.addRule (android.widget.RelativeLayout.BELOW, stableTitle.getId ());
+				verParam.addRule (android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				verParam.addRule (android.widget.RelativeLayout.LEFT_OF, stableDlBtn.getId ());
+				stableVer.addView (stableDesc, verParam);
+				
+				var params = new android.widget.LinearLayout.LayoutParams (android.widget.LinearLayout.LayoutParams.MATCH_PARENT, heig);
+				content.addView (currentVer, params);
+				params = new android.widget.LinearLayout.LayoutParams (android.widget.LinearLayout.LayoutParams.MATCH_PARENT, heig);
+				content.addView(stableVer, params);
+				
+				
+				//footer
+				var closeButton = new styledBtn();
+				closeButton.setText("Close");
+				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
+				closeButton.setId(10472);
+				closeButton.setTypeface(Utils.font);
+				closeButton.setTextColor(android.graphics.Color.BLACK);
+				closeButton.setTypeface(Utils.font);
+				//layout alignement....
+				var dialogLayout = new android.widget.RelativeLayout(ctx);
+				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
+				//dialogLayout.setGravity(android.view.Gravity.CENTER);
+				//dialogLayout.setOrientation(LinearLayout.VERTICAL);
+				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				params.addRule (android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				params.addRule (android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				dialogLayout.addView (title, params);
+				contentScroll.addView(content);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.BELOW, title.getId ());
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				params.addRule(android.widget.RelativeLayout.ABOVE, closeButton.getId());
+				contentScroll.setFillViewport(true);
+				dialogLayout.addView(contentScroll, params);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				dialogLayout.addView(closeButton, params);
+				//Dialog Stuff
+				updatemgrDialog = new android.app.Dialog(ctx);
+				updatemgrDialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+				updatemgrDialog.getWindow()
+					 .setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				updatemgrDialog.setContentView(dialogLayout);
+				updatemgrDialog.setCanceledOnTouchOutside(true);
+				updatemgrDialog.setTitle(DragOP.getLString ("special.aboard"));
+				updatemgrDialog.setOnDismissListener(new android.content.DialogInterface.OnDismissListener( {
+					onDismiss: function () {
+						
+					}
+				}));
+				updatemgrDialog.show();
+				var window = updatemgrDialog.getWindow();
+				window.setLayout(mwidth, display.heightPixels);
+				closeButton.setOnClickListener(new android.view.View.OnClickListener( {
+					onClick: function (view) {
+						updatemgrDialog.dismiss();
+					}
+				}));
+			} catch(e) {
+				DragOP.ctoast("Error: " + e);
+			}
+		}
+	}));
+}
+
 function openABoard (){
 	ctx.runOnUiThread(new java.lang.Runnable( {
 		run: function () {
@@ -4159,6 +4410,26 @@ function openABoard (){
 				btnSelected.setStroke (2, android.graphics.Color.BLACK);
 				btnSelected.setCornerRadius (dip2px (5));
 				
+				var btnListener = new android.view.View.OnTouchListener( {
+					onTouch: function (v, motionEvent) {
+						try {
+							switch(motionEvent.getAction()) {
+							case android.view.MotionEvent.ACTION_DOWN:
+								v.setBackground (btnSelected);
+								break;
+							case android.view.MotionEvent.ACTION_UP:
+							case android.view.MotionEvent.ACTION_CANCEL:
+								v.setBackground(btnBg);
+								break;
+							}
+							
+						}catch (e){
+							DragOP.ctoast ("Error: "+e);
+						}
+						return false;
+					}
+				});
+				
 				var settingBtn = new android.widget.Button (ctx);
 				settingBtn.setText ("Settings");
 				settingBtn.setTypeface (Utils.font);
@@ -4170,26 +4441,22 @@ function openABoard (){
 						openSettingScreen ();
 					}
 				}));
-				settingBtn.setOnTouchListener(new android.view.View.OnTouchListener( {
-					onTouch: function (view, motionEvent) {
-						try {
-							switch(motionEvent.getAction()) {
-							case android.view.MotionEvent.ACTION_DOWN:
-								settingBtn.setBackground (btnSelected);
-								break;
-							case android.view.MotionEvent.ACTION_UP:
-							case android.view.MotionEvent.ACTION_CANCEL:
-								settingBtn.setBackground(btnBg);
-								break;
-							}
-							
-						}catch (e){
-							DragOP.ctoast ("Error: "+e);
-						}
-						return false;
+				settingBtn.setOnTouchListener(btnListener);
+				content.addView (settingBtn);
+				
+				var updateBtn = new android.widget.Button (ctx);
+				updateBtn.setText (DragOP.getLString ("screen.updatemgr"));
+				updateBtn.setTypeface (Utils.font);
+				updateBtn.setBackground (btnBg);
+				updateBtn.setCompoundDrawablesWithIntrinsicBounds(0,0,android.R.drawable.stat_sys_download,0);
+				updateBtn.setOnClickListener (new android.view.View.OnClickListener ({
+					onClick: function (v){
+						aboard.dismiss ();
+						openUpdateMgrScreen ();
 					}
 				}));
-				content.addView (settingBtn);
+				updateBtn.setOnTouchListener (btnListener);
+				content.addView (updateBtn);
 				
 				//footer
 				var closeButton = new styledBtn();
@@ -4447,6 +4714,7 @@ function rptask() {
 								(dialog == null || !dialog.isShowing()) && 
 								(aboard == null || !aboard.isShowing()) &&
 								(settingDialog == null || !settingDialog.isShowing ()) &&
+								(updatemgrDialog == null || !updatemgrDialog.isShowing ()) &&
 								(webbrowser.browser == null || !webbrowser.browser.isShowing()) &&
 								(/*Shop.dialog == null || !Shop.dialog.isShowing()*/true)) {
 							showMenuBtn();
@@ -4488,11 +4756,13 @@ function chatHook(text) {
 
 	if(text.charAt(0) == ".") {
 		preventDefault();
+		
 		try {
 			com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
-				.nativeSetTextboxText("");
-			com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
 				.updateTextboxText("");
+			com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+				.nativeSetTextboxText("");
+			
 		} catch(e) {
 			//Not-BlockLauncher-Error
 		}
