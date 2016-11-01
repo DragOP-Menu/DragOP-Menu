@@ -216,6 +216,12 @@ var ModuleType = {
         }
     }
 };
+var ModCategory = {
+		MOVEMENT: 1,
+		COMBAT: 2,
+		RENDER: 3,
+		MISC: 4
+};
 var l = new Array();
 l.push(new Array()); //Codes
 l.push(new Array()); //English
@@ -3550,6 +3556,69 @@ var follow = {
     }
 };
 DragOP.registerModule(follow);
+var lifedisplay = {
+	name: "LifeDisplay",
+	desc: "Displays your life stats",
+	type: ModuleType.mod,
+	state: false,
+	lifeGui: null,
+	lifeView: null,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+        if(this.state && getPlayerEnt() == -1 || getPlayerEnt() == -1)
+            ctx.runOnUiThread(new java.lang.Runnable({
+                run: function () {
+                    if(lifedisplay.lifeGui != null) 
+                    	lifedisplay.lifeGui.dismiss();
+                }
+            }));
+        else if(this.state && tick1 % 8 == 0) {
+            this.showGui(Entity.getHealth(getPlayerEnt()) + "/" + Entity.getMaxHealth(getPlayerEnt()) + "❤");
+        }
+    },
+    showGui: function (text) {
+        ctx.runOnUiThread(new java.lang.Runnable({
+            run: function () {
+                if(lifedisplay.lifeGui == null || lifedisplay.lifeGui.isShowing() == false) {
+                    var bg = new android.graphics.drawable.GradientDrawable();
+                    bg.setColor(android.graphics.Color.argb(150, 20, 20, 20));
+                    bg.setCornerRadius(dip2px(3));
+                    lifedisplay.lifeView = new android.widget.TextView(ctx);
+                    lifedisplay.lifeView.setTypeface(Utils.font);
+                    lifedisplay.lifeView.setTextColor(android.graphics.Color.WHITE);
+                    lifedisplay.lifeView.setBackground(bg);
+                    lifedisplay.lifeView.setText(text);
+                    lifedisplay.lifeGui = new android.widget.PopupWindow(lifedisplay.lifeView, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+                    lifedisplay.lifeGui.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                    lifedisplay.lifeGui.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, 0, 0);
+                } else {
+                    lifedisplay.lifeView.setText(text);
+                }
+            }
+        }));
+
+    },
+    onClick: function (btn) {
+        this.state = !this.state;
+        if(!this.state) 
+        ctx.runOnUiThread(new java.lang.Runnable({
+            run: function () {
+                lifedisplay.lifeGui.dismiss();
+            }
+        }));
+    },
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(lifedisplay);
 /*
 var statehack = {
 	name: "Hack",
