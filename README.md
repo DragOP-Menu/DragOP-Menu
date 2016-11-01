@@ -7,7 +7,7 @@ A Hacked Client / mod menu for MCPE inspired by many other mod menus and PC Hack
 - [ ] New menu (Cater)
  - [ ] Add a category parameter to every Module
  - [ ] Finish the Menu itself
- - [ ] Add the Category Types: Movement, Combat, Render, Misc
+ - [x] Add the Category Types: Movement, Combat, Render, Misc
 - [ ] DragOP Cash
 - [ ] DragOP Shop
 - [ ] Buyable Themes
