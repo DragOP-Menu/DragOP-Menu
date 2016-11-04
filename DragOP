@@ -739,12 +739,10 @@ var Utils = {
 		},
 		getNearestEntity(maxrange, bypass) {
 			var mobs = Utils.Entity.getAll();
-			//clientMessage(mobs.length);
 			var players = Server.getAllPlayers();
 
 			var small = maxrange;
 			var ent = null;
-			/*if(mobs.length > 500)clientMessage("lag found: "+mobs.length);*/
 			var much = 0;
 
 			mobs.forEach(function (entry) {
@@ -819,9 +817,7 @@ var UpdateManager = {
 			DragOP.ctoast("You are using an unsupported Launcher. The auto updater wont work");
 			return;
 		}
-		this.downloadStableInfo();
-		//this.downloadDevInfo ();
-		//this.checkForUpdate();
+		this.downloadStableInfo();   
 	},
 	downloadStableInfo: function () {
 		Utils.Url.getUrlContents("https://api.github.com/repos/DragOP-Menu/DragOP-Menu/releases/latest", function (cont, err) {
@@ -861,17 +857,12 @@ DragOP.addCode = function (code) {
 DragOP.setLString = function (code, lang, value) {
 		var done = false;
 		l[0].forEach(function (entry, index, array) {
-			if(entry.toLowerCase() == code.toLowerCase()) {
+			if(done == false && entry.toLowerCase() == code.toLowerCase()) {
 				l[lang][index] = value;
 				done = true;
 			}
 		});
-		if(done) return;
-		//DragOP.addCode(code);
-		//l[0].push(code+"".toLowerCase());
-		//DragOP.setLString(code, lang, value);
-	}
-	//DragOP.addCode(code);
+}
 DragOP.addCode("special.shop");
 DragOP.addCode("special.panic");
 DragOP.addCode("special.target");
@@ -948,8 +939,7 @@ DragOP.setLString("screen.settings", lc.en_US, "Settings");
 DragOP.setLString("screen.updatemgr", lc.en_US, "Update Manager");
 //German
 DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
-/*DragOP.setLString("hacks.speed", lc.de_DE, "Schnelligkeit");Schnelligkeit is bad*/
-DragOP.setLString("hacks.jumpspeed", lc.de_DE, "HasenTempo"); //Why not using bunnyspeed? :)
+DragOP.setLString("hacks.jumpspeed", lc.de_DE, "HasenTempo"); 
 DragOP.setLString("hacks.autojump", lc.de_DE, "Automatisches\nSpringen");
 DragOP.setLString("hacks.jesus", lc.de_DE, "Wasserlauf");
 DragOP.setLString("hacks.flight", lc.de_DE, "Fliegen");
@@ -962,7 +952,6 @@ DragOP.setLString("moddialog.description", lc.de_DE, "Beschreibung");
 DragOP.setLString("moddialog.type", lc.de_DE, "Typ");
 
 DragOP.getL = function () {
-	//Todo
 	return l[1];
 }
 
@@ -1095,14 +1084,12 @@ DragOP.showModDialog = function (mod) {
 				var modSettings = new android.widget.LinearLayout(ctx);
 				modSettings.setOrientation(1);
 				if(mod.getSettingsLayout) {
-					//modSettings = mod.Layout();
 					var params = new android.widget.LinearLayout.LayoutParams(mwidth, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
 					var line = new android.widget.TextView(ctx);
 					line.setText("");
 					var gradientLine = new android.graphics.drawable.GradientDrawable();
 					gradientLine.setShape(android.graphics.drawable.GradientDrawable.LINE);
 					gradientLine.setColor(android.graphics.Color.TRANSPARENT);
-					//gradientLine.setCornerRadius(dip2px(100));
 					gradientLine.setStroke(dip2px(1), android.graphics.Color.argb(50, 0, 0, 0));
 					line.setBackground(gradientLine);
 					line.setGravity(android.view.Gravity.CENTER);
@@ -1129,8 +1116,6 @@ DragOP.showModDialog = function (mod) {
 				//layout alignement....
 				var dialogLayout = new android.widget.RelativeLayout(ctx);
 				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
-				//dialogLayout.setGravity(android.view.Gravity.CENTER);
-				//dialogLayout.setOrientation(LinearLayout.VERTICAL);
 				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				dialogLayout.addView(modTitle, params);
@@ -1238,7 +1223,6 @@ var friendMgr = {
 							params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 
 							params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
-							//params.addRule(android.widget.RelativeLayout.RIGHT_OF, Fname.getId());
 							layout.addView(del, params);
 							list.addView(layout);
 						}
@@ -1252,7 +1236,6 @@ var friendMgr = {
 					FriendManager.loadFromFile();
 					//default content
 					var title = new android.widget.TextView(ctx);
-					//modTitle.setText(android.text.Html.fromHtml("<u>" + mod.name + "</u>"));
 					title.setText(DragOP.getLString("special.friend_manager"));
 					title.setTextSize(dip2px(20));
 					title.setGravity(android.view.Gravity.CENTER);
@@ -1331,7 +1314,6 @@ var friendMgr = {
 						params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 
 						params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
-						//params.addRule(android.widget.RelativeLayout.RIGHT_OF, Fname.getId());
 						layout.addView(del, params);
 						list.addView(layout);
 					}
@@ -1346,8 +1328,6 @@ var friendMgr = {
 					//layout alignement....
 					var dialogLayout = new android.widget.RelativeLayout(ctx);
 					dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
-					//dialogLayout.setGravity(android.view.Gravity.CENTER);
-					//dialogLayout.setOrientation(LinearLayout.VERTICAL);
 					var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 					params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 					dialogLayout.addView(title, params);
@@ -1367,7 +1347,6 @@ var friendMgr = {
 					dialog.getWindow()
 						.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 					dialog.setContentView(dialogLayout);
-					//dialog.setTitle(mod.name);
 					dialog.setOnDismissListener(new android.content.DialogInterface.OnDismissListener({
 						onDismiss: function () {
 							showMenu();
@@ -3865,7 +3844,6 @@ var modBtn = function (mod) {
 	btn1.setTransformationMethod(null);
 	var txt = eval("new String(\"" + "\\" + "uD83D" + "\\" + "uDD3D\")");
 	btn1.setText(txt + "");
-	//btn1.setBackground(null);
 	if(!DragOP.lightMode)
 		btn1.setBackgroundColor(android.graphics.Color.argb(100, 0, 0, 0));
 	btn1.setOnClickListener(new android.view.View.OnClickListener({
@@ -3899,7 +3877,6 @@ var modBtn = function (mod) {
 	modButtonLayoutRight.addView(btn1);
 
 	mod.onRefresh(btn);
-	//btn.setLayoutParams(new android.widget.TableLayout.LayoutParams(mwidth/2, android.widget.TableLayout.LayoutParams.WRAP_CONTENT, 1));
 	return modButtonLayout;
 };
 
@@ -4083,12 +4060,10 @@ function showNavigatorMenu() {
 				sbar.addView(search, new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
 				sbar.setId(39472);
 				mlist = new android.widget.LinearLayout(ctx);
-				//mlist.setGravity(android.view.Gravity.TOP);
 				mlist.setId(20372);
 				mlist.addView(DragOP.generateMenu(search.getText() + ""));
 				var lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 
-				//lparam.addRule(android.widget.RelativeLayout.BELOW, toplayout.getChildAt(0).getId());
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
 				var toplayout = new android.widget.RelativeLayout(ctx);
@@ -4099,11 +4074,9 @@ function showNavigatorMenu() {
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_RIGHT, toplayout.getChildAt(0).getId());
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_LEFT, toplayout.getChildAt(0).getId());
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
-				//lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
 				mlist.setLayoutParams(lparam);
 				mlist.setId(563729);
 				toplayout.addView(mlist);
-				//toplayout.setBackground(null);
 
 				//Side stuff
 				var sideLayout = new android.widget.RelativeLayout(ctx);
@@ -4136,7 +4109,6 @@ function showNavigatorMenu() {
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
-				//sideLayout.addView(cashText, InParam);
 				InParam = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
@@ -4144,7 +4116,6 @@ function showNavigatorMenu() {
 				sideLayout.addView(dashBtn, InParam);
 
 				var sideParams = new android.widget.RelativeLayout.LayoutParams(ctx.getWindowManager().getDefaultDisplay().getWidth() / 100 * 15, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
-				//cashParams.addRule(android.widget.RelativeLayout.LEFT_OF, mlist.getId());
 				sideParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				sideParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 
@@ -4313,8 +4284,6 @@ function openSettingScreen() {
 				//layout alignement....
 				var dialogLayout = new android.widget.RelativeLayout(ctx);
 				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
-				//dialogLayout.setGravity(android.view.Gravity.CENTER);
-				//dialogLayout.setOrientation(LinearLayout.VERTICAL);
 				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
@@ -4483,8 +4452,6 @@ function openUpdateMgrScreen() {
 				//layout alignement....
 				var dialogLayout = new android.widget.RelativeLayout(ctx);
 				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
-				//dialogLayout.setGravity(android.view.Gravity.CENTER);
-				//dialogLayout.setOrientation(LinearLayout.VERTICAL);
 				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
@@ -4621,8 +4588,6 @@ function openABoard() {
 				//layout alignement....
 				var dialogLayout = new android.widget.RelativeLayout(ctx);
 				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
-				//dialogLayout.setGravity(android.view.Gravity.CENTER);
-				//dialogLayout.setOrientation(LinearLayout.VERTICAL);
 				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
@@ -4728,7 +4693,6 @@ function showMenuBtn() {
 			try {
 				menuBtn.setText("D");
 				menuBtn.setTypeface(Utils.font);
-				//menuBtn.setBackgroundDrawable(new android.graphics.drawable.BitmapDrawable(bg));
 				menuBtn.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (viewarg) {
 						showMenu();
@@ -4871,7 +4835,6 @@ function rptask() {
 									editor.commit();
 									DragOP.ctoast("Achievement get: Break DragOP", true, android.R.drawable.star_big_off);
 								}
-								//							DragOP.ctoast("MODI ACTIVATED");
 							}
 							if(DragOP.modi && menu != null && menu.isShowing())
 								menu.dismiss();
@@ -4946,7 +4909,6 @@ function useItem(x, y, z, itemid, blockid, side, itemDamage, blockDamage) {
 
 function newLevel() {
 	DragOP.inGame = true;
-	//DEBUG: DragOP.ctoast("Achievement get: Scroll 1 km", true, android.R.drawable.star_big_off);
 }
 
 function leaveGame() {
@@ -4957,11 +4919,9 @@ function leaveGame() {
 function entityAddedHook(ent) {
 	if(Entity.getMobSkin(ent) != "mob/char.png") Utils.Entity.allEntitys.push(ent);
 	else Utils.Entity.charEnts.push(ent);
-	//clientMessage("Entity added count:"+Utils.Entity.getAll().length);
 }
 
 function entityRemovedHook(ent) {
-	//clientMessage("Entity removed("+Entity.getNameTag(ent));
 	Utils.Entity.charEnts.forEach(function (entry, index, array) {
 		if(entry == ent) Utils.Entity.charEnts.splice(index, 1);
 
@@ -4992,5 +4952,4 @@ function modTick() {
 
 function screenChangeHook(screen) {
 	Utils.currentScreen = screen;
-	//DragOP.ctoast(screen);
 }
