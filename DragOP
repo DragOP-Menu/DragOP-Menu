@@ -53,7 +53,7 @@ var Settings = {
 	settings: new org.json.JSONObject(),
 	resetConfig: function () {
 		this.settings = new org.json.JSONObject();
-		this.setString("menu", "Navigator"); //Navigator, Basic, TabGUI (Comming soon)
+		this.setString("menu", "Navigator"); //Navigator, Basic, Cater (Comming soon)
 
 		this.setBoolean("enable_commands", true);
 		this.setString("command_prefix", ".");
@@ -262,7 +262,6 @@ var Themes = {
 	DEFAULT: {
 		font: android.os.Build.VERSION.SDK_INT >= 17 ? android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL) : android.graphics.Typeface.DEFAULT,
 		ModButton: {
-
 			Neutral: {
 				textColor: android.graphics.Color.WHITE,
 				background: getStyledBtnBackground(false, false)
@@ -331,7 +330,6 @@ var Utils = {
 	currentSearchCount: 0,
 	font: android.os.Build.VERSION.SDK_INT >= 17 ? android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL) : android.graphics.Typeface.DEFAULT,
 	Render: {
-
 		getFloatBuffer: function (fArray) {
 			var bBuffer = java.nio.ByteBuffer.allocateDirect(fArray.length * 4);
 			bBuffer.order(java.nio.ByteOrder.nativeOrder());
@@ -377,20 +375,16 @@ var Utils = {
 					gl.glEnable(GL10.GL_DEPTH_TEST);
 					gl.glDepthFunc(GL10.GL_LEQUAL);
 					gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
-					//DragOP.ctoast("created");
 				},
 				onSurfaceChanged: function (gl, width, height) {
-					//DragOP.ctoast("Changing...");
 					var GL10 = javax.microedition.khronos.opengles.GL10;
 					gl.glMatrixMode(GL10.GL_PROJECTION);
 					gl.glLoadIdentity();
 					android.opengl.GLU.gluPerspective(gl, Utils.Render.fov, width / height, 0.1, 100);
 					gl.glMatrixMode(GL10.GL_MODELVIEW);
 					gl.glLoadIdentity();
-					//DragOP.ctoast("changed");
 				},
 				onDrawFrame: function (gl) {
-					//DragOP.ctoast("Drawing...");
 					var GL10 = javax.microedition.khronos.opengles.GL10;
 					gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 					gl.glLoadIdentity();
@@ -418,7 +412,6 @@ var Utils = {
 								try {
 									if((!entry.isStateMode() || entry.state) && entry.hasOwnProperty("onRender"))
 										entry.onRender(gl);
-									//gl.glTranslatef(0,0,0);
 								} catch(e) {}
 							});
 						} catch(e) {
@@ -483,8 +476,6 @@ var Utils = {
 			var indexBuffer = Utils.Render.getShortBuffer(indices);
 			gl.glTranslatef(x, y, z);
 			gl.glFrontFace(GL10.GL_CCW);
-			//gl.glEnable(GL10.GL_CULL_FACE);
-			//gl.glCullFace(GL10.GL_BACK);
 			gl.glEnable(GL10.GL_BLEND);
 			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 			gl.glLineWidth(4);
@@ -660,7 +651,6 @@ var Utils = {
 			if(Math.round(z * 100) == 30) blockZ--;
 			if(Math.round(x * 100) == 70) blockX++;
 			if(Math.round(z * 100) == 70) blockZ++;
-			//clientMessage(blockX+";"+blockZ);
 			if(getTile(blockX, getPlayerY(), blockZ) == 0 && getTile(blockX, getPlayerY() - 1, blockZ) == 0 && getTile(blockX, getPlayerY() - 0.5, blockZ) == 0 && getTile(blockX, getPlayerY() + 0.2, blockZ) == 0 && getTile(blockX, getPlayerY() - 1.6, blockZ) == 0) return false;
 
 			if(Block.getDestroyTime(getTile(blockX, getPlayerY() - 1, blockZ)) <= 0.1 && Block.getDestroyTime(getTile(blockX, getPlayerY(), blockZ)) <= 0.1) return false;
@@ -849,7 +839,7 @@ var UpdateManager = {
 		}
 	}
 };
-//UpdateManager.init();
+UpdateManager.init();
 
 DragOP.addCode = function (code) {
 	l[0].push(code);
