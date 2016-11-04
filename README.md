@@ -11,6 +11,10 @@ A Hacked Client / mod menu for MCPE inspired by many other mod menus and PC Hack
 - [ ] DragOP Cash
 - [ ] DragOP Shop
 - [ ] Buyable Themes
+- [ ] Advanced Bug Handling
+ - [ ] Console (with log output & error stack traces)
+ - [ ] Policy which errors should be shown and which not
+ - [ ] Bug-Report dialog with all needed informations
 
 
 Hey, why the fuck are you looking here?  
