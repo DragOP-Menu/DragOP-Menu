@@ -1605,7 +1605,7 @@ var aimaura = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function () {
+	onModTick: function () {
 		if(this.state) {
 			try {
 				var ent = Utils.Entity.getNearestEntity(this.range, true);
@@ -1854,7 +1854,7 @@ var speed = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function () {
+	onModTick: function () {
 		if(this.state && Utils.Player.onGround()) {
 			switch(Utils.speedMode) {
 			case SpeedMode.DEFAULT:
@@ -2146,7 +2146,7 @@ var nodownglide = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function () {
+	onModTick: function () {
 		if(this.state) {
 			setVelY(getPlayerEnt(), -0.000000000001);
 			Entity.setPositionRelative(getPlayerEnt(), 0, this.startY - getPlayerY(), 0);
@@ -2265,7 +2265,7 @@ var glide = {
 		setVelY(getPlayerEnt(), -4);
 
 	},
-	onTick: function () {
+	onModTick: function () {
 		if(this.state && !Player.isFlying() && !Utils.Player.isInWater()) {
 			switch(Utils.bypassMode) {
 			case BypassMode.DEFAULT:
@@ -2876,7 +2876,7 @@ var nuker = {
 	},
 	done: true,
 	radius: 2,
-	onTick: function () {
+	onModTick: function () {
 		if(this.state == true && this.done == true) {
 			var t = new java.lang.Thread(new java.lang.Runnable({
 				run: function () {
@@ -2928,7 +2928,7 @@ var velocity = {
 
 		if(this.lastHealth > Entity.getHealth(getPlayerEnt())) {
 			Entity.setImmobile(getPlayerEnt(), true);
-			this.attackTick = 2;
+			this.attackTick = 1;
 		}
 
 		this.lastHealth = Entity.getHealth(getPlayerEnt());
@@ -2937,7 +2937,7 @@ var velocity = {
 		if(!this.state || (vic != getPlayerEnt()))
 			return;
 		Entity.setImmobile(getPlayerEnt(), true);
-		this.attackTick = 2;
+		this.attackTick = 1;
 	},
 	onClick: function (btn) {
 		this.state = !this.state
@@ -4835,7 +4835,7 @@ function rptask() {
 
 						}
 					}));
-				java.lang.Thread.sleep(15);
+				java.lang.Thread.sleep(50);
 			}
 		}
 	}));
