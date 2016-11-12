@@ -44,7 +44,7 @@ DragOP.finishedBreak = false;
 })();
 
 function dip2px(dips) {
-	var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+	let ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 	return Math.ceil(dips * ctx.getResources()
 		.getDisplayMetrics()
 		.density);
@@ -119,10 +119,10 @@ var CommandManager = {
 	cmdBlacklist: ["login", "log", "legit", "register", "reg"],
 	onCommand: function (cmd) {
 		cmd = cmd.split(" ");
-		var command = cmd.shift().toLowerCase();
-		var args = cmd;
-		var module = null;
-		var found = false;
+		let command = cmd.shift().toLowerCase();
+		let args = cmd;
+		let module = null;
+		let found = false;
 		this.cmdNames.forEach(function (entry, index) {
 			if(found == false) {
 				entry.forEach(function (entry2) {
@@ -155,7 +155,7 @@ var CommandManager = {
 var FriendManager = {
 	all: new org.json.JSONArray(),
 	isFriend: function (name) {
-		var is = false;
+		let is = false;
 		if(name == null) return false;
 		var cname = Utils.Text.clean(name.toString().toLowerCase());
 
@@ -166,10 +166,10 @@ var FriendManager = {
 	},
 	loadFromFile: function () {
 		try {
-			var file = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP/", "friends.dat");
-			var readed = (new java.io.BufferedReader(new java.io.FileReader(file)));
-			var data = new java.lang.StringBuilder();
-			var string;
+			let file = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP/", "friends.dat");
+			let readed = (new java.io.BufferedReader(new java.io.FileReader(file)));
+			let data = new java.lang.StringBuilder();
+			let string;
 			while((string = readed.readLine()) != null) {
 				data.append(string);
 
@@ -250,7 +250,7 @@ var SpeedMode = {
 	LONGJUMP: 2
 };
 var getStyledBtnBackground = function (state, toggleable) {
-	var bg = android.graphics.drawable.GradientDrawable();
+	let bg = android.graphics.drawable.GradientDrawable();
 	bg.setCornerRadius(1);
 	bg.setColor(android.graphics.Color.argb(80, 0, 0, 0));
 	if(state) bg.setColor(android.graphics.Color.argb(210, 0, 200, 0));
@@ -442,7 +442,7 @@ var Utils = {
 		drawBox: function (gl, x, y, z, xsize, ysize, zsize) {
 			if(!DragOP.enableOpenGL)
 				return;
-			var GL10 = javax.microedition.khronos.opengles.GL10;
+			let GL10 = javax.microedition.khronos.opengles.GL10;
 			var size = new Array(xsize, ysize, zsize);
 			var vertices = [
 				0, 0, 0,
@@ -488,7 +488,7 @@ var Utils = {
 		drawLine: function (gl, x, y, z, x2, y2, z2) {
 			if(!DragOP.enableOpenGL)
 				return;
-			var GL10 = javax.microedition.khronos.opengles.GL10;
+			let GL10 = javax.microedition.khronos.opengles.GL10;
 			var size = new Array(x2, y2, z2);
 			var vertices = [
 				0, 0, 0,
@@ -1004,7 +1004,7 @@ DragOP.pxToMeter = function (px) {
 }
 
 DragOP.getMetersScrolled = function () {
-	var justScrolled = DragOP.pxToMeter(DragOP.xScrolled + DragOP.yScrolled);
+	let justScrolled = DragOP.pxToMeter(DragOP.xScrolled + DragOP.yScrolled);
 	justScrolled += DragOP.metersScrolled;
 	editor.putInt("DragOP.egg.metersScrolled", justScrolled);
 	editor.commit();
@@ -1013,7 +1013,7 @@ DragOP.getMetersScrolled = function () {
 }
 
 DragOP.scrollView = function (context) {
-	var scrollView = new android.widget.ScrollView(context);
+	let scrollView = new android.widget.ScrollView(context);
 
 	try {
 		if(android.os.Build.VERSION.SDK_INT > 22)
@@ -4642,7 +4642,7 @@ function refreshMenu() {
 	if(mlist != null) {
 		mlist.removeAllViewsInLayout();
 		var genmenu = DragOP.generateMenu(search.getText() + "");
-		if (mlist != null)mlist.addView(genmenu);
+		mlist.addView(genmenu);
 	}
 }
 DragOP.mt = ModuleType;
