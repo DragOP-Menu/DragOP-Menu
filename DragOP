@@ -698,30 +698,29 @@ var Utils = {
 				}
 				if(Entity.getEntityTypeId(ent) != 63)
 					y += 0.5;
-				var a = 0.5 + Entity.getX(ent);
-				var b = Entity.getY(ent);
-				var c = 0.5 + Entity.getZ(ent);
+				
 				var len = Math.sqrt(x * x + y * y + z * z);
 				var y = y / len;
 				var pitch = Math.asin(y);
-				pitch = pitch * 180.0 / Math.PI;
+				var deg_rad = 180 / Math.PI;
+				pitch = pitch * deg_rad;
 				pitch = -pitch;
-				var yaw = -Math.atan2(a - (Player.getX() + 0.5), c - (Player.getZ() + 0.5)) * (180 / Math.PI);
+				var yaw = -Math.atan2(x , z ) * deg_rad;
 				if(pitch < 89 && pitch > -89) {
 					Entity.setRot(Player.getEntity(), yaw, pitch);
 				}
 			}
 		},
 		bowAimAt: function (ent) {
-			var velocity = 1;
+			var deg_rad = 180 / Math.PI;
 			var posX = Entity.getX(ent) - Player.getX();
 			var posY = Entity.getEntityTypeId(ent) == EntityType.PLAYER ? Entity.getY(ent) - Player.getY() : Entity.getY(ent) + 1 - Player.getY();
 			var posZ = Entity.getZ(ent) - Player.getZ();
-			var yaw = (Math.atan2(posZ, posX) * 180 / Math.PI) - 90;
-			var y2 = Math.sqrt(posX * posX + posZ * posZ);
+			var yaw = (Math.atan2(posZ, posX) * deg_rad) - 90;
+			var len = Math.sqrt(posX * posX + posZ * posZ);
 			var g = 0.007;
-			var tmp = (velocity * velocity * velocity * velocity - g * (g * (y2 * y2) + 2 * posY * (velocity * velocity)));
-			var pitch = -(180 / Math.PI) * (Math.atan((velocity * velocity - Math.sqrt(tmp)) / (g * y2)));
+			var tmp = (1 - g * (g * (Math.pow (len, 2)) + 2 * posY));
+			var pitch = deg_rad * -(Math.atan((1 - Math.sqrt(tmp)) / (g * len)));
 			if(pitch < 89 && pitch > -89) {
 				setRot(Player.getEntity(), yaw, pitch);
 			}
@@ -743,7 +742,7 @@ var Utils = {
 
 				var cancel = false;
 
-				if(bypass && y > 1) {
+				if(bypass && y > 0.8) {
 					var xVel = Entity.getVelX(entry);
 					var yVel = Entity.getVelY(entry);
 					var zVel = Entity.getVelZ(entry);
@@ -1568,6 +1567,7 @@ var aimaura = {
 	type: ModuleType.mod,
 	state: false,
 	range: 7,
+	requestAim: false,
 	getSettingsLayout: function (params) {
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
@@ -1607,18 +1607,34 @@ var aimaura = {
 	},
 	onModTick: function () {
 		if(this.state) {
-			try {
-				var ent = Utils.Entity.getNearestEntity(this.range, true);
-			} catch(e) {
-				DragOP.ctoast(e);
-			}
-			if(ent != null) Utils.Entity.crosshairAimAt(ent);
+			this.requestAim = true;
+			
 		}
 	},
-	onEnable: function (btn) { /*Not used*/ },
-	onDisable: function (btn) { /*Not used*/ },
 	onClick: function (btn) {
 		this.state = !this.state;
+		if (this.state){
+			var r = new java.lang.Runnable({
+				run: function(){
+					while (aimaura.state){
+						if (aimaura.requestAim){
+							aimaura.requestAim = false;
+							try {
+								let ent = Utils.Entity.getNearestEntity(aimaura.range, true);
+								if(ent != null) Utils.Entity.crosshairAimAt(ent);
+							} catch(e) {
+								DragOP.ctoast(e);
+								aimaura.state = false;
+							}
+							
+						}else 
+							java.lang.Thread.sleep(10);
+					}
+				}
+			});
+			var t = new java.lang.Thread (r);
+			t.start ();
+		}
 	},
 	onRefresh: function (btn) {
 		if(btn != null)
@@ -4625,7 +4641,8 @@ function openABoard() {
 function refreshMenu() {
 	if(mlist != null) {
 		mlist.removeAllViewsInLayout();
-		mlist.addView(DragOP.generateMenu(search.getText() + ""));
+		var genmenu = DragOP.generateMenu(search.getText() + "");
+		if (mlist != null)mlist.addView(genmenu);
 	}
 }
 DragOP.mt = ModuleType;
