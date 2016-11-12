@@ -61,10 +61,10 @@ var Settings = {
 	},
 	loadFromFile: function () {
 		try {
-			var file = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP/", "config.dat");
-			var readed = (new java.io.BufferedReader(new java.io.FileReader(file)));
-			var data = new java.lang.StringBuilder();
-			var string;
+			let file = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP/", "config.dat");
+			let readed = (new java.io.BufferedReader(new java.io.FileReader(file)));
+			let data = new java.lang.StringBuilder();
+			let string;
 			while((string = readed.readLine()) != null) {
 				data.append(string);
 
@@ -82,11 +82,11 @@ var Settings = {
 		}
 	},
 	saveToFile: function () {
-		var dir = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP");
+		let dir = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP");
 		if(!dir.exists()) dir.mkdir();
-		var file = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP/", "config.dat");
+		let file = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP/", "config.dat");
 		if(!file.exists()) file.createNewFile();
-		var stream = new java.io.FileOutputStream(file);
+		let stream = new java.io.FileOutputStream(file);
 		try {
 			stream.write(this.settings.toString().getBytes());
 		} finally {
@@ -157,9 +157,9 @@ var FriendManager = {
 	isFriend: function (name) {
 		let is = false;
 		if(name == null) return false;
-		var cname = Utils.Text.clean(name.toString().toLowerCase());
+		let cname = Utils.Text.clean(name.toString().toLowerCase());
 
-		for(var i = 0; i < this.all.length(); i++) {
+		for(let i = 0; i < this.all.length(); i++) {
 			if(cname.toString().toLowerCase() == this.all.getString(i).toLowerCase()) is = true;
 		}
 		return is;
@@ -184,11 +184,11 @@ var FriendManager = {
 		}
 	},
 	saveToFile: function () {
-		var dir = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP");
+		let dir = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP");
 		if(!dir.exists()) dir.mkdir();
-		var file = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP/", "friends.dat");
+		let file = new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/DragOP/", "friends.dat");
 		if(!file.exists()) file.createNewFile();
-		var stream = new java.io.FileOutputStream(file);
+		let stream = new java.io.FileOutputStream(file);
 		try {
 			stream.write(this.all.toString().getBytes());
 		} finally {
@@ -200,8 +200,8 @@ var FriendManager = {
 		this.saveToFile();
 	},
 	removeFriend: function (name) {
-		var tempall = new org.json.JSONArray();
-		for(var i = 0; i < this.all.length(); i++) {
+		let tempall = new org.json.JSONArray();
+		for(let i = 0; i < this.all.length(); i++) {
 			if(this.all.getString(i).toLowerCase() != name.toString().toLowerCase()) tempall.put(this.all.getString(i));
 		}
 		this.all = tempall;
@@ -284,13 +284,13 @@ DragOP.cmsg = function (text) {
 }
 DragOP.ctoast = function (text, showPrefix, iconName) {
 	try {
-		var ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
+		let ctx = com.mojang.minecraftpe.MainActivity.currentMainActivity.get();
 		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function () {
-				var thetoast = android.widget.Toast.makeText(com.mojang.minecraftpe.MainActivity.currentMainActivity.get(), "" + text, android.widget.Toast.LENGTH_LONG);
-				var layout = new android.widget.LinearLayout(ctx);
-				var icon = new android.widget.ImageView(ctx);
-				var msg = new android.widget.TextView(ctx);
+				let thetoast = android.widget.Toast.makeText(com.mojang.minecraftpe.MainActivity.currentMainActivity.get(), "" + text, android.widget.Toast.LENGTH_LONG);
+				let layout = new android.widget.LinearLayout(ctx);
+				let icon = new android.widget.ImageView(ctx);
+				let msg = new android.widget.TextView(ctx);
 				if(showPrefix || showPrefix == null) text = "DragOP: " + text;
 				try {
 					if(iconName != null) {
@@ -305,7 +305,7 @@ DragOP.ctoast = function (text, showPrefix, iconName) {
 				msg.setTextSize(20);
 				msg.setPadding(10, 10, 10, 10);
 				msg.setTextColor(android.graphics.Color.WHITE);
-				var bg = new android.graphics.drawable.GradientDrawable();
+				let bg = new android.graphics.drawable.GradientDrawable();
 				bg.setColor(android.graphics.Color.argb(150, 50, 50, 50));
 				bg.setStroke(dip2px(5), android.graphics.Color.argb(200, 5, 5, 5));
 				bg.setCornerRadius(dip2px(20));
@@ -331,19 +331,19 @@ var Utils = {
 	font: android.os.Build.VERSION.SDK_INT >= 17 ? android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL) : android.graphics.Typeface.DEFAULT,
 	Render: {
 		getFloatBuffer: function (fArray) {
-			var bBuffer = java.nio.ByteBuffer.allocateDirect(fArray.length * 4);
+			let bBuffer = java.nio.ByteBuffer.allocateDirect(fArray.length * 4);
 			bBuffer.order(java.nio.ByteOrder.nativeOrder());
 
-			var fBuffer = bBuffer.asFloatBuffer();
+			let fBuffer = bBuffer.asFloatBuffer();
 			fBuffer.put(fArray);
 			fBuffer.position(0);
 			return fBuffer;
 		},
 		getShortBuffer: function (sArray) {
-			var bBuffer = java.nio.ByteBuffer.allocateDirect(sArray.length * 2);
+			let bBuffer = java.nio.ByteBuffer.allocateDirect(sArray.length * 2);
 			bBuffer.order(java.nio.ByteOrder.nativeOrder());
 
-			var sBuffer = bBuffer.asShortBuffer();
+			let sBuffer = bBuffer.asShortBuffer();
 			sBuffer.put(sArray);
 			sBuffer.position(0);
 			return sBuffer;
@@ -356,11 +356,11 @@ var Utils = {
 			if(!DragOP.enableOpenGL)
 				return;
 
-			var options = Utils.File.getTextFromFile(new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/", "options.txt"));
+			let options = Utils.File.getTextFromFile(new java.io.File(android.os.Environment.getExternalStorageDirectory() + "/games/com.mojang/minecraftpe/", "options.txt"));
 
 			options = options.split("\n");
 			options.forEach(function (entry) {
-				var suboption = entry.split(":");
+				let suboption = entry.split(":");
 				if(suboption[0] == "gfx_field_of_view") {
 					Utils.Render.fov = suboption[1];
 
@@ -368,7 +368,7 @@ var Utils = {
 			});
 			this.renderer = new android.opengl.GLSurfaceView.Renderer({
 				onSurfaceCreated: function (gl, config) {
-					var GL10 = javax.microedition.khronos.opengles.GL10;
+					let GL10 = javax.microedition.khronos.opengles.GL10;
 					gl.glClearColor(0, 0, 0, 0);
 					gl.glShadeModel(GL10.GL_SMOOTH);
 					gl.glClearDepthf(1.0);
@@ -377,7 +377,7 @@ var Utils = {
 					gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
 				},
 				onSurfaceChanged: function (gl, width, height) {
-					var GL10 = javax.microedition.khronos.opengles.GL10;
+					let GL10 = javax.microedition.khronos.opengles.GL10;
 					gl.glMatrixMode(GL10.GL_PROJECTION);
 					gl.glLoadIdentity();
 					android.opengl.GLU.gluPerspective(gl, Utils.Render.fov, width / height, 0.1, 100);
@@ -385,26 +385,26 @@ var Utils = {
 					gl.glLoadIdentity();
 				},
 				onDrawFrame: function (gl) {
-					var GL10 = javax.microedition.khronos.opengles.GL10;
+					let GL10 = javax.microedition.khronos.opengles.GL10;
 					gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 					gl.glLoadIdentity();
 
 					if(playerEsp.state || chesttracers.state || tracers.state) {
 						try {
 							gl.glDisable(GL10.GL_LIGHTING);
-							var yaw = getYaw() % 360;
-							var pitch = getPitch() % 360;
-							var eyeX = getPlayerX();
-							var eyeY = getPlayerY() + 1;
-							var eyeZ = getPlayerZ();
+							let yaw = getYaw() % 360;
+							let pitch = getPitch() % 360;
+							let eyeX = getPlayerX();
+							let eyeY = getPlayerY() + 1;
+							let eyeZ = getPlayerZ();
 
-							var dCenterX = Math.sin(yaw / 180 * Math.PI);
-							var dCenterZ = Math.cos(yaw / 180 * Math.PI);
-							var dCenterY = Math.sqrt(dCenterX * dCenterX + dCenterZ * dCenterZ) * Math.tan((pitch - 180) / 180 * Math.PI);
+							let dCenterX = Math.sin(yaw / 180 * Math.PI);
+							let dCenterZ = Math.cos(yaw / 180 * Math.PI);
+							let dCenterY = Math.sqrt(dCenterX * dCenterX + dCenterZ * dCenterZ) * Math.tan((pitch - 180) / 180 * Math.PI);
 
-							var centerX = eyeX - dCenterX;
-							var centerZ = eyeZ + dCenterZ;
-							var centerY = eyeY - dCenterY;
+							let centerX = eyeX - dCenterX;
+							let centerZ = eyeZ + dCenterZ;
+							let centerY = eyeY - dCenterY;
 
 							android.opengl.GLU.gluLookAt(gl, eyeX, eyeY, eyeZ, centerX, centerY, centerZ, 0, 1.0, 0);
 
@@ -443,8 +443,8 @@ var Utils = {
 			if(!DragOP.enableOpenGL)
 				return;
 			let GL10 = javax.microedition.khronos.opengles.GL10;
-			var size = new Array(xsize, ysize, zsize);
-			var vertices = [
+			let size = new Array(xsize, ysize, zsize);
+			let vertices = [
 				0, 0, 0,
 				size[0], 0, 0,
 				0, 0, size[2],
@@ -455,8 +455,8 @@ var Utils = {
 				0, size[1], size[2],
 				size[0], size[1], size[2]
 			];
-			var vertexBuffer = Utils.Render.getFloatBuffer(vertices);
-			var indices = [
+			let vertexBuffer = Utils.Render.getFloatBuffer(vertices);
+			let indices = [
 				0, 1,
 				0, 2,
 				0, 4,
@@ -473,7 +473,7 @@ var Utils = {
 				6, 7,
 				6, 2
 			];
-			var indexBuffer = Utils.Render.getShortBuffer(indices);
+			let indexBuffer = Utils.Render.getShortBuffer(indices);
 			gl.glTranslatef(x, y, z);
 			gl.glFrontFace(GL10.GL_CCW);
 			gl.glEnable(GL10.GL_BLEND);
@@ -489,16 +489,16 @@ var Utils = {
 			if(!DragOP.enableOpenGL)
 				return;
 			let GL10 = javax.microedition.khronos.opengles.GL10;
-			var size = new Array(x2, y2, z2);
-			var vertices = [
+			let size = new Array(x2, y2, z2);
+			let vertices = [
 				0, 0, 0,
 				x2 - x, y2 - y, z2 - z
 			];
-			var vertexBuffer = Utils.Render.getFloatBuffer(vertices);
-			var indices = [
+			let vertexBuffer = Utils.Render.getFloatBuffer(vertices);
+			let indices = [
 				0, 1
 			];
-			var indexBuffer = Utils.Render.getShortBuffer(indices);
+			let indexBuffer = Utils.Render.getShortBuffer(indices);
 			gl.glTranslatef(x, y, z);
 			gl.glEnable(GL10.GL_BLEND);
 			gl.glDepthMask(false);
@@ -521,17 +521,17 @@ var Utils = {
 	},
 	Url: {
 		getUrlContents: function (url, result) {
-			var t = new java.lang.Thread(new java.lang.Runnable({
+			let t = new java.lang.Thread(new java.lang.Runnable({
 				run: function () {
 					try {
-						var u = new java.net.URL(url);
-						var allCont = new java.lang.StringBuilder();
-						var con = u.openConnection();
+						let u = new java.net.URL(url);
+						let allCont = new java.lang.StringBuilder();
+						let con = u.openConnection();
 						con.setIfModifiedSince(0);
 						con.setRequestProperty("User-Agent", "Mozilla/5.0");
 						con.setRequestProperty("Accept-Encoding", "UTF-8");
-						var reader = new java.io.BufferedReader(new java.io.InputStreamReader(con.getInputStream(), "UTF-8"));
-						var line = "";
+						let reader = new java.io.BufferedReader(new java.io.InputStreamReader(con.getInputStream(), "UTF-8"));
+						let line = "";
 						while((line = reader.readLine()) != null)
 							allCont.append(line + "\n");
 						reader.close();
@@ -549,18 +549,18 @@ var Utils = {
 		dragopDir: android.os.Environment.getExternalStorageDirectory() + "/DragOP/",
 		getTextFromFile: function (file) {
 
-			var readed = (new java.io.BufferedReader(new java.io.FileReader(file)));
-			var data = new java.lang.StringBuilder();
-			var string;
+			let readed = (new java.io.BufferedReader(new java.io.FileReader(file)));
+			let data = new java.lang.StringBuilder();
+			let string;
 			while((string = readed.readLine()) != null)
 				data.append(string + "\n");
 			return data.toString();
 		},
 		saveTextToFile: function (file, text) {
 			if(!file.exists()) file.createNewFile();
-			var bytes = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, text.length());
-			for(var i = 0; i < text.length(); i++) bytes[i] = text.charCodeAt(i);
-			var stream = new java.io.FileOutputStream(file);
+			let bytes = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, text.length());
+			for(let i = 0; i < text.length(); i++) bytes[i] = text.charCodeAt(i);
+			let stream = new java.io.FileOutputStream(file);
 			try {
 				stream.write(bytes);
 			} finally {
@@ -571,8 +571,8 @@ var Utils = {
 	Base64: {
 		encode: function (text) {
 
-			var bytes = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, text.length());
-			for(var i = 0; i < text.length(); i++) bytes[i] = new java.lang.Byte(new String(text).charCodeAt(i));
+			let bytes = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, text.length());
+			for(let i = 0; i < text.length(); i++) bytes[i] = new java.lang.Byte(new String(text).charCodeAt(i));
 			return android.util.Base64.encodeToString(bytes, 0);
 		},
 		decode: function (text) {
@@ -581,7 +581,7 @@ var Utils = {
 	},
 	Text: {
 		clean: function (text) {
-			var allColor = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "k", "l", "m", "n", "o", "r"];
+			let allColor = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "k", "l", "m", "n", "o", "r"];
 
 			if(text != null) {
 
@@ -591,18 +591,6 @@ var Utils = {
 				return text;
 			} else
 				return "";
-		}
-	},
-	MobRender: {
-		makeInvi: function (renderer) {
-			var model = renderer.getModel();
-			model.getPart("body").clear();
-			model.getPart("rightArm").clear();
-			model.getPart("head").clear();
-			model.getPart("leftArm").clear();
-			model.getPart("rightLeg").clear();
-			model.getPart("leftLeg").clear();
-			renderer.name = "godsoft.de.Invi";
 		}
 	},
 	ModSettings: {
@@ -626,7 +614,7 @@ var Utils = {
 			return false;
 		},
 		onGround: function () {
-			var y = getPlayerY();
+			let y = getPlayerY();
 			while(y > 1) y -= 1;
 
 			if((Math.round(y * 100) >= 61 && Math.round(y * 100) <= 63) && getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()) != 0 && !Utils.Block.isLiquid(getTile(getPlayerX(), getPlayerY() - 1.65, getPlayerZ()))) return true;
@@ -634,10 +622,10 @@ var Utils = {
 			return false;
 		},
 		isCollidedHorizontally: function () {
-			var x = getPlayerX();
-			var z = getPlayerZ();
-			var blockX = Math.round(x - 0.5);
-			var blockZ = Math.round(z - 0.5);
+			let x = getPlayerX();
+			let z = getPlayerZ();
+			let blockX = Math.round(x - 0.5);
+			let blockZ = Math.round(z - 0.5);
 			while(x < 1) x += 1;
 			while(z < 1) z += 1;
 			while(x > 1) x -= 1;
@@ -687,9 +675,9 @@ var Utils = {
 		charEnts: new Array(),
 		crosshairAimAt: function (ent, pos) {
 			if(ent != null) {
-				var x = Entity.getX(ent) - getPlayerX();
-				var y = Entity.getY(ent) - getPlayerY();
-				var z = Entity.getZ(ent) - getPlayerZ();
+				let x = Entity.getX(ent) - getPlayerX();
+				let y = Entity.getY(ent) - getPlayerY();
+				let z = Entity.getZ(ent) - getPlayerZ();
 				if(pos != null && pos instanceof Array) {
 
 					x = Entity.getX(ent) - pos[0];
@@ -699,53 +687,53 @@ var Utils = {
 				if(Entity.getEntityTypeId(ent) != 63)
 					y += 0.5;
 				
-				var len = Math.sqrt(x * x + y * y + z * z);
-				var y = y / len;
-				var pitch = Math.asin(y);
-				var deg_rad = 180 / Math.PI;
+				let len = Math.sqrt(x * x + y * y + z * z);
+				y = y / len;
+				let pitch = Math.asin(y);
+				let deg_rad = 180 / Math.PI;
 				pitch = pitch * deg_rad;
 				pitch = -pitch;
-				var yaw = -Math.atan2(x , z ) * deg_rad;
+				let yaw = -Math.atan2(x , z ) * deg_rad;
 				if(pitch < 89 && pitch > -89) {
 					Entity.setRot(Player.getEntity(), yaw, pitch);
 				}
 			}
 		},
 		bowAimAt: function (ent) {
-			var deg_rad = 180 / Math.PI;
-			var posX = Entity.getX(ent) - Player.getX();
-			var posY = Entity.getEntityTypeId(ent) == EntityType.PLAYER ? Entity.getY(ent) - Player.getY() : Entity.getY(ent) + 1 - Player.getY();
-			var posZ = Entity.getZ(ent) - Player.getZ();
-			var yaw = (Math.atan2(posZ, posX) * deg_rad) - 90;
-			var len = Math.sqrt(posX * posX + posZ * posZ);
-			var g = 0.007;
-			var tmp = (1 - g * (g * (Math.pow (len, 2)) + 2 * posY));
-			var pitch = deg_rad * -(Math.atan((1 - Math.sqrt(tmp)) / (g * len)));
+			let deg_rad = 180 / Math.PI;
+			let posX = Entity.getX(ent) - Player.getX();
+			let posY = Entity.getEntityTypeId(ent) == EntityType.PLAYER ? Entity.getY(ent) - Player.getY() : Entity.getY(ent) + 1 - Player.getY();
+			let posZ = Entity.getZ(ent) - Player.getZ();
+			let yaw = (Math.atan2(posZ, posX) * deg_rad) - 90;
+			let len = Math.sqrt(posX * posX + posZ * posZ);
+			let g = 0.007;
+			let tmp = (1 - g * (g * (Math.pow (len, 2)) + 2 * posY));
+			let pitch = deg_rad * -(Math.atan((1 - Math.sqrt(tmp)) / (g * len)));
 			if(pitch < 89 && pitch > -89) {
 				setRot(Player.getEntity(), yaw, pitch);
 			}
 
 		},
 		getNearestEntity(maxrange, bypass) {
-			var mobs = Utils.Entity.getAll();
-			var players = Server.getAllPlayers();
+			let mobs = Utils.Entity.getAll();
+			let players = Server.getAllPlayers();
 
-			var small = maxrange;
-			var ent = null;
-			var much = 0;
+			let small = maxrange;
+			let ent = null;
+			let much = 0;
 
 			mobs.forEach(function (entry) {
-				var x = Entity.getX(entry) - getPlayerX();
-				var y = Entity.getY(entry) - getPlayerY();
-				var z = Entity.getZ(entry) - getPlayerZ();
+				let x = Entity.getX(entry) - getPlayerX();
+				let y = Entity.getY(entry) - getPlayerY();
+				let z = Entity.getZ(entry) - getPlayerZ();
 
 
-				var cancel = false;
+				let cancel = false;
 
 				if(bypass && y > 0.8) {
-					var xVel = Entity.getVelX(entry);
-					var yVel = Entity.getVelY(entry);
-					var zVel = Entity.getVelZ(entry);
+					let xVel = Entity.getVelX(entry);
+					let yVel = Entity.getVelY(entry);
+					let zVel = Entity.getVelZ(entry);
 					if(xVel == 0 && yVel == 0 && zVel == 0)
 						cancel = true;
 				}
@@ -754,9 +742,9 @@ var Utils = {
 				if(Entity.getEntityTypeId(entry) == 63 && Entity.getNameTag(entry) == "")
 					cancel = true;
 
-				var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+				let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
 
-				var allowed = false;
+				let allowed = false;
 				if(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(entry) == 63) allowed = true;
 				if(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(entry) < 63) allowed = true;
 
@@ -770,14 +758,14 @@ var Utils = {
 			});
 
 
-			for(var i = 0; i < players.length; i++) {
-				var x = Entity.getX(players[i]) - getPlayerX();
-				var y = Entity.getY(players[i]) - getPlayerY();
-				var z = Entity.getZ(players[i]) - getPlayerZ();
-				var allowed = false;
+			for(let i = 0; i < players.length; i++) {
+				let x = Entity.getX(players[i]) - getPlayerX();
+				let y = Entity.getY(players[i]) - getPlayerY();
+				let z = Entity.getZ(players[i]) - getPlayerZ();
+				let allowed = false;
 				if(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(players[i]) == 63) allowed = true;
 				if(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(players[i]) < 63) allowed = true;
-				var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+				let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
 				if(FriendManager.isFriend(Entity.getNameTag(players[i])) == true) allowed = false;
 				if(dist < small && dist > 0 && allowed == true && Entity.getHealth(players[i]) >= 1) {
 					small = dist;
@@ -822,7 +810,7 @@ var UpdateManager = {
 	downloadDevInfo: function () {
 		Utils.Url.getUrlContents("https://api.github.com/repos/DragOP-Menu/DragOP-Menu/commits", function (cont, err) {
 			if(cont != null && cont != "") {
-				var arr = new org.json.JSONArray(cont);
+				let arr = new org.json.JSONArray(cont);
 				UpdateManager.devInfo = arr.getJSONObject(0);
 			} else {
 				DragOP.ctoast("DevDownloadError: " + err);
@@ -844,7 +832,7 @@ DragOP.addCode = function (code) {
 	l[0].push(code);
 }
 DragOP.setLString = function (code, lang, value) {
-		var done = false;
+		let done = false;
 		l[0].forEach(function (entry, index, array) {
 			if(done == false && entry.toLowerCase() == code.toLowerCase()) {
 				l[lang][index] = value;
@@ -945,7 +933,7 @@ DragOP.getL = function () {
 }
 
 DragOP.getLString = function (code) {
-	var str = code;
+	let str = code;
 	l[0].forEach(function (entry, index, array) {
 
 		if(entry.toLowerCase()
@@ -978,7 +966,7 @@ DragOP.loadModsAnim = function (progress) {
 	}));
 }
 DragOP.getStyledBackground = function () {
-	var bg = new android.graphics.drawable.GradientDrawable();
+	let bg = new android.graphics.drawable.GradientDrawable();
 	bg.setCornerRadius(1);
 	bg.setColor(android.graphics.Color.argb(90, 255, 255, 255));
 	bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
@@ -986,7 +974,7 @@ DragOP.getStyledBackground = function () {
 	return bg;
 }
 DragOP.getStyledBtnBackground = function (state, toggleable) {
-	var bg = android.graphics.drawable.GradientDrawable();
+	let bg = android.graphics.drawable.GradientDrawable();
 	bg.setCornerRadius(1);
 	bg.setColor(android.graphics.Color.argb(80, 0, 0, 0));
 	if(state) bg.setColor(android.graphics.Color.argb(210, 0, 200, 0));
@@ -1031,38 +1019,38 @@ DragOP.showModDialog = function (mod) {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
 			try {
-				var display = new android.util.DisplayMetrics();
+				let display = new android.util.DisplayMetrics();
 				com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
 					.getWindowManager()
 					.getDefaultDisplay()
 					.getMetrics(display);
-				var content = new android.widget.RelativeLayout(ctx);
+				let content = new android.widget.RelativeLayout(ctx);
 				content.setId(9472729);
-				var contentScroll = new DragOP.scrollView(ctx);
+				let contentScroll = new DragOP.scrollView(ctx);
 				contentScroll.setId(492628);
 				//default content
-				var modTitle = new android.widget.TextView(ctx);
+				let modTitle = new android.widget.TextView(ctx);
 				modTitle.setText(android.text.Html.fromHtml("<u>" + mod.name + "</u>"));
 				modTitle.setTextSize(dip2px(20));
 				modTitle.setGravity(android.view.Gravity.CENTER);
 				modTitle.setTextColor(android.graphics.Color.BLACK);
 				modTitle.setTypeface(Utils.font);
 				modTitle.setId(94771);
-				var modTypeText = new android.widget.TextView(ctx);
+				let modTypeText = new android.widget.TextView(ctx);
 				modTypeText.setText(DragOP.getLString("moddialog.type") + ": " + ModuleType.toName(mod.type));
 				modTypeText.setGravity(android.view.Gravity.CENTER);
 				modTypeText.setTextColor(android.graphics.Color.BLACK);
 				modTypeText.setTextSize(dip2px(10));
 				modTypeText.setTypeface(Utils.font);
 				modTypeText.setId(93922);
-				var modDescTitle = new android.widget.TextView(ctx);
+				let modDescTitle = new android.widget.TextView(ctx);
 				modDescTitle.setText(DragOP.getLString("moddialog.description") + ":");
 				modDescTitle.setGravity(android.view.Gravity.CENTER);
 				modDescTitle.setTextColor(android.graphics.Color.BLACK);
 				modDescTitle.setTextSize(dip2px(11));
 				modDescTitle.setTypeface(Utils.font);
 				modDescTitle.setId(29582);
-				var modDescText = new android.widget.TextView(ctx);
+				let modDescText = new android.widget.TextView(ctx);
 				modDescText.setText(mod.desc);
 				modDescText.setGravity(android.view.Gravity.CENTER);
 				modDescText.setTextSize(dip2px(10));
@@ -1070,32 +1058,32 @@ DragOP.showModDialog = function (mod) {
 				modDescText.setTextColor(android.graphics.Color.BLACK);
 				modDescText.setId(29285);
 				//settings
-				var modSettings = new android.widget.LinearLayout(ctx);
+				let modSettings = new android.widget.LinearLayout(ctx);
 				modSettings.setOrientation(1);
 				if(mod.getSettingsLayout) {
-					var params = new android.widget.LinearLayout.LayoutParams(mwidth, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
-					var line = new android.widget.TextView(ctx);
+					let params = new android.widget.LinearLayout.LayoutParams(mwidth, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+					let line = new android.widget.TextView(ctx);
 					line.setText("");
-					var gradientLine = new android.graphics.drawable.GradientDrawable();
+					let gradientLine = new android.graphics.drawable.GradientDrawable();
 					gradientLine.setShape(android.graphics.drawable.GradientDrawable.LINE);
 					gradientLine.setColor(android.graphics.Color.TRANSPARENT);
 					gradientLine.setStroke(dip2px(1), android.graphics.Color.argb(50, 0, 0, 0));
 					line.setBackground(gradientLine);
 					line.setGravity(android.view.Gravity.CENTER);
 					modSettings.addView(line, params);
-					var settingText = new android.widget.TextView(ctx);
+					let settingText = new android.widget.TextView(ctx);
 					settingText.setText("Settings");
 					settingText.setGravity(android.view.Gravity.CENTER);
 					settingText.setTextColor(android.graphics.Color.BLACK);
 					settingText.setTextSize(dip2px(11));
 					settingText.setTypeface(Utils.font);
 					modSettings.addView(settingText, params);
-					var extraParams = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+					let extraParams = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
 					modSettings.addView(mod.getSettingsLayout(extraParams));
 					//Im thinking about a line (html <hr> tag) and the layout underneath
 				}
 				//footer
-				var closeButton = new styledBtn();
+				let closeButton = new styledBtn();
 				closeButton.setText("Close");
 				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
 				closeButton.setId(10472);
@@ -1103,9 +1091,9 @@ DragOP.showModDialog = function (mod) {
 				closeButton.setTextColor(android.graphics.Color.BLACK);
 				closeButton.setTypeface(Utils.font);
 				//layout alignement....
-				var dialogLayout = new android.widget.RelativeLayout(ctx);
+				let dialogLayout = new android.widget.RelativeLayout(ctx);
 				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
-				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				let params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				dialogLayout.addView(modTitle, params);
 				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -1142,7 +1130,7 @@ DragOP.showModDialog = function (mod) {
 					}
 				}));
 				dialog.show();
-				var window = dialog.getWindow();
+				let window = dialog.getWindow();
 				window.setLayout(mwidth, display.heightPixels);
 				closeButton.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (view) {
@@ -2114,7 +2102,7 @@ var jesus = {
 	},
 	onClick: function (btn) {
 		this.state = !this.state;
-		if(jesus.state && jesus.mode == JesusMode.SOLID) {
+		if(this.state && this.mode == JesusMode.SOLID) {
 			Block.defineBlock(8, "Water", [
 				["still_water", 0]
 			], 8, false, 4);
@@ -2131,7 +2119,7 @@ var jesus = {
 			], 11, false, 4);
 			Block.setShape(10, 0, 0, 0, 1, 0.7, 1);
 			Block.setShape(11, 0, 0, 0, 1, 0.7, 1);
-		} else {
+		} else if (this.mode == JesusMode.SOLID) {
 			Block.defineLiquidBlock(8, "Water", [
 				["still_water", 0],
 				["still_water", 0]
@@ -2194,22 +2182,22 @@ var glide = {
 		//Call hack.onClick() to toggle
 	},
 	getSettingsLayout: function (params) {
-		var settings = new android.widget.LinearLayout(ctx);
+		let settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
-		var gmText = new android.widget.TextView(ctx);
+		let gmText = new android.widget.TextView(ctx);
 		gmText.setText("GlideMotion: " + this.motion);
 		gmText.setTextColor(android.graphics.Color.BLACK);
 		gmText.setTextSize(dip2px(9));
 		gmText.setGravity(android.view.Gravity.CENTER);
 		gmText.setTypeface(Utils.font);
-		var gmSlider = Utils.ModSettings.getSlider();
+		let gmSlider = Utils.ModSettings.getSlider();
 		gmSlider.setMax(250);
 		//rangeSlider.setMin(1);
 		gmSlider.setProgress(-(this.motion + 0.001) * 1000);
 		gmSlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener({
 			onProgressChanged: function (seekBar, progress, fromUser) {
 
-				var pro = (-progress / 1000) - 0.001;
+				let pro = (-progress / 1000) - 0.001;
 				pro = Math.round(pro * 1000) / 1000;
 				pro = pro.toString();
 				if(pro.length == 2) pro += ".";
@@ -2219,7 +2207,7 @@ var glide = {
 
 			},
 			onStopTrackingTouch: function (seekbar) {
-				var pro = (-seekbar.getProgress() / 1000) - 0.001;
+				let pro = (-seekbar.getProgress() / 1000) - 0.001;
 				pro = Math.round(pro * 1000) / 1000;
 				glide.motion = pro;
 			}
@@ -2238,7 +2226,7 @@ var glide = {
 		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function () {
 				if(glide.glideGui == null || glide.glideGui.isShowing() == false) {
-					var glideUpBtn = new android.widget.Button(ctx);
+					let glideUpBtn = new android.widget.Button(ctx);
 					glideUpBtn.setTypeface(Utils.font);
 					glideUpBtn.setText("UP");
 					glideUpBtn.getBackground().setAlpha(200);
@@ -2248,7 +2236,7 @@ var glide = {
 							Entity.setPositionRelative(getPlayerEnt(), 0, 1.01, 0);
 						}
 					}));
-					var glideDownBtn = new android.widget.Button(ctx);
+					let glideDownBtn = new android.widget.Button(ctx);
 					glideDownBtn.setTypeface(Utils.font);
 					glideDownBtn.setText("DOWN");
 					glideDownBtn.getBackground().setAlpha(200);
@@ -2258,7 +2246,7 @@ var glide = {
 							Entity.setPositionRelative(getPlayerEnt(), 0, -1.01, 0);
 						}
 					}));
-					var layout = new android.widget.LinearLayout(ctx);
+					let layout = new android.widget.LinearLayout(ctx);
 					layout.setOrientation(1);
 					layout.addView(glideUpBtn);
 					layout.addView(glideDownBtn);
@@ -2270,8 +2258,8 @@ var glide = {
 
 	},
 	goDown: function () {
-		var found = false;
-		var cord = new Array(getPlayerX(), getPlayerY(), getPlayerZ());
+		let found = false;
+		let cord = new Array(getPlayerX(), getPlayerY(), getPlayerZ());
 
 		while(!found) {
 			cord[1] = cord[1] - 1;
@@ -2322,96 +2310,7 @@ var glide = {
 	}
 };
 DragOP.registerModule(glide);
-var nametag = {
-	name: DragOP.getLString("hacks.nametag"),
-	desc: "Shows a bigger nametag of Mobs.",
-	type: ModuleType.mod,
-	state: false,
-	nameTagMobs: new Array(),
-	inviRenderer: null,
-	doClean: function () {
-		var all = Utils.Entity.charEnts;
-		all.forEach(function (entry) {
-			if(Entity.getMobSkin(entry) == "mob/char.png" || Entity.getRenderType(entry) == nametag.inviRenderer.renderType) {
-				Entity.remove(entry);
-			}
-		});
-	},
-	isStateMode: function () {
-		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
-		//Call hack.state = !hack.state; to toggle 
-	},
-	isToggleAble: function () {
-		return true; //MUST be true if isStateMode = true
-		//Call hack.onClick() to toggle
-	},
-	onTick: function () {
 
-		if(this.state && tick1 % 25 == 0) {
-			if(this.inviRenderer == null) {
-				this.inviRenderer = Renderer.createHumanoidRenderer();
-				Utils.Render.makeInvi(this.inviRenderer);
-			}
-			var r = new java.lang.Runnable({
-				run: function () {
-
-					try {
-						for(var i = 0; i < nametag.nameTagMobs.length; i++) {
-							Entity.remove(nametag.nameTagMobs[i]);
-						}
-						var newTagMobs = new Array();
-						nametag.doClean();
-
-						var all = Utils.Entity.getAll();
-						all.forEach(function (entry, i) {
-							var nt = Entity.getNameTag(all[i]);
-							if(Entity.getRenderType(all[i]) != nametag.inviRenderer.renderType && Entity.getMobSkin(all[i]) != "mob/char.png" && nt != "" && nt != null && nt != "null" && all[i] != getPlayerEnt() && Entity.getX(all[i]) != getPlayerX() && Entity.getZ(all[i]) != getPlayerZ()) {
-								var x = getPlayerX() - Entity.getX(all[i]);
-								var y = getPlayerY() - Entity.getY(all[i]);
-								var z = getPlayerZ() - Entity.getZ(all[i]);
-								while(x > 2 || x < -2 || y > 2 || y < -2 || z > 2 || z < -2) {
-									x = x / 1.5;
-									y = y / 1.5;
-									z = z / 1.5;
-								}
-
-								var cow = Level.spawnCow(getPlayerX() - x, getPlayerY() - y, getPlayerZ() - z, "mob/char.png");
-								Entity.setRenderType(cow, nametag.inviRenderer.renderType);
-								Entity.setImmobile(cow, true);
-								Entity.setCollisionSize(cow, 0, 0);
-
-								Entity.setNameTag(cow, nt);
-								newTagMobs.push(cow);
-
-							}
-						});
-						nametag.nameTagMobs = newTagMobs;
-						newTagMobs = null;
-					} catch(e) {}
-				}
-			});
-			var t = new java.lang.Thread(r);
-			t.start();
-		}
-	},
-	onClick: function (btn) {
-		this.state = !this.state;
-		if(!this.state) {
-			for(var i = 0; i < nametag.nameTagMobs.length; i++) {
-				Entity.remove(nametag.nameTagMobs[i]);
-			}
-			var newTagMobs = new Array();
-
-
-		}
-	},
-	onRefresh: function (btn) {
-		if(btn != null)
-			btn.setText(DragOP.getLString("hacks.nametag"));
-	}
-};
-/*DragOP.registerModule(nametag);*/
-/*Removed nametag because of buggyness*/
 var chesttracers = {
 	name: DragOP.getLString("hacks.chestTracer"),
 	desc: "Makes chests better visible",
@@ -2426,15 +2325,15 @@ var chesttracers = {
 		scanning: false
 	},
 	getSettingsLayout: function (params) {
-		var settings = new android.widget.LinearLayout(ctx);
+		let settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
-		var rangeText = new android.widget.TextView(ctx);
+		let rangeText = new android.widget.TextView(ctx);
 		rangeText.setText("Range: " + this.radius);
 		rangeText.setTextColor(android.graphics.Color.BLACK);
 		rangeText.setTextSize(dip2px(9));
 		rangeText.setGravity(android.view.Gravity.CENTER);
 		rangeText.setTypeface(Utils.font);
-		var rangeSlider = Utils.ModSettings.getSlider();
+		let rangeSlider = Utils.ModSettings.getSlider();
 		rangeSlider.setMax(100);
 		//rangeSlider.setMin(1);
 		rangeSlider.setProgress(this.radius);
@@ -2448,7 +2347,7 @@ var chesttracers = {
 				chesttracers.radius = seekbar.getProgress();
 			}
 		}));
-		var groundCheck = new android.widget.CheckBox(ctx);
+		let groundCheck = new android.widget.CheckBox(ctx);
 		groundCheck.setChecked(this.groundMode);
 		groundCheck.setText("Ground Mode");
 		groundCheck.setTypeface(Utils.font);
@@ -2461,7 +2360,7 @@ var chesttracers = {
 				v.setChecked(chesttracers.groundMode);
 			}
 		}));
-		var drawEspBox = new android.widget.CheckBox(ctx);
+		let drawEspBox = new android.widget.CheckBox(ctx);
 		drawEspBox.setChecked(this.drawBox);
 		drawEspBox.setText("Draw ESPBox around Chests");
 		drawEspBox.setTypeface(Utils.font);
@@ -2474,7 +2373,7 @@ var chesttracers = {
 				v.setChecked(chesttracers.drawBox);
 			}
 		}));
-		var chestScan = new android.widget.TextView(ctx);
+		let chestScan = new android.widget.TextView(ctx);
 		chestScan.setTypeface(Utils.font);
 		chestScan.setGravity(android.view.Gravity.CENTER);
 		chestScan.setTextSize(dip2px(9));
@@ -2486,10 +2385,10 @@ var chesttracers = {
 			chestScan.setText("Currently scanning for Chests. " + this.ChestScan.blocks + " Blocks already checked");
 		else
 			chestScan.setText("Chest Scan not started yet");
-		var refreshBG = new android.graphics.drawable.GradientDrawable();
+		let refreshBG = new android.graphics.drawable.GradientDrawable();
 		refreshBG.setColor(android.graphics.Color.argb(90, 30, 30, 30));
 		refreshBG.setStroke(dip2px(2), android.graphics.Color.BLACK);
-		var refresh = new android.widget.Button(ctx);
+		let refresh = new android.widget.Button(ctx);
 		refresh.setBackground(refreshBG);
 		refresh.setTypeface(Utils.font);
 		refresh.setTextColor(android.graphics.Color.WHITE);
@@ -2531,19 +2430,19 @@ var chesttracers = {
 		this.ChestScan.finished = false;
 		this.ChestScan.scanning = true;
 		this.ChestScan.blocks = 0;
-		var startX = Math.round(getPlayerX());
-		var startZ = Math.round(getPlayerZ());
-		var startRadius = this.radius;
-		var blocks = 0;
-		var newChests = new Array();
-		var finished = [false, false, false, false];
-		var lt = new java.lang.Runnable({
+		let startX = Math.round(getPlayerX());
+		let startZ = Math.round(getPlayerZ());
+		let startRadius = this.radius;
+		let blocks = 0;
+		let newChests = new Array();
+		let finished = [false, false, false, false];
+		let lt = new java.lang.Runnable({
 			run: function () {
 
-				for(var x = startX - startRadius; x < startX; x++) {
-					for(var z = startZ; z < startZ + startRadius; z++) {
+				for(let x = startX - startRadius; x < startX; x++) {
+					for(let z = startZ; z < startZ + startRadius; z++) {
 						java.lang.Thread.sleep(1);
-						for(var y = 0; y < 127; y++) {
+						for(let y = 0; y < 127; y++) {
 							try {
 								if(getTile(x, y, z) == 54) newChests.push([x, y, z]);
 								blocks++;
@@ -2558,15 +2457,15 @@ var chesttracers = {
 				finished[0] = true;
 			}
 		});
-		var t = new java.lang.Thread(lt);
+		let t = new java.lang.Thread(lt);
 		t.start();
-		var rt = new java.lang.Runnable({
+		let rt = new java.lang.Runnable({
 			run: function () {
 
-				for(var x = startX; x < startX + startRadius; x++) {
-					for(var z = startZ; z < startZ + startRadius; z++) {
+				for(let x = startX; x < startX + startRadius; x++) {
+					for(let z = startZ; z < startZ + startRadius; z++) {
 						java.lang.Thread.sleep(1);
-						for(var y = 0; y < 127; y++) {
+						for(let y = 0; y < 127; y++) {
 							try {
 								if(getTile(x, y, z) == 54) newChests.push([x, y, z]);
 
@@ -2581,15 +2480,15 @@ var chesttracers = {
 				finished[1] = true;
 			}
 		});
-		var t2 = new java.lang.Thread(rt);
+		let t2 = new java.lang.Thread(rt);
 		t2.start();
-		var lb = new java.lang.Runnable({
+		let lb = new java.lang.Runnable({
 			run: function () {
 
-				for(var x = startX - startRadius; x < startX; x++) {
-					for(var z = startZ - startRadius; z < startZ; z++) {
+				for(let x = startX - startRadius; x < startX; x++) {
+					for(let z = startZ - startRadius; z < startZ; z++) {
 						java.lang.Thread.sleep(1);
-						for(var y = 0; y < 127; y++) {
+						for(let y = 0; y < 127; y++) {
 							try {
 								if(getTile(x, y, z) == 54) newChests.push([x, y, z]);
 
@@ -2604,15 +2503,15 @@ var chesttracers = {
 				finished[2] = true;
 			}
 		});
-		var t3 = new java.lang.Thread(lb);
+		let t3 = new java.lang.Thread(lb);
 		t3.start();
-		var rb = new java.lang.Runnable({
+		let rb = new java.lang.Runnable({
 			run: function () {
 
-				for(var x = startX; x < startX + startRadius; x++) {
-					for(var z = startZ - startRadius; z < startZ; z++) {
+				for(let x = startX; x < startX + startRadius; x++) {
+					for(let z = startZ - startRadius; z < startZ; z++) {
 						java.lang.Thread.sleep(1);
-						for(var y = 0; y < 127; y++) {
+						for(let y = 0; y < 127; y++) {
 							try {
 								if(getTile(x, y, z) == 54) newChests.push([x, y, z]);
 
@@ -2627,11 +2526,11 @@ var chesttracers = {
 				finished[3] = true;
 			}
 		});
-		var t4 = new java.lang.Thread(rb);
+		let t4 = new java.lang.Thread(rb);
 		t4.start();
-		var finishChecker = new java.lang.Runnable({
+		let finishChecker = new java.lang.Runnable({
 			run: function () {
-				var wasEmpty = false;
+				let wasEmpty = false;
 				wasEmpty = chesttracers.chests.length == 0;
 				while(!finished[0] || !finished[1] || !finished[2] || !finished[3]) {
 					java.lang.Thread.sleep(250);
@@ -2660,10 +2559,10 @@ var chesttracers = {
 					this.findChests();
 			}
 			this.chests.forEach(function (entry) {
-				var x = getPlayerX() - entry[0] - 0.5;
-				var y = getPlayerY() - entry[1] - 0.5;
-				var z = getPlayerZ() - entry[2] - 0.5;
-				var dist = Math.sqrt(Math.pow(x, 2) * Math.pow(y, 2) * Math.pow(z, 2));
+				let x = getPlayerX() - entry[0] - 0.5;
+				let y = getPlayerY() - entry[1] - 0.5;
+				let z = getPlayerZ() - entry[2] - 0.5;
+				let dist = Math.sqrt(Math.pow(x, 2) * Math.pow(y, 2) * Math.pow(z, 2));
 				while(x > 2 || x < -2 || y > 2 || y < -2 || z > 2 || z < -2) {
 					x /= 1.5;
 					y /= 1.5;
@@ -2769,7 +2668,7 @@ var coords = {
 		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function () {
 				if(coords.coordGui == null || coords.coordGui.isShowing() == false) {
-					var bg = new android.graphics.drawable.GradientDrawable();
+					let bg = new android.graphics.drawable.GradientDrawable();
 					bg.setColor(android.graphics.Color.argb(150, 20, 20, 20));
 					bg.setCornerRadius(dip2px(3));
 					coords.coordView = new android.widget.TextView(ctx);
@@ -2816,8 +2715,8 @@ var playerEsp = {
 	},
 	onRender: function (gl) {
 		if(playerEsp.state && getPlayerEnt() != -1 && getPlayerEnt() != -1 && true) {
-			var mobs = Utils.Entity.getAll();
-			var players = Server.getAllPlayers();
+			let mobs = Utils.Entity.getAll();
+			let players = Server.getAllPlayers();
 
 			//clientMessage(mobs.length);
 			mobs.forEach(function (entry) {
@@ -2854,15 +2753,15 @@ var nuker = {
 	type: ModuleType.mod,
 	state: false,
 	getSettingsLayout: function (params) {
-		var settings = new android.widget.LinearLayout(ctx);
+		let settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
-		var radiusText = new android.widget.TextView(ctx);
+		let radiusText = new android.widget.TextView(ctx);
 		radiusText.setText("Radius: " + this.radius);
 		radiusText.setTextColor(android.graphics.Color.BLACK);
 		radiusText.setTextSize(dip2px(9));
 		radiusText.setGravity(android.view.Gravity.CENTER);
 		radiusText.setTypeface(Utils.font);
-		var radiusSlider = Utils.ModSettings.getSlider();
+		let radiusSlider = Utils.ModSettings.getSlider();
 		radiusSlider.setMax(4);
 		//rangeSlider.setMin(1);
 		radiusSlider.setProgress(this.radius - 2);
@@ -2894,13 +2793,13 @@ var nuker = {
 	radius: 2,
 	onModTick: function () {
 		if(this.state == true && this.done == true) {
-			var t = new java.lang.Thread(new java.lang.Runnable({
+			let t = new java.lang.Thread(new java.lang.Runnable({
 				run: function () {
 					nuker.done = false;
-					for(var x = -nuker.radius; x < nuker.radius; x++) {
+					for(let x = -nuker.radius; x < nuker.radius; x++) {
 						java.lang.Thread.sleep(20);
-						for(var y = -nuker.radius; y < nuker.radius; y++)
-							for(var z = -nuker.radius; z < nuker.radius; z++)
+						for(let y = -nuker.radius; y < nuker.radius; y++)
+							for(let z = -nuker.radius; z < nuker.radius; z++)
 								Level.destroyBlock(Math.floor(getPlayerX() + x), Math.floor(getPlayerY() + y), Math.floor(getPlayerZ() + z), false);
 					}
 
@@ -2975,7 +2874,7 @@ var webbrowser = {
 	showBrowser: function () {
 		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function () {
-				var layout1 = new android.widget.RelativeLayout(ctx);
+				let layout1 = new android.widget.RelativeLayout(ctx);
 				webbrowser.view = new android.webkit.WebView(ctx);
 				webbrowser.view.getSettings().setJavaScriptEnabled(true);
 				webbrowser.view.setWebChromeClient(new android.webkit.WebChromeClient());
@@ -2995,7 +2894,7 @@ var webbrowser = {
 				webbrowser.address.setOnKeyListener(new android.view.View.OnKeyListener({
 					onKey: function (view, keycode, event) {
 						if(keycode == android.view.KeyEvent.KEYCODE_ENTER && event.getAction() == android.view.KeyEvent.ACTION_DOWN) {
-							var url = webbrowser.address.getText().toString();
+							let url = webbrowser.address.getText().toString();
 							if(android.util.Patterns.WEB_URL.matcher(url).matches()) {
 								if(url.indexOf("http") == -1)
 									url = "http://" + url;
@@ -3008,7 +2907,7 @@ var webbrowser = {
 						return true;
 					}
 				}));
-				var param = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				let param = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 				param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
@@ -3031,8 +2930,8 @@ var webbrowser = {
 					}
 				}));
 				webbrowser.browser.show();
-				var window = webbrowser.browser.getWindow();
-				var display = new android.util.DisplayMetrics();
+				let window = webbrowser.browser.getWindow();
+				let display = new android.util.DisplayMetrics();
 				com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
 					.getWindowManager()
 					.getDefaultDisplay()
@@ -3061,11 +2960,11 @@ if(DragOP.enableFastEat){
 	try {
 		var items = "Ww0KICB7DQogICAgIm5hbWUiOiAiYXBwbGUiLA0KICAgICJpZCI6IDQsDQogICAgImljb24iOiAiYXBwbGUiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDQsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJsb3ciLA0KICAgICAgImlzX21lYXQiOiBmYWxzZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImdvbGRlbl9hcHBsZSIsDQogICAgImlkIjogNjYsDQogICAgImljb24iOiAiYXBwbGVfZ29sZGVuIiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQogICAgInN0YWNrX2J5X2RhdGEiOiB0cnVlLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJmb2lsIjogZmFsc2UsDQogICAgImhvdmVyX3RleHRfY29sb3IiOiAiYXF1YSIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA0LCANCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInN1cGVybmF0dXJhbCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlLCANCiAgICAgICJlZmZlY3RzIjogWw0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAicmVnZW5lcmF0aW9uIiwNCiAgICAgICAgICAiY2hhbmNlIjogMS4wLA0KICAgICAgICAgICJkdXJhdGlvbiI6IDUsDQogICAgICAgICAgImFtcGxpZmllciI6IDENCiAgICAgICAgfSwNCiAgICAgICAgew0KICAgICAgICAgICJuYW1lIjogImFic29ycHRpb24iLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMTIwLCANCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9DQogICAgICBdLA0KICAgICAgImVuY2hhbnRlZF9lZmZlY3RzIjogWw0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAicmVnZW5lcmF0aW9uIiwNCiAgICAgICAgICAiY2hhbmNlIjogMC42NiwNCiAgICAgICAgICAiZHVyYXRpb24iOiAzMCwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogNA0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiYWJzb3JwdGlvbiIsDQogICAgICAgICAgImNoYW5jZSI6IDAuNjYsDQogICAgICAgICAgImR1cmF0aW9uIjogMTIwLCANCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAicmVzaXN0YW5jZSIsIA0KICAgICAgICAgICJjaGFuY2UiOiAwLjY2LA0KICAgICAgICAgICJkdXJhdGlvbiI6IDMwMCwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiZmlyZV9yZXNpc3RhbmNlIiwNCiAgICAgICAgICAiY2hhbmNlIjogMC42NiwNCiAgICAgICAgICAiZHVyYXRpb24iOiAzMDAsDQogICAgICAgICAgImFtcGxpZmllciI6IDANCiAgICAgICAgfQ0KICAgICAgXQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImFwcGxlRW5jaGFudGVkIiwgDQogICAgImlkIjogMjEwLA0KICAgICJpY29uIjogImFwcGxlX2dvbGRlbiIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KICAgICJoYW5kX2VxdWlwcGVkIjogZmFsc2UsDQogICAgInN0YWNrX2J5X2RhdGEiOiB0cnVlLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJmb2lsIjogdHJ1ZSwNCiAgICAiaG92ZXJfdGV4dF9jb2xvciI6ICJsaWdodF9wdXJwbGUiLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogNCwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInN1cGVybmF0dXJhbCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlLA0KICAgICAgImVmZmVjdHMiOiBbDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJyZWdlbmVyYXRpb24iLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMzAsDQogICAgICAgICAgImFtcGxpZmllciI6IDQNCiAgICAgICAgfSwNCiAgICAgICAgew0KICAgICAgICAgICJuYW1lIjogImFic29ycHRpb24iLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMTIwLCANCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAicmVzaXN0YW5jZSIsIA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMzAwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0sDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJmaXJlX3Jlc2lzdGFuY2UiLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMzAwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0NCiAgICAgIF0NCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJtdXNocm9vbV9zdGV3IiwNCiAgICAiaWQiOiAyNiwNCiAgICAiaWNvbiI6ICJtdXNocm9vbV9zdGV3IiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQogICAgIm1heF9zdGFja19zaXplIjogMSwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDYsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiBmYWxzZSwNCiAgICAgICJ1c2luZ19jb252ZXJ0c190byI6ICJpdGVtLmJvd2wiDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiYnJlYWQiLA0KICAgICJpZCI6IDQxLA0KICAgICJpY29uIjogImJyZWFkIiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA1LA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibm9ybWFsIiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJwb3JrY2hvcCIsDQogICAgImlkIjogNjMsDQogICAgImljb24iOiAicG9ya2Nob3BfcmF3IiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDMsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJsb3ciLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicG9ya2Nob3BfY29va2VkIiwNCiAgICAiaWQiOiA2NCwNCiAgICAiaWNvbiI6ICJwb3JrY2hvcF9jb29rZWQiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDgsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJnb29kIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImZpc2giLA0KICAgICJpZCI6IDkzLA0KICAgICJpY29uIjogImZpc2giLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJtYXhfZGFtYWdlIjogMCwNCiAgICAic3RhY2tlZF9ieV9kYXRhIjogdHJ1ZSwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDIsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJwb29yIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogInNhbG1vbiIsDQogICAgImlkIjogMjA0LA0KICAgICJpY29uIjogInNhbG1vbiIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQogICAgIm1heF9kYW1hZ2UiOiAwLA0KICAgICJzdGFja2VkX2J5X2RhdGEiOiB0cnVlLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogMiwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInBvb3IiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY2xvd25maXNoIiwNCiAgICAiaWQiOiAyMDUsDQogICAgImljb24iOiAiY2xvd25maXNoIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCiAgICAibWF4X2RhbWFnZSI6IDAsDQogICAgInN0YWNrZWRfYnlfZGF0YSI6IHRydWUsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAxLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAicG9vciIsDQogICAgICAiaXNfbWVhdCI6IHRydWUNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJwdWZmZXJmaXNoIiwNCiAgICAiaWQiOiAyMDYsDQogICAgImljb24iOiAicHVmZmVyZmlzaCIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQogICAgIm1heF9kYW1hZ2UiOiAwLA0KICAgICJzdGFja2VkX2J5X2RhdGEiOiB0cnVlLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogMSwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInBvb3IiLA0KICAgICAgImlzX21lYXQiOiB0cnVlLA0KICAgICAgImVmZmVjdHMiOiBbDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJwb2lzb24iLA0KICAgICAgICAgICJkdXJhdGlvbiI6IDYwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAzDQogICAgICAgIH0sDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJuYXVzZWEiLCANCiAgICAgICAgICAiZHVyYXRpb24iOiAxNSwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogMQ0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiaHVuZ2VyIiwNCiAgICAgICAgICAiZHVyYXRpb24iOiAxNSwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogMg0KICAgICAgICB9DQogICAgICBdDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY29va2VkX2Zpc2giLA0KICAgICJpZCI6IDk0LA0KICAgICJpY29uIjogImNvb2tlZF9maXNoIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCiAgICAibWF4X2RhbWFnZSI6IDAsDQogICAgInN0YWNrZWRfYnlfZGF0YSI6IHRydWUsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA1LA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibm9ybWFsIiwNCiAgICAgICJlYXRfc291bmQiOiAicmFuZG9tLmJ1cnAiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY29va2VkX3NhbG1vbiIsDQogICAgImlkIjogMjA3LA0KICAgICJpY29uIjogImNvb2tlZF9zYWxtb24iLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJtYXhfZGFtYWdlIjogMCwNCiAgICAic3RhY2tlZF9ieV9kYXRhIjogdHJ1ZSwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDYsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJnb29kIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImNvb2tpZSIsDQogICAgImlkIjogMTAxLA0KICAgICJpY29uIjogImNvb2tpZSIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAicG9vciIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAibWVsb24iLA0KICAgICJpZCI6IDEwNCwNCiAgICAiaWNvbiI6ICJtZWxvbiIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJiZWVmIiwNCiAgICAiaWQiOiAxMDcsDQogICAgImljb24iOiAiYmVlZl9yYXciLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogMywNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogImxvdyIsDQogICAgICAiaXNfbWVhdCI6IHRydWUNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJzdGVhayIsDQogICAgImlkIjogMTA4LA0KICAgICJpY29uIjogImJlZWZfY29va2VkIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDgsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJnb29kIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImNoaWNrZW4iLA0KICAgICJpZCI6IDEwOSwNCiAgICAiaWNvbiI6ICJjaGlja2VuX3JhdyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZSwNCiAgICAgICJlZmZlY3RzIjogWw0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiaHVuZ2VyIiwNCiAgICAgICAgICAiY2hhbmNlIjogMC4zLA0KICAgICAgICAgICJkdXJhdGlvbiI6IDMwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0NCiAgICAgIF0NCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJjb29rZWRfY2hpY2tlbiIsDQogICAgImlkIjogMTEwLA0KICAgICJpY29uIjogImNoaWNrZW5fY29va2VkIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDYsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAibXV0dG9uUmF3IiwNCiAgICAiaWQiOiAxNjcsDQogICAgImljb24iOiAibXV0dG9uX3JhdyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogIm11dHRvbkNvb2tlZCIsDQogICAgImlkIjogMTY4LA0KICAgICJpY29uIjogIm11dHRvbl9jb29rZWQiLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogNiwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogImdvb2QiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicm90dGVuX2ZsZXNoIiwNCiAgICAiaWQiOiAxMTEsDQogICAgImljb24iOiAicm90dGVuX2ZsZXNoIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDQsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJwb29yIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZSwNCiAgICAgICJlZmZlY3RzIjogWw0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiaHVuZ2VyIiwNCiAgICAgICAgICAiY2hhbmNlIjogMC4zLA0KICAgICAgICAgICJkdXJhdGlvbiI6IDMwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0NCiAgICAgIF0NCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJzcGlkZXJfZXllIiwNCiAgICAiaWQiOiAxMTksDQogICAgImljb24iOiAic3BpZGVyX2V5ZSIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAiZ29vZCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlLA0KICAgICAgImVmZmVjdHMiOiBbDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJwb2lzb24iLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogNSwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9DQogICAgICBdDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY2Fycm90IiwNCiAgICAiaWQiOiAxMzUsDQogICAgImljb24iOiAiY2Fycm90IiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDMsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiBmYWxzZQ0KICAgIH0sDQogICAgInNlZWQiOiB7DQogICAgICAiY3JvcF9yZXN1bHQiOiAiY2Fycm90cyIsDQogICAgICAicGxhbnRfYXQiOiAiZmFybWxhbmQiDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicG90YXRvIiwNCiAgICAiaWQiOiAxMzYsDQogICAgImljb24iOiAicG90YXRvIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDEsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJsb3ciLA0KICAgICAgImlzX21lYXQiOiBmYWxzZQ0KICAgIH0sDQogICAgInNlZWQiOiB7DQogICAgICAiY3JvcF9yZXN1bHQiOiAicG90YXRvZXMiLA0KICAgICAgInBsYW50X2F0IjogImZhcm1sYW5kIg0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImJha2VkX3BvdGF0byIsDQogICAgImlkIjogMTM3LA0KICAgICJpY29uIjogInBvdGF0b19iYWtlZCIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA1LA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibm9ybWFsIiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJwb2lzb25vdXNfcG90YXRvIiwNCiAgICAiaWQiOiAxMzgsDQogICAgImljb24iOiAicG90YXRvX3BvaXNvbm91cyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UsDQogICAgICAiZWZmZWN0cyI6IFsNCiAgICAgICAgew0KICAgICAgICAgICJuYW1lIjogInBvaXNvbiIsDQogICAgICAgICAgImNoYW5jZSI6IDAuNiwNCiAgICAgICAgICAiZHVyYXRpb24iOiA1LA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0NCiAgICAgIF0NCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJnb2xkZW5fY2Fycm90IiwNCiAgICAiaWQiOiAxNDAsDQogICAgImljb24iOiAiY2Fycm90X2dvbGRlbiIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogNiwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInN1cGVybmF0dXJhbCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicHVtcGtpbl9waWUiLA0KICAgICJpZCI6IDE0NCwNCiAgICAiaWNvbiI6ICJwdW1wa2luX3BpZSIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA4LA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJyYWJiaXQiLA0KICAgICJpZCI6IDE1NSwNCiAgICAiaWNvbiI6ICJyYWJiaXQiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDMsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJsb3ciLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY29va2VkX3JhYmJpdCIsDQogICAgImlkIjogMTU2LA0KICAgICJpY29uIjogInJhYmJpdF9jb29rZWQiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDUsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicmFiYml0X3N0ZXciLA0KICAgICJpZCI6IDE1NywNCiAgICAiaWNvbiI6ICJyYWJiaXRfc3RldyIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJtYXhfc3RhY2tfc2l6ZSI6IDEsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAxMCwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogIm5vcm1hbCIsDQogICAgICAidXNpbmdfY29udmVydHNfdG8iOiAiYm93bCIsDQogICAgICAiaXNfbWVhdCI6IHRydWUNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJiZWV0cm9vdCIsDQogICAgImlkIjogMjAxLA0KICAgICJpY29uIjogImJlZXRyb290IiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDEsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiBmYWxzZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImJlZXRyb290X3NvdXAiLA0KICAgICJpZCI6IDIwMywNCiAgICAiaWNvbiI6ICJiZWV0cm9vdF9zb3VwIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCiAgICAibWF4X3N0YWNrX3NpemUiOiAxLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogNiwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogIm5vcm1hbCIsDQogICAgICAidXNpbmdfY29udmVydHNfdG8iOiAiYm93bCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAid2hlYXRfc2VlZHMiLCANCiAgICAiaWQiOiAzOSwNCiAgICAiaWNvbiI6ICJzZWVkc193aGVhdCIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KDQogICAgInNlZWQiOiB7DQogICAgICAiY3JvcF9yZXN1bHQiOiAid2hlYXQiLCANCiAgICAgICJwbGFudF9hdCI6ICJmYXJtbGFuZCINCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJwdW1wa2luX3NlZWRzIiwNCiAgICAiaWQiOiAxMDUsDQogICAgImljb24iOiAic2VlZHNfcHVtcGtpbiIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KDQogICAgInNlZWQiOiB7DQogICAgICAiY3JvcF9yZXN1bHQiOiAicHVtcGtpbl9zdGVtIiwNCiAgICAgICJwbGFudF9hdCI6ICJmYXJtbGFuZCINCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJtZWxvbl9zZWVkcyIsDQogICAgImlkIjogMTA2LA0KICAgICJpY29uIjogInNlZWRzX21lbG9uIiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQoNCiAgICAic2VlZCI6IHsNCiAgICAgICJjcm9wX3Jlc3VsdCI6ICJtZWxvbl9zdGVtIiwNCiAgICAgICJwbGFudF9hdCI6ICJmYXJtbGFuZCINCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJuZXRoZXJfd2FydCIsDQogICAgImlkIjogMTE2LA0KICAgICJpY29uIjogIm5ldGhlcl93YXJ0IiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQoNCiAgICAic2VlZCI6IHsNCiAgICAgICJjcm9wX3Jlc3VsdCI6ICJuZXRoZXJfd2FydCIsDQogICAgICAicGxhbnRfYXQiOiAic291bF9zYW5kIg0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImJlZXRyb290X3NlZWRzIiwNCiAgICAiaWQiOiAyMDIsDQogICAgImljb24iOiAic2VlZHNfYmVldHJvb3QiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCg0KICAgICJzZWVkIjogew0KICAgICAgImNyb3BfcmVzdWx0IjogImJlZXRyb290IiwNCiAgICAgICJwbGFudF9hdCI6ICJmYXJtbGFuZCINCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJjYW1lcmEiLA0KICAgICJpZCI6IDI0MiwNCiAgICAiaWNvbiI6ICJjYW1lcmEiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJjYW1lcmEiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAxMDAwMDAsDQogICAgImJsb2NrIjogImNhbWVyYSIsDQoNCiAgICAiY2FtZXJhIjogew0KICAgICAgImJsYWNrX2JhcnNfZHVyYXRpb24iOiAwLjIsDQogICAgICAiYmxhY2tfYmFyc19zY3JlZW5fcmF0aW8iOiAwLjA4LA0KICAgICAgInNodXR0ZXJfZHVyYXRpb24iOiAwLjIsDQogICAgICAicGljdHVyZV9kdXJhdGlvbiI6IDEuMCwNCiAgICAgICJzbGlkZV9hd2F5X2R1cmF0aW9uIjogMC4yDQoNCiAgICB9DQogIH0NCl0NCg";
 		items = Utils.Base64.decode(items);
-		var newStr = "",
+		let newStr = "",
 			leng = 0;
-		for(var i in items)
+		for(let i in items)
 			leng++;
-		for(var i = 0; i < leng; i++)
+		for(let i = 0; i < leng; i++)
 			newStr += String.fromCharCode(items[i]);
 		items = newStr;
 	} catch(e) {
@@ -3082,12 +2981,12 @@ var fasteat = {
 	state: false,
 	eatTime: 4,
 	refreshFEat: function (eatTime) {
-		var t = new java.lang.Thread(new java.lang.Runnable({
+		let t = new java.lang.Thread(new java.lang.Runnable({
 			run: function () {
 				try {
 					items = new org.json.JSONArray(items.toString());
-					var curr;
-					for(var i = 0; i < items.length(); i++)
+					let curr;
+					for(let i = 0; i < items.length(); i++)
 						if((curr = items.optJSONObject(i)) && curr.has("use_duration") && curr.getInt("use_duration") <= 32)
 							if(curr.put("use_duration", eatTime))
 								Item.setProperties(256 + parseInt(curr.getInt("id")), curr.toString() + "");
@@ -3099,15 +2998,15 @@ var fasteat = {
 		t.start();
 	},
 	getSettingsLayout: function (params) {
-		var settings = new android.widget.LinearLayout(ctx);
+		let settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
-		var timeText = new android.widget.TextView(ctx);
+		let timeText = new android.widget.TextView(ctx);
 		timeText.setText("EatTime: " + (this.eatTime));
 		timeText.setTextColor(android.graphics.Color.BLACK);
 		timeText.setTextSize(dip2px(9));
 		timeText.setGravity(android.view.Gravity.CENTER);
 		timeText.setTypeface(Utils.font);
-		var timeSlider = Utils.ModSettings.getSlider();
+		let timeSlider = Utils.ModSettings.getSlider();
 		timeSlider.setMax(31);
 		//rangeSlider.setMin(1);
 		timeSlider.setProgress(this.eatTime - 1);
@@ -3164,27 +3063,27 @@ var tracers = {
 	onRender: function (gl) {
 		if(!this.state)
 			return
-		var all = Utils.Entity.getAll();
-		var players = Server.getAllPlayers();
-		var px = getPlayerX();
-		var py = getPlayerY();
-		var pz = getPlayerZ();
+		let all = Utils.Entity.getAll();
+		let players = Server.getAllPlayers();
+		let px = getPlayerX();
+		let py = getPlayerY();
+		let pz = getPlayerZ();
 		all.forEach(function (entry) {
-			var x = Entity.getX(entry) - px;
-			var y = Entity.getY(entry) - py;
-			var z = Entity.getZ(entry) - pz;
+			let x = Entity.getX(entry) - px;
+			let y = Entity.getY(entry) - py;
+			let z = Entity.getZ(entry) - pz;
 
-			var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+			let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
 
 			if(dist <= 200 && dist > 0.1)
 				Utils.Render.drawLine(gl, px, py + 0.8, pz, Entity.getX(entry), Entity.getY(entry) + 1, Entity.getZ(entry));
 		});
 		players.forEach(function (entry) {
-			var x = Entity.getX(entry) - px;
-			var y = Entity.getY(entry) - py;
-			var z = Entity.getZ(entry) - pz;
+			let x = Entity.getX(entry) - px;
+			let y = Entity.getY(entry) - py;
+			let z = Entity.getZ(entry) - pz;
 
-			var dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+			let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
 
 			if(dist <= 200 && dist > 0.1)
 				Utils.Render.drawLine(gl, px, py + 0.8, pz, Entity.getX(entry), Entity.getY(entry) + 1, Entity.getZ(entry));
@@ -3253,15 +3152,15 @@ var spammer = {
 	msg: "Spam! Spam! Spam!",
 	delay: 100,
 	getSettingsLayout: function (params) {
-		var settings = new android.widget.LinearLayout(ctx);
+		let settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
-		var delayText = new android.widget.TextView(ctx);
+		let delayText = new android.widget.TextView(ctx);
 		delayText.setText("Delay: " + (this.delay / 1000) + " Seconds");
 		delayText.setTextColor(android.graphics.Color.BLACK);
 		delayText.setTextSize(dip2px(9));
 		delayText.setGravity(android.view.Gravity.CENTER);
 		delayText.setTypeface(Utils.font);
-		var delaySlider = Utils.ModSettings.getSlider();
+		let delaySlider = Utils.ModSettings.getSlider();
 		delaySlider.setMax(50);
 		//5 seconds
 		delaySlider.setProgress(this.delay / 100);
@@ -3290,7 +3189,7 @@ var spammer = {
 				spammer.delay = seekbar.getProgress() * 100;
 			}
 		}));
-		var spamMsg = new android.widget.EditText(ctx);
+		let spamMsg = new android.widget.EditText(ctx);
 		spamMsg.setText(this.msg);
 		spamMsg.setGravity(android.view.Gravity.CENTER);
 		spamMsg.setTypeface(Utils.font);
@@ -3320,7 +3219,7 @@ var spammer = {
 		switch(Utils.bypassMode) {
 		case BypassMode.DEFAULT:
 			if(java.lang.System.currentTimeMillis() - this.lastTime > this.delay) {
-				var msg = this.msg;
+				let msg = this.msg;
 				if(msg.charAt(0) != "/") {
 					msg = msg + "😀";
 					msg = msg + Math.random().toString(36).replace(/[^a-z]+/g, '');
@@ -3331,7 +3230,7 @@ var spammer = {
 			break;
 		case BypassMode.LBSG:
 			if(java.lang.System.currentTimeMillis() - this.lastTime > Math.max(this.delay, 4000)) {
-				var msg = this.msg;
+				let msg = this.msg;
 				if(msg.charAt(0) != "/") {
 					msg = msg + "😀";
 					msg = msg + Math.random().toString(36).replace(/[^a-z]+/g, '');
@@ -3376,9 +3275,9 @@ var autowalk = {
 	onTick: function () {
 		if(!this.state)
 			return;
-		var vector = new Array();
-		var yaw = (getYaw(getPlayerEnt()) + 90) * (Math.PI / 180);
-		var pitch = 0;
+		let vector = new Array();
+		let yaw = (getYaw(getPlayerEnt()) + 90) * (Math.PI / 180);
+		let pitch = 0;
 		vector[0] = Math.cos(yaw) * Math.cos(pitch);
 		vector[1] = Math.sin(getPitch(getPlayerEnt()) * (Math.PI / 180) * -1);
 		vector[2] = Math.sin(yaw) * Math.cos(pitch);
@@ -3408,7 +3307,7 @@ var passhack = {
 	passes: "lol",
 	usedPasses: 0,
 	downloadPasses: function () {
-		var url = "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/10_million_password_list_top_10000.txt";
+		let url = "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/10_million_password_list_top_10000.txt";
 		Utils.Url.getUrlContents(url, function (cont, error) {
 			if(error != null && error != "") {
 				DragOP.ctoast("Pass-DL-Error: " + error);
@@ -3429,7 +3328,7 @@ var passhack = {
 		if(!this.state || this.passes == "lol")
 			return
 		if((java.lang.System.currentTimeMillis() - this.lastTime) > 100) {
-			var password = this.passes[this.usedPasses];
+			let password = this.passes[this.usedPasses];
 			this.usedPasses++;
 			Server.sendChat(this.loginPattern.replace(new RegExp("{password}", 'g'), password));
 			DragOP.cmsg("Tried the " + this.usedPasses + "th password \"" + password + "\"");
@@ -3520,18 +3419,18 @@ var follow = {
 			//		if(this.lastTime == 0)
 			//			this.lastTime = java.lang.System.currentTimeMillis() - 100;
 			//		if(java.lang.System.currentTimeMillis() - this.lastTime > )
-		var target = Utils.Entity.getNearestEntity(80);
-		var x = getPlayerX();
-		var z = getPlayerZ();
-		var x2 = Entity.getX(target);
-		var z2 = Entity.getZ(target);
+		let target = Utils.Entity.getNearestEntity(80);
+		let x = getPlayerX();
+		let z = getPlayerZ();
+		let x2 = Entity.getX(target);
+		let z2 = Entity.getZ(target);
 		if(Utils.Player.onGround() && getPlayerY() - 1.62 - (Entity.getEntityTypeId(target) == 63 ? Entity.getY(target) - 1.62 : Entity.getY(target)) < -0.8)
 			setVelY(getPlayerEnt(), 0.42);
 		if(Utils.Player.isInWater() && getPlayerY() - 1.62 - (Entity.getEntityTypeId(target) == 63 ? Entity.getY(target) - 1.62 : Entity.getY(target)) < -0.8)
 			setVelY(getPlayerEnt(), 0.3);
 		if(Utils.Player.isOnLadder() && getPlayerY() - 1.62 - (Entity.getEntityTypeId(target) == 63 ? Entity.getY(target) - 1.62 : Entity.getY(target)) < -0.2)
 			setVelY(getPlayerEnt(), 0.2);
-		var dist = Math.sqrt(Math.pow(x - x2, 2) + Math.pow(z - z2, 2));
+		let dist = Math.sqrt(Math.pow(x - x2, 2) + Math.pow(z - z2, 2));
 		if(dist <= 1)
 			return;
 		setVelX(getPlayerEnt(), -Math.max(-0.35, Math.min(0.35, ((x - x2) / dist) / 3)));
@@ -3576,7 +3475,7 @@ var lifedisplay = {
 		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function () {
 				if(lifedisplay.lifeGui == null || lifedisplay.lifeGui.isShowing() == false) {
-					var bg = new android.graphics.drawable.GradientDrawable();
+					let bg = new android.graphics.drawable.GradientDrawable();
 					bg.setColor(android.graphics.Color.argb(150, 20, 20, 20));
 					bg.setCornerRadius(dip2px(3));
 					lifedisplay.lifeView = new android.widget.TextView(ctx);
@@ -3596,7 +3495,7 @@ var lifedisplay = {
 	},
 	onClick: function (btn) {
 		this.state = !this.state;
-		if(!this.state)
+		if(!this.state && this.lifeGui != null)
 			ctx.runOnUiThread(new java.lang.Runnable({
 				run: function () {
 					lifedisplay.lifeGui.dismiss();
@@ -3636,8 +3535,8 @@ var statehack = {
  * Commands
  */
 DragOP.getHighestPageNumber = function () {
-	var cmds = CommandManager.cmdModules.length;
-	var pages = 1;
+	let cmds = CommandManager.cmdModules.length;
+	let pages = 1;
 	while(cmds > 8) {
 		cmds -= 8;
 		pages++;
@@ -3667,7 +3566,7 @@ var help = {
 			if(cmd[0] == undefined || cmd[0] == null || cmd[0] == "1" || cmd[0] <= 0) {
 				DragOP.showHelpPage(1);
 			} else {
-				var pageInt = parseInt(cmd[0]);
+				let pageInt = parseInt(cmd[0]);
 				if(pageInt <= DragOP.getHighestPageNumber()) {
 					DragOP.showHelpPage(pageInt);
 				} else if(pageInt > DragOP.getHighestPageNumber()) {
@@ -3692,7 +3591,7 @@ var toggle = {
 	},
 	onCall: function (cmd) {
 		if(cmd[0] != undefined && cmd[0] != null && cmd[0] != "") {
-			var shouldReturn = false;
+			let shouldReturn = false;
 			DragOP.mods.forEach(function (entry, index, array) {
 				if(entry.name.toLowerCase() == (cmd[0] + "").toLowerCase() && !shouldReturn) {
 					if(entry.isStateMode()) {
@@ -3764,7 +3663,7 @@ var vclip = {
 	onCall: function (cmd) {
 		if(cmd[0] != undefined && cmd[0] != null && cmd[0] != "") {
 			try {
-				var height = parseInt(cmd[0]);
+				let height = parseInt(cmd[0]);
 				Entity.setPositionRelative(getPlayerEnt(), 0, height, 0);
 				DragOP.cmsg("Moved " + height + " blocks");
 			} catch(e) {
@@ -3794,7 +3693,7 @@ var spamcmd = {
 			DragOP.cmsg("Spammer message has been set to \"" + spammer.msg + "\"");
 			break;
 		case "delay":
-			var delay = parseInt(args[1]) * 1000;
+			let delay = parseInt(args[1]) * 1000;
 			spammer.delay = delay;
 			DragOP.cmsg("Spammer delay has been set to " + delay + " milliseconds");
 			break;
@@ -3818,13 +3717,13 @@ var mwidth = ctx.getWindowManager()
 var menu;
 
 var styledBtn = function () {
-	var defaultBtn = new android.widget.Button(ctx);
+	let defaultBtn = new android.widget.Button(ctx);
 	defaultBtn.setBackgroundDrawable(DragOP.getStyledBackground());
 	return defaultBtn;
 }
 
 var modBtn = function (mod) {
-	var btn = new android.widget.Button(ctx);
+	let btn = new android.widget.Button(ctx);
 	btn.setTransformationMethod(null);
 	if(!DragOP.lightMode) {
 		btn.setBackground(null);
@@ -3846,9 +3745,9 @@ var modBtn = function (mod) {
 		}
 	}));
 
-	var btn1 = new android.widget.Button(ctx);
+	let btn1 = new android.widget.Button(ctx);
 	btn1.setTransformationMethod(null);
-	var txt = eval("new String(\"" + "\\" + "uD83D" + "\\" + "uDD3D\")");
+	let txt = eval("new String(\"" + "\\" + "uD83D" + "\\" + "uDD3D\")");
 	btn1.setText(txt + "");
 	if(!DragOP.lightMode)
 		btn1.setBackgroundColor(android.graphics.Color.argb(100, 0, 0, 0));
@@ -3861,7 +3760,7 @@ var modBtn = function (mod) {
 		}
 	}));
 
-	var modButtonLayout = new LinearLayout(ctx);
+	let modButtonLayout = new LinearLayout(ctx);
 	modButtonLayout.setOrientation(LinearLayout.HORIZONTAL);
 	if(!DragOP.lightMode)
 		if(mod.isStateMode())
@@ -3869,12 +3768,12 @@ var modBtn = function (mod) {
 		else
 			modButtonLayout.setBackground(DragOP.getStyledBtnBackground(false, false));
 
-	var modButtonLayoutLeft = new LinearLayout(ctx);
+	let modButtonLayoutLeft = new LinearLayout(ctx);
 	modButtonLayoutLeft.setOrientation(1);
 	modButtonLayoutLeft.setLayoutParams(new android.view.ViewGroup.LayoutParams(mwidth / 2.5, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
 	modButtonLayout.addView(modButtonLayoutLeft);
 
-	var modButtonLayoutRight = new LinearLayout(ctx);
+	let modButtonLayoutRight = new LinearLayout(ctx);
 	modButtonLayoutRight.setOrientation(1);
 	modButtonLayoutRight.setLayoutParams(new android.view.ViewGroup.LayoutParams(mwidth / 2 - mwidth / 2.5, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT));
 	modButtonLayout.addView(modButtonLayoutRight);
@@ -3888,8 +3787,8 @@ var modBtn = function (mod) {
 
 
 DragOP.generateMenu = function (keyword) {
-	var lay = new android.widget.TableLayout(ctx);
-	var currow;
+	let lay = new android.widget.TableLayout(ctx);
+	let currow;
 	DragOP.mods.forEach(function (entry, index, array) {
 		if(entry.type != ModuleType.cmd) {
 			if((entry.name.toString()
@@ -3913,13 +3812,13 @@ DragOP.generateMenu = function (keyword) {
 		}
 	});
 	if(currow != null) lay.addView(currow);
-	var sc = new DragOP.scrollView(ctx);
+	let sc = new DragOP.scrollView(ctx);
 	sc.addView(lay);
 	return sc;
 }
 
 function showMenu() {
-	var menu = Settings.getString("menu", "navigator").toLowerCase();
+	let menu = Settings.getString("menu", "navigator").toLowerCase();
 	if(menu == "basic") {
 		showAlternateMenu();
 	} else if(menu == "cater") {
@@ -3949,12 +3848,12 @@ function showAlternateMenu() {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
 			try {
-				var mlist = new android.widget.LinearLayout(ctx);
+				let mlist = new android.widget.LinearLayout(ctx);
 				mlist.setOrientation(1);
 
 				DragOP.mods.forEach(function (entry, index, array) {
 					if(entry.type != ModuleType.cmd) {
-						var btn = new android.widget.Button(ctx);
+						let btn = new android.widget.Button(ctx);
 						btn.setText(entry.name);
 						btn.setTextColor(android.graphics.Color.WHITE);
 						if(entry.isStateMode() && entry.state)
@@ -3987,11 +3886,11 @@ function showAlternateMenu() {
 						mlist.addView(btn);
 					}
 				});
-				var scroll = new android.widget.ScrollView(ctx);
+				let scroll = new android.widget.ScrollView(ctx);
 				scroll.addView(mlist);
 				scroll.setId(52991);
 
-				var dashBtn = new android.widget.Button(ctx);
+				let dashBtn = new android.widget.Button(ctx);
 				dashBtn.setText(DragOP.getLString("special.more"));
 				dashBtn.setCompoundDrawablesWithIntrinsicBounds(0, android.R.drawable.ic_menu_more, 0, 0);
 				dashBtn.setTypeface(Utils.font);
@@ -4005,7 +3904,7 @@ function showAlternateMenu() {
 				}));
 
 
-				var toplayout = new android.widget.RelativeLayout(ctx);
+				let toplayout = new android.widget.RelativeLayout(ctx);
 				toplayout.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (viewarg) {
 						menu.dismiss();
@@ -4013,7 +3912,7 @@ function showAlternateMenu() {
 						searchQ = "";
 					}
 				}));
-				var lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				let lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
 				toplayout.addView(scroll, lparam);
@@ -4038,9 +3937,9 @@ function showNavigatorMenu() {
 		run: function () {
 			try {
 
-				var sbar = new android.widget.LinearLayout(ctx);
+				let sbar = new android.widget.LinearLayout(ctx);
 				if(!DragOP.lightMode) {
-					var bg = android.graphics.drawable.GradientDrawable();
+					let bg = android.graphics.drawable.GradientDrawable();
 					bg.setColor(android.graphics.Color.argb(100, 255, 255, 255));
 					bg.setStroke(dip2px(2), android.graphics.Color.BLACK);
 					bg.setCornerRadius(1);
@@ -4068,11 +3967,11 @@ function showNavigatorMenu() {
 				mlist = new android.widget.LinearLayout(ctx);
 				mlist.setId(20372);
 				mlist.addView(DragOP.generateMenu(search.getText() + ""));
-				var lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				let lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
-				var toplayout = new android.widget.RelativeLayout(ctx);
+				let toplayout = new android.widget.RelativeLayout(ctx);
 				toplayout.addView(sbar, lparam);
 				lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 
@@ -4085,12 +3984,12 @@ function showNavigatorMenu() {
 				toplayout.addView(mlist);
 
 				//Side stuff
-				var sideLayout = new android.widget.RelativeLayout(ctx);
-				var roundGradient = new android.graphics.drawable.GradientDrawable();
+				let sideLayout = new android.widget.RelativeLayout(ctx);
+				let roundGradient = new android.graphics.drawable.GradientDrawable();
 				roundGradient.setColor(android.graphics.Color.argb(200, 30, 30, 30));
 				roundGradient.setCornerRadius(dip2px(20));
 				roundGradient.setStroke(dip2px(1), android.graphics.Color.argb(150, 0, 0, 0));
-				var cashText = new android.widget.TextView(ctx);
+				let cashText = new android.widget.TextView(ctx);
 				cashText.setTypeface(Utils.font);
 				cashText.setGravity(android.view.Gravity.CENTER);
 				cashText.setText("Disabled");
@@ -4098,7 +3997,7 @@ function showNavigatorMenu() {
 				cashText.setBackground(roundGradient);
 				cashText.setTextSize(dip2px(13));
 
-				var dashBtn = new android.widget.Button(ctx);
+				let dashBtn = new android.widget.Button(ctx);
 				dashBtn.setText(DragOP.getLString("special.more"));
 				dashBtn.setCompoundDrawablesWithIntrinsicBounds(0, android.R.drawable.ic_menu_more, 0, 0);
 				dashBtn.setTypeface(Utils.font);
@@ -4111,7 +4010,7 @@ function showNavigatorMenu() {
 					}
 				}));
 
-				var InParam = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				let InParam = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.MATCH_PARENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
@@ -4121,7 +4020,7 @@ function showNavigatorMenu() {
 				InParam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
 				sideLayout.addView(dashBtn, InParam);
 
-				var sideParams = new android.widget.RelativeLayout.LayoutParams(ctx.getWindowManager().getDefaultDisplay().getWidth() / 100 * 15, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
+				let sideParams = new android.widget.RelativeLayout.LayoutParams(ctx.getWindowManager().getDefaultDisplay().getWidth() / 100 * 15, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
 				sideParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				sideParams.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 
@@ -4152,21 +4051,21 @@ var SettingMode = {
 };
 //[[propertyName, fallbackValue], [value1, value2, value3, .....]] 
 function SettingEntry(name, mode, valueList, onSelect) {
-	var layout = new android.widget.RelativeLayout(ctx);
-	var bg = new android.graphics.drawable.GradientDrawable();
+	let layout = new android.widget.RelativeLayout(ctx);
+	let bg = new android.graphics.drawable.GradientDrawable();
 	bg.setStroke(3, android.graphics.Color.BLACK);
-	var nameT = new android.widget.TextView(ctx);
+	let nameT = new android.widget.TextView(ctx);
 	nameT.setTypeface(Utils.font);
 	nameT.setText(" " + name);
 	nameT.setSingleLine(true);
 	nameT.setTextSize(dip2px(13));
 	nameT.setTextColor(android.graphics.Color.WHITE);
 	nameT.setGravity(android.view.Gravity.CENTER);
-	var chooser = new android.widget.Button(ctx);
+	let chooser = new android.widget.Button(ctx);
 	if(mode == SettingMode.MODE_TOGGLE) {
-		var curValue = Settings.getBoolean(valueList[0][0], valueList[0][1] == null ? false : valueList[0][1]);
-		var on = valueList[1] == null ? "On" : valueList[1][0];
-		var off = valueList[1] == null ? "Off" : valueList[1][1];
+		let curValue = Settings.getBoolean(valueList[0][0], valueList[0][1] == null ? false : valueList[0][1]);
+		let on = valueList[1] == null ? "On" : valueList[1][0];
+		let off = valueList[1] == null ? "Off" : valueList[1][1];
 		chooser.setText(curValue ? on : off);
 		chooser.setOnClickListener(new android.view.View.OnClickListener({
 			onClick: function (v) {
@@ -4178,9 +4077,9 @@ function SettingEntry(name, mode, valueList, onSelect) {
 			}
 		}));
 	} else if(mode == SettingMode.MODE_LIST) {
-		var curValue = Settings.getString(valueList[0][0], valueList[0][1] == null ? "" : valueList[0][1]);
-		var nextValue = curValue;
-		var done = false;
+		let curValue = Settings.getString(valueList[0][0], valueList[0][1] == null ? "" : valueList[0][1]);
+		let nextValue = curValue;
+		let done = false;
 		valueList[1].forEach(function (entry, index) {
 			if(entry.toLowerCase() == curValue.toLowerCase() && done == false) {
 				if(index + 1 == valueList[1].length) {
@@ -4199,7 +4098,7 @@ function SettingEntry(name, mode, valueList, onSelect) {
 					onSelect(nextValue);
 				curValue = nextValue;
 				Settings.setString(valueList[0][0], curValue);
-				var done = false;
+				let done = false;
 				valueList[1].forEach(function (entry, index) {
 					if(entry.toLowerCase() == curValue.toLowerCase() && done == false) {
 						if(index + 1 == valueList[1].length) {
@@ -4213,7 +4112,7 @@ function SettingEntry(name, mode, valueList, onSelect) {
 			}
 		}));
 	}
-	var param = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
+	let param = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.MATCH_PARENT);
 	param.addRule(android.widget.RelativeLayout.CENTER_IN_PARENT);
 	param.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 	layout.addView(nameT, param);
@@ -4231,18 +4130,18 @@ function openSettingScreen() {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
 			try {
-				var display = new android.util.DisplayMetrics();
+				let display = new android.util.DisplayMetrics();
 				com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
 					.getWindowManager()
 					.getDefaultDisplay()
 					.getMetrics(display);
-				var content = new android.widget.LinearLayout(ctx);
+				let content = new android.widget.LinearLayout(ctx);
 				content.setId(9472729);
 				content.setOrientation(1);
-				var contentScroll = new DragOP.scrollView(ctx);
+				let contentScroll = new DragOP.scrollView(ctx);
 				contentScroll.setId(492628);
 				//default content
-				var title = new android.widget.TextView(ctx);
+				let title = new android.widget.TextView(ctx);
 				title.setText(android.text.Html.fromHtml("<u>" + DragOP.getLString("screen.settings") + "</u>"));
 				title.setTextSize(dip2px(20));
 				title.setGravity(android.view.Gravity.CENTER);
@@ -4250,12 +4149,12 @@ function openSettingScreen() {
 				title.setTypeface(Utils.font);
 				title.setId(94771);
 
-				var btnBg = new android.graphics.drawable.GradientDrawable();
+				let btnBg = new android.graphics.drawable.GradientDrawable();
 				btnBg.setColor(android.graphics.Color.argb(120, 255, 255, 255));
 				btnBg.setStroke(2, android.graphics.Color.BLACK);
 				btnBg.setCornerRadius(dip2px(5));
 
-				var setMenu = SettingEntry("Menu", SettingMode.MODE_LIST, [
+				let setMenu = SettingEntry("Menu", SettingMode.MODE_LIST, [
 					["menu", "Navigator"],
 					["Navigator", "Basic", "Cater"]
 				], function (item) {
@@ -4268,19 +4167,19 @@ function openSettingScreen() {
 					}
 				});
 				content.addView(setMenu);
-				var setCommandEnable = SettingEntry("Enable Commands", SettingMode.MODE_TOGGLE, [
+				let setCommandEnable = SettingEntry("Enable Commands", SettingMode.MODE_TOGGLE, [
 					["enable_commands", true],
 					null
 				], null)
 				content.addView(setCommandEnable);
-				var commandPrefix = SettingEntry("Command Prefix", SettingMode.MODE_LIST, [
+				let commandPrefix = SettingEntry("Command Prefix", SettingMode.MODE_LIST, [
 				                                                                           ["command_prefix", "."],
 				                                                                           [".", "@", "&", "*", "~"]
 				                                                                           ], null);
 				content.addView(commandPrefix);
 
 				//footer
-				var closeButton = new styledBtn();
+				let closeButton = new styledBtn();
 				closeButton.setText("Close");
 				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
 				closeButton.setId(10472);
@@ -4288,9 +4187,9 @@ function openSettingScreen() {
 				closeButton.setTextColor(android.graphics.Color.BLACK);
 				closeButton.setTypeface(Utils.font);
 				//layout alignement....
-				var dialogLayout = new android.widget.RelativeLayout(ctx);
+				let dialogLayout = new android.widget.RelativeLayout(ctx);
 				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
-				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				let params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
@@ -4320,7 +4219,7 @@ function openSettingScreen() {
 					}
 				}));
 				settingDialog.show();
-				var window = settingDialog.getWindow();
+				let window = settingDialog.getWindow();
 				window.setLayout(mwidth, display.heightPixels);
 				closeButton.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (view) {
@@ -4338,18 +4237,18 @@ function openUpdateMgrScreen() {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
 			try {
-				var display = new android.util.DisplayMetrics();
+				let display = new android.util.DisplayMetrics();
 				com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
 					.getWindowManager()
 					.getDefaultDisplay()
 					.getMetrics(display);
-				var content = new android.widget.LinearLayout(ctx);
+				let content = new android.widget.LinearLayout(ctx);
 				content.setId(9472729);
 				content.setOrientation(1);
-				var contentScroll = new DragOP.scrollView(ctx);
+				let contentScroll = new DragOP.scrollView(ctx);
 				contentScroll.setId(492628);
 				//default content
-				var title = new android.widget.TextView(ctx);
+				let title = new android.widget.TextView(ctx);
 				title.setText(android.text.Html.fromHtml("<u>" + DragOP.getLString("screen.updatemgr") + "</u>"));
 				title.setTextSize(dip2px(20));
 				title.setGravity(android.view.Gravity.CENTER);
@@ -4357,31 +4256,31 @@ function openUpdateMgrScreen() {
 				title.setTypeface(Utils.font);
 				title.setId(94771);
 
-				var verBg = new android.graphics.drawable.GradientDrawable();
+				let verBg = new android.graphics.drawable.GradientDrawable();
 				verBg.setColor(android.graphics.Color.argb(120, 255, 255, 255));
 				verBg.setStroke(2, android.graphics.Color.BLACK);
 				verBg.setCornerRadius(dip2px(12));
 
-				var heig = dip2px(100);
+				let heig = dip2px(100);
 
-				var verParam = new android.widget.RelativeLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+				let verParam = new android.widget.RelativeLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
 				//CurrentVersion
-				var currentVer = new android.widget.RelativeLayout(ctx);
+				let currentVer = new android.widget.RelativeLayout(ctx);
 				currentVer.setBackground(verBg);
-				var currTitle = new android.widget.TextView(ctx);
+				let currTitle = new android.widget.TextView(ctx);
 				currTitle.setTypeface(Utils.font);
 				currTitle.setTextSize(dip2px(13));
 				currTitle.setId(972404);
 				currTitle.setTextColor(android.graphics.Color.BLACK);
 				currTitle.setText("Current Version (v" + UpdateManager.version + ")");
-				var currDlBtn = new android.widget.Button(ctx);
+				let currDlBtn = new android.widget.Button(ctx);
 				currDlBtn.setText("Installed");
 				currDlBtn.setId(535714);
 				currDlBtn.setTextColor(android.graphics.Color.BLACK);
 				currDlBtn.setEnabled(false);
 				currDlBtn.setTypeface(Utils.font);
 				currDlBtn.setTextSize(dip2px(9));
-				var desc = new android.widget.TextView(ctx);
+				let desc = new android.widget.TextView(ctx);
 				desc.setTypeface(Utils.font);
 				desc.setTextColor(android.graphics.Color.BLACK);
 				desc.setPadding(dip2px(4), dip2px(2), dip2px(5), 0);
@@ -4401,9 +4300,9 @@ function openUpdateMgrScreen() {
 				currentVer.addView(desc, verParam);
 
 				//Stable Version
-				var stableVer = new android.widget.RelativeLayout(ctx);
+				let stableVer = new android.widget.RelativeLayout(ctx);
 				stableVer.setBackground(verBg);
-				var stableTitle = new android.widget.TextView(ctx);
+				let stableTitle = new android.widget.TextView(ctx);
 				stableTitle.setTypeface(Utils.font);
 				stableTitle.setTextSize(dip2px(13));
 				stableTitle.setId(972144);
@@ -4412,14 +4311,14 @@ function openUpdateMgrScreen() {
 					stableTitle.setText("No Network Connection");
 				else
 					stableTitle.setText("Stable version (" + UpdateManager.stableInfo.getString("tag_name") + ")");
-				var stableDlBtn = new android.widget.Button(ctx);
+				let stableDlBtn = new android.widget.Button(ctx);
 				stableDlBtn.setText("WIP");
 				stableDlBtn.setId(537814);
 				stableDlBtn.setTextColor(android.graphics.Color.BLACK);
 				stableDlBtn.setEnabled(false);
 				stableDlBtn.setTypeface(Utils.font);
 				stableDlBtn.setTextSize(dip2px(9));
-				var stableDesc = new android.widget.TextView(ctx);
+				let stableDesc = new android.widget.TextView(ctx);
 				stableDesc.setTypeface(Utils.font);
 				stableDesc.setTextColor(android.graphics.Color.BLACK);
 				stableDesc.setPadding(dip2px(4), dip2px(2), dip2px(5), 0);
@@ -4441,14 +4340,14 @@ function openUpdateMgrScreen() {
 				verParam.addRule(android.widget.RelativeLayout.LEFT_OF, stableDlBtn.getId());
 				stableVer.addView(stableDesc, verParam);
 
-				var params = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, heig);
+				let params = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, heig);
 				content.addView(currentVer, params);
 				params = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, heig);
 				content.addView(stableVer, params);
 
 
 				//footer
-				var closeButton = new styledBtn();
+				let closeButton = new styledBtn();
 				closeButton.setText("Close");
 				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
 				closeButton.setId(10472);
@@ -4456,9 +4355,9 @@ function openUpdateMgrScreen() {
 				closeButton.setTextColor(android.graphics.Color.BLACK);
 				closeButton.setTypeface(Utils.font);
 				//layout alignement....
-				var dialogLayout = new android.widget.RelativeLayout(ctx);
+				let dialogLayout = new android.widget.RelativeLayout(ctx);
 				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
-				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
@@ -4488,7 +4387,7 @@ function openUpdateMgrScreen() {
 					}
 				}));
 				updatemgrDialog.show();
-				var window = updatemgrDialog.getWindow();
+				let window = updatemgrDialog.getWindow();
 				window.setLayout(mwidth, display.heightPixels);
 				closeButton.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (view) {
@@ -4506,18 +4405,18 @@ function openABoard() {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
 			try {
-				var display = new android.util.DisplayMetrics();
+				let display = new android.util.DisplayMetrics();
 				com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
 					.getWindowManager()
 					.getDefaultDisplay()
 					.getMetrics(display);
-				var content = new android.widget.LinearLayout(ctx);
+				let content = new android.widget.LinearLayout(ctx);
 				content.setId(9472729);
 				content.setOrientation(1);
-				var contentScroll = new DragOP.scrollView(ctx);
+				let contentScroll = new DragOP.scrollView(ctx);
 				contentScroll.setId(492628);
 				//default content
-				var title = new android.widget.TextView(ctx);
+				let title = new android.widget.TextView(ctx);
 				title.setText(android.text.Html.fromHtml("<u>" + DragOP.getLString("special.more") + "</u>"));
 				title.setTextSize(dip2px(20));
 				title.setGravity(android.view.Gravity.CENTER);
@@ -4525,17 +4424,17 @@ function openABoard() {
 				title.setTypeface(Utils.font);
 				title.setId(94771);
 
-				var btnBg = new android.graphics.drawable.GradientDrawable();
+				let btnBg = new android.graphics.drawable.GradientDrawable();
 				btnBg.setColor(android.graphics.Color.argb(120, 255, 255, 255));
 				btnBg.setStroke(2, android.graphics.Color.BLACK);
 				btnBg.setCornerRadius(dip2px(5));
 
-				var btnSelected = new android.graphics.drawable.GradientDrawable();
+				let btnSelected = new android.graphics.drawable.GradientDrawable();
 				btnSelected.setColor(android.graphics.Color.argb(120, 170, 170, 170));
 				btnSelected.setStroke(2, android.graphics.Color.BLACK);
 				btnSelected.setCornerRadius(dip2px(5));
 
-				var btnListener = new android.view.View.OnTouchListener({
+				let btnListener = new android.view.View.OnTouchListener({
 					onTouch: function (v, motionEvent) {
 						try {
 							switch(motionEvent.getAction()) {
@@ -4555,7 +4454,7 @@ function openABoard() {
 					}
 				});
 
-				var settingBtn = new android.widget.Button(ctx);
+				let settingBtn = new android.widget.Button(ctx);
 				settingBtn.setText("Settings");
 				settingBtn.setTypeface(Utils.font);
 				settingBtn.setBackground(btnBg);
@@ -4569,7 +4468,7 @@ function openABoard() {
 				settingBtn.setOnTouchListener(btnListener);
 				content.addView(settingBtn);
 
-				var updateBtn = new android.widget.Button(ctx);
+				let updateBtn = new android.widget.Button(ctx);
 				updateBtn.setText(DragOP.getLString("screen.updatemgr"));
 				updateBtn.setTypeface(Utils.font);
 				updateBtn.setBackground(btnBg);
@@ -4584,7 +4483,7 @@ function openABoard() {
 				content.addView(updateBtn);
 
 				//footer
-				var closeButton = new styledBtn();
+				let closeButton = new styledBtn();
 				closeButton.setText("Close");
 				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
 				closeButton.setId(10472);
@@ -4592,9 +4491,9 @@ function openABoard() {
 				closeButton.setTextColor(android.graphics.Color.BLACK);
 				closeButton.setTypeface(Utils.font);
 				//layout alignement....
-				var dialogLayout = new android.widget.RelativeLayout(ctx);
+				let dialogLayout = new android.widget.RelativeLayout(ctx);
 				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
-				var params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				let params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
@@ -4624,7 +4523,7 @@ function openABoard() {
 					}
 				}));
 				aboard.show();
-				var window = aboard.getWindow();
+				let window = aboard.getWindow();
 				window.setLayout(mwidth, display.heightPixels);
 				closeButton.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (view) {
@@ -4640,9 +4539,9 @@ function openABoard() {
 
 function refreshMenu() {
 	if(mlist != null) {
-		mlist.removeAllViewsInLayout();
-		var genmenu = DragOP.generateMenu(search.getText() + "");
-		mlist.addView(genmenu);
+		mlist.removeAllViews();
+		let genmenu = DragOP.generateMenu(search.getText() + "");
+		if (mlist != null)mlist.addView(genmenu);
 	}
 }
 DragOP.mt = ModuleType;
@@ -4650,16 +4549,16 @@ DragOP.mt = ModuleType;
 function updateMenu(keyword, toplayout) {
 	Utils.currentSearchCount += 1;
 	if(Utils.currentSearchCount > 999) Utils.currentSearchCount = 0;
-	var myNum = Utils.currentSearchCount;
-	var r = new java.lang.Runnable({
+	let myNum = Utils.currentSearchCount;
+	let r = new java.lang.Runnable({
 		run: function () {
-			var newList = DragOP.generateMenu(keyword);
+			let newList = DragOP.generateMenu(keyword);
 			ctx.runOnUiThread(new java.lang.Runnable({
 				run: function () {
 					try {
 						if(myNum == Utils.currentSearchCount) {
-							var mlist = toplayout.getChildAt(1);
-							var lparam = mlist.getLayoutParams();
+							let mlist = toplayout.getChildAt(1);
+							let lparam = mlist.getLayoutParams();
 							while(mlist.getChildCount() > 0) mlist.removeView(mlist.getChildAt(0));
 							mlist.addView(newList);
 						}
@@ -4670,7 +4569,7 @@ function updateMenu(keyword, toplayout) {
 			}));
 		}
 	});
-	var t = new java.lang.Thread(r);
+	let t = new java.lang.Thread(r);
 	t.start();
 }
 
@@ -4759,15 +4658,15 @@ function showMenuBtn() {
 showMenuBtn();
 
 function rptask() {
-	var t = new java.lang.Thread(new java.lang.Runnable({
+	let t = new java.lang.Thread(new java.lang.Runnable({
 		run: function () {
 
 			while(true) {
 
-				var randString = "";
+				let randString = "";
 
 				if(DragOP.modi) {
-					for(var i = 0; i < 30; i++) randString += String.fromCharCode(Math.floor(Math.random() * 255));
+					for(let i = 0; i < 30; i++) randString += String.fromCharCode(Math.floor(Math.random() * 255));
 					if(tick1 % 5 == 0) {
 						setVelX(getPlayerEnt(), Math.random() * 2 - 1);
 						setVelY(getPlayerEnt(), Math.random() - 0.5);
