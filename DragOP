@@ -26,7 +26,7 @@ var DragOP = {
 	lightMode: false,
 	ghostMode: false,
 	enableOpenGL: true,
-	enableFastEat: false
+	enableFastEat: true
 };
 
 var sharedPref = ctx.getPreferences(ctx.MODE_PRIVATE);
@@ -840,7 +840,6 @@ DragOP.setLString = function (code, lang, value) {
 			}
 		});
 }
-DragOP.addCode("special.shop");
 DragOP.addCode("special.panic");
 DragOP.addCode("special.target");
 DragOP.addCode("special.friend_manager");
@@ -878,7 +877,6 @@ DragOP.addCode("screen.settings");
 DragOP.addCode("screen.updatemgr");
 
 //DragOP.setLString(code, lc.en_US, value);
-DragOP.setLString("special.shop", lc.en_US, "Shop");
 DragOP.setLString("special.bypass", lc.en_US, "Bypass");
 DragOP.setLString("special.target", lc.en_US, "Target");
 DragOP.setLString("special.friend_manager", lc.en_US, "Friend-Manager");
@@ -3989,14 +3987,7 @@ function showNavigatorMenu() {
 				roundGradient.setColor(android.graphics.Color.argb(200, 30, 30, 30));
 				roundGradient.setCornerRadius(dip2px(20));
 				roundGradient.setStroke(dip2px(1), android.graphics.Color.argb(150, 0, 0, 0));
-				let cashText = new android.widget.TextView(ctx);
-				cashText.setTypeface(Utils.font);
-				cashText.setGravity(android.view.Gravity.CENTER);
-				cashText.setText("Disabled");
-				cashText.setTextColor(android.graphics.Color.WHITE);
-				cashText.setBackground(roundGradient);
-				cashText.setTextSize(dip2px(13));
-
+				
 				let dashBtn = new android.widget.Button(ctx);
 				dashBtn.setText(DragOP.getLString("special.more"));
 				dashBtn.setCompoundDrawablesWithIntrinsicBounds(0, android.R.drawable.ic_menu_more, 0, 0);
@@ -4760,7 +4751,6 @@ function rptask() {
 
 rptask();
 DragOP.loadModsAnim(0);
-//Shop.init();
 Utils.Render.init();
 
 function chatHook(text) {
