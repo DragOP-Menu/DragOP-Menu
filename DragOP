@@ -1,3 +1,4 @@
+"use-strict";
 /*
  * © 2016 - brought to you by the DragOP team: Godsoft029 and peacestorm.
  */
@@ -233,6 +234,12 @@ var ModuleType = {
 			return "unknown";
 		}
 	}
+};
+var ModCategory = {
+	MOVEMENT: 1,
+	COMBAT: 2,
+	RENDER: 3,
+	MISC: 4
 };
 var l = new Array();
 l.push(new Array()); //Codes
@@ -4386,7 +4393,7 @@ function openUpdateMgrScreen() {
 					}
 				}));
 			} catch(e) {
-				DragOP.ctoast("Error: " + e);
+				DragOP.ctoast("No Internet Connection detected. Restart your Launcher if you think this is an Error");
 			}
 		}
 	}));
