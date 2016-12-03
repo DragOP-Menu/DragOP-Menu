@@ -5,7 +5,7 @@ A Hacked Client / mod menu for MCPE inspired by many other mod menus and PC Hack
 
 ##Todo:
 - [ ] New menu (Cater)
- - [ ] Add a category parameter to every Module
+ - [x] Add a category parameter to every Module
  - [ ] Finish the Menu itself
  - [x] Add the Category Types: Movement, Combat, Render, Misc
 - [ ] Themes
