@@ -983,7 +983,7 @@ var UpdateManager = {
 	checkForUpdate: function () {
 		if(this.stableInfo == null)
 			return;
-		if(this.stableInfo.getString("tag_name") != UpdateManager.version) {
+		if(this.stableInfo.getString("tag_name") != UpdateManager.version && this.stableInfo.getString("tag_name").replace("v", "") != UpdateManager.version) {
 			DragOP.ctoast("New stable version available: " + this.stableInfo.getString("tag_name") + "\nCurrent version: " + UpdateManager.version);
 		}
 	}
@@ -1076,19 +1076,6 @@ DragOP.setLString("state.off", lc.en_US, "Off");
 DragOP.setLString("screen.settings", lc.en_US, "Settings");
 DragOP.setLString("screen.updatemgr", lc.en_US, "Update Manager");
 DragOP.setLString("screen.about", lc.en_US, "About");
-//German
-DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
-DragOP.setLString("hacks.jumpspeed", lc.de_DE, "HasenTempo");
-DragOP.setLString("hacks.autojump", lc.de_DE, "Automatisches\nSpringen");
-DragOP.setLString("hacks.jesus", lc.de_DE, "Wasserlauf");
-DragOP.setLString("hacks.flight", lc.de_DE, "Fliegen");
-DragOP.setLString("gm.survival", lc.de_DE, "Ã?berleben");
-DragOP.setLString("gm.creative", lc.de_DE, "Kreativ");
-DragOP.setLString("moduletype.mod", lc.de_DE, "Mod");
-DragOP.setLString("moduletype.special", lc.de_DE, "Spezielles");
-DragOP.setLString("moduletype.command", lc.de_DE, "Befehl");
-DragOP.setLString("moddialog.description", lc.de_DE, "Beschreibung");
-DragOP.setLString("moddialog.type", lc.de_DE, "Typ");
 
 DragOP.getL = function () {
 	return l[1];
@@ -3937,7 +3924,6 @@ var sbind = {
 					sbind.sbtn.setOnTouchListener(new android.view.View.OnTouchListener({
 						onTouch: function (view, motionEvent) {
 							try {
-								DragOP.cmsg(motionEvent.getAction());
 								if(!moving2) return false;
 								switch(motionEvent.getAction()) {
 								case android.view.MotionEvent.ACTION_DOWN:
@@ -4030,7 +4016,7 @@ var autosword = {
 				while(autosword.state){
 					if(Utils.Entity.getNearestEntity(5, true) != null){
 						let bestsword = [-1, -1];
-						for(let i = 0; i < 8; i++){
+						for(let i = 0; i < 10; i++){
 							let dmg = Utils.Item.getDamage(Player.getInventorySlot(i));
 							if(dmg > bestsword[0]){
 								bestsword[0] = dmg;
@@ -4057,6 +4043,7 @@ var autosword = {
 	}
 };
 DragOP.registerModule(autosword);
+
 /*
 var statehack = {
 	name: "Hack",
@@ -4800,7 +4787,7 @@ function openAboutScreen() {
 				
 				let about = new android.widget.TextView (ctx);
 				about.setTextSize(dip2px(10));
-				about.setText ("DragOP was made by GodSoft029");
+				about.setText ("DragOP was made by GodSoft029 and Peacestorm");
 				about.setGravity(android.view.Gravity.CENTER | android.view.Gravity.TOP);
 				about.setTextColor(android.graphics.Color.BLACK);
 				about.setTypeface(Utils.font);
