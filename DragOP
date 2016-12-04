@@ -941,7 +941,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 };
 
 var UpdateManager = {
-	version: "1.0.0",
+	version: "1.0.1",
 	stableVer: "Loading",
 	stableInfo: null,
 	devInfo: null,
