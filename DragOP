@@ -138,9 +138,9 @@ var CommandManager = {
 		else
 			DragOP.cmsg("Command \"" + command + "\" not found");
 	},
-	isBlacklisted: function(cmd) {
+	isBlacklisted: function (cmd) {
 		cmd = cmd.split(" ").shift().toLowerCase();
-		this.cmdBlacklist.forEach(function(entry){
+		this.cmdBlacklist.forEach(function (entry) {
 			if(entry == cmd)
 				return true;
 		});
@@ -238,7 +238,8 @@ var ModCategory = {
 	MOVEMENT: 1,
 	COMBAT: 2,
 	RENDER: 3,
-	MISC: 4
+	MISC: 4,
+	PLAYER: 5
 };
 var l = new Array();
 l.push(new Array()); //Codes
@@ -248,7 +249,7 @@ l.push(new Array()); //German
 var BypassMode = {
 	DEFAULT: 0,
 	LBSG: 1,
-	MINIBOX: 2
+	FACILITY: 2
 };
 var SpeedMode = {
 	DEFAULT: 0,
@@ -308,15 +309,20 @@ DragOP.ctoast = function (text, showPrefix, iconName) {
 				}
 				msg.setText(text);
 				msg.setGravity(android.view.Gravity.CENTER);
-				msg.setTextSize(20);
+				msg.setTextSize(16);
 				msg.setPadding(10, 10, 10, 10);
 				msg.setTextColor(android.graphics.Color.WHITE);
 				let bg = new android.graphics.drawable.GradientDrawable();
 				bg.setColor(android.graphics.Color.argb(150, 50, 50, 50));
-				bg.setStroke(dip2px(5), android.graphics.Color.argb(200, 5, 5, 5));
+				bg.setStroke(dip2px(3), android.graphics.Color.argb(200, 5, 5, 5));
 				bg.setCornerRadius(dip2px(20));
 				layout.addView(msg);
 				layout.setBackground(bg);
+				layout.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function (v) {
+						thetoast.cancel();
+					}
+				}));
 				thetoast.setView(layout);
 				thetoast.show();
 			}
@@ -395,7 +401,7 @@ var Utils = {
 					gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 					gl.glLoadIdentity();
 
-					if(playerEsp.state || chesttracers.state || tracers.state) {
+					if(playerEsp.state || chesttracers.state || tracers.state || teleport.state) {
 						try {
 							gl.glDisable(GL10.GL_LIGHTING);
 							let yaw = getYaw() % 360;
@@ -602,12 +608,116 @@ var Utils = {
 	ModSettings: {
 		getSlider: function () {
 			return new android.widget.SeekBar(ctx);
-		}
+		},
 	},
 	Block: {
 		isLiquid: function (id) {
 			if(id >= 8 && id <= 11) return true;
 			return false;
+		},
+		rayTrace: function (dir, pos, radius) {
+			/*
+			Taken from  https://raw.githubusercontent.com/zhuowei/ModPEScripts/master/500ise_paintbrush.js
+Originally Taken from https://raw.github.com/Overv/MineAssemble/master/reference/src/mineassemble.c .
+An implementation of http://www.cse[1]orku.ca/~amana/research/grid.pdf
+(modified with guidance from http://gamedev.stackexchange.com/questions/47362/cast-ray-to-select-block-in-voxel-game)
+Thus, this below method is:
+Copyright (C) 2013 Alexander Overvoorde
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+			let result = {};
+			if(dir[0] == 0.0 && dir[1] == 0.0 && dir[2] == 0.0) {
+				result.hit = false;
+				return result;
+			}
+			let start = pos.slice(0);
+
+			let x = Math.floor(pos[0]);
+			let y = Math.floor(pos[1]);
+			let z = Math.floor(pos[2]);
+
+			let x_dir = dir[0] >= 0.0 ? 1 : -1;
+			let y_dir = dir[1] >= 0.0 ? 1 : -1;
+			let z_dir = dir[2] >= 0.0 ? 1 : -1;
+
+			let dx_off = x_dir > 0 ? 1.0 : 0.0;
+			let dy_off = y_dir > 0 ? 1.0 : 0.0;
+			let dz_off = z_dir > 0 ? 1.0 : 0.0;
+
+
+
+
+			let radius2 = radius * radius;
+
+			while(true) {
+				let dx = start[0] - pos[0];
+				let dy = start[1] - pos[1];
+				let dz = start[2] - pos[2];
+				let dist2 = dx * dx + dy * dy + dz * dz;
+				if(dist2 > radius2) {
+					result.hit = false;
+
+
+					return result;
+				}
+
+				if(getTile(x, y, z) != 0) {
+					let dist = Math.sqrt(dist2);
+
+					pos[0] -= x;
+					pos[1] -= y;
+					pos[2] -= z;
+
+					result.hit = true;
+					result.x = x;
+					result.y = y;
+					result.z = z;
+					result.dist = dist;
+
+					return result;
+
+				}
+
+				dx = x - pos[0] + dx_off;
+				dy = y - pos[1] + dy_off;
+				dz = z - pos[2] + dz_off;
+
+				let t1 = dx / dir[0];
+				let t2 = dy / dir[1];
+				let t3 = dz / dir[2];
+
+				if(t1 <= t2 && t1 <= t3) {
+					pos[0] += dx;
+					pos[1] += t1 * dir[1];
+					pos[2] += t1 * dir[2];
+					x += x_dir;
+				}
+				if(t2 <= t1 && t2 <= t3) {
+					pos[0] += t2 * dir[0];
+					pos[1] += dy;
+					pos[2] += t2 * dir[2];
+					y += y_dir;
+				}
+				if(t3 <= t1 && t3 <= t2) {
+					pos[0] += t3 * dir[0];
+					pos[1] += t3 * dir[1];
+					pos[2] += dz;
+					z += z_dir;
+				}
+			}
 		}
 	},
 	Player: {
@@ -662,6 +772,40 @@ var Utils = {
 			return Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
 		}
 	},
+	Item: {
+		getDamage: function(id){
+			switch(id){
+			//Swords
+			case 268:
+			case 283:
+				return 5;
+				break;
+			case 272:
+				return 6;
+				break;
+			case 267:
+				return 7;
+				break;
+			case 276:
+				return 8;
+				break;
+			//Axe
+			case 271:
+			case 286:
+				return 4;
+				break;
+			case 275:
+				return 5;
+				break;
+			case 258:
+				return 6;
+				break;
+			case 279:
+				return 7;
+				break;
+			}
+		}
+	},
 	Pos: {
 		lastX: 0,
 		lastY: 0,
@@ -692,14 +836,14 @@ var Utils = {
 				}
 				if(Entity.getEntityTypeId(ent) != 63)
 					y += 0.5;
-				
+
 				let len = Math.sqrt(x * x + y * y + z * z);
 				y = y / len;
 				let pitch = Math.asin(y);
 				let deg_rad = 180 / Math.PI;
 				pitch = pitch * deg_rad;
 				pitch = -pitch;
-				let yaw = -Math.atan2(x , z ) * deg_rad;
+				let yaw = -Math.atan2(x, z) * deg_rad;
 				if(pitch < 89 && pitch > -89) {
 					Entity.setRot(Player.getEntity(), yaw, pitch);
 				}
@@ -713,7 +857,7 @@ var Utils = {
 			let yaw = (Math.atan2(posZ, posX) * deg_rad) - 90;
 			let len = Math.sqrt(posX * posX + posZ * posZ);
 			let g = 0.007;
-			let tmp = (1 - g * (g * (Math.pow (len, 2)) + 2 * posY));
+			let tmp = (1 - g * (g * (Math.pow(len, 2)) + 2 * posY));
 			let pitch = deg_rad * -(Math.atan((1 - Math.sqrt(tmp)) / (g * len)));
 			if(pitch < 89 && pitch > -89) {
 				setRot(Player.getEntity(), yaw, pitch);
@@ -763,21 +907,33 @@ var Utils = {
 
 			});
 
+			players.forEach(function (entry) {
+				let x = Entity.getX(entry) - getPlayerX();
+				let y = Entity.getY(entry) - getPlayerY();
+				let z = Entity.getZ(entry) - getPlayerZ();
+				let cancel = false;
 
-			for(let i = 0; i < players.length; i++) {
-				let x = Entity.getX(players[i]) - getPlayerX();
-				let y = Entity.getY(players[i]) - getPlayerY();
-				let z = Entity.getZ(players[i]) - getPlayerZ();
-				let allowed = false;
-				if(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(players[i]) == 63) allowed = true;
-				if(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(players[i]) < 63) allowed = true;
-				let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
-				if(FriendManager.isFriend(Entity.getNameTag(players[i])) == true) allowed = false;
-				if(dist < small && dist > 0 && allowed == true && Entity.getHealth(players[i]) >= 1) {
-					small = dist;
-					ent = players[i];
+				if(bypass && y > 0.3) {
+					let xVel = Entity.getVelX(entry);
+					let yVel = Entity.getVelY(entry);
+					let zVel = Entity.getVelZ(entry);
+					if(xVel == 0 && yVel == 0 && zVel == 0)
+						cancel = true;
 				}
-			}
+
+
+				if(Entity.getEntityTypeId(entry) == 63 && Entity.getNameTag(entry) == "")
+					cancel = true;
+				let allowed = false;
+				if(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(entry) == 63) allowed = true;
+				if(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(entry) < 63) allowed = true;
+				let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+				if(FriendManager.isFriend(Entity.getNameTag(entry)) == true) allowed = false;
+				if(dist < small && dist > 0 && allowed == true && Entity.getHealth(entry) >= 1) {
+					small = dist;
+					ent = entry;
+				}
+			});
 
 			return ent;
 		}
@@ -800,7 +956,7 @@ var UpdateManager = {
 			DragOP.ctoast("You are using an unsupported Launcher. The auto updater wont work");
 			return;
 		}
-		this.downloadStableInfo();   
+		this.downloadStableInfo();
 	},
 	downloadStableInfo: function () {
 		Utils.Url.getUrlContents("https://api.github.com/repos/DragOP-Menu/DragOP-Menu/releases/latest", function (cont, err) {
@@ -838,13 +994,13 @@ DragOP.addCode = function (code) {
 	l[0].push(code);
 }
 DragOP.setLString = function (code, lang, value) {
-		let done = false;
-		l[0].forEach(function (entry, index, array) {
-			if(done == false && entry.toLowerCase() == code.toLowerCase()) {
-				l[lang][index] = value;
-				done = true;
-			}
-		});
+	let done = false;
+	l[0].forEach(function (entry, index, array) {
+		if(done == false && entry.toLowerCase() == code.toLowerCase()) {
+			l[lang][index] = value;
+			done = true;
+		}
+	});
 }
 DragOP.addCode("special.panic");
 DragOP.addCode("special.target");
@@ -881,6 +1037,7 @@ DragOP.addCode("state.on");
 DragOP.addCode("state.off");
 DragOP.addCode("screen.settings");
 DragOP.addCode("screen.updatemgr");
+DragOP.addCode("screen.about");
 
 //DragOP.setLString(code, lc.en_US, value);
 DragOP.setLString("special.bypass", lc.en_US, "Bypass");
@@ -918,9 +1075,10 @@ DragOP.setLString("state.on", lc.en_US, "On");
 DragOP.setLString("state.off", lc.en_US, "Off");
 DragOP.setLString("screen.settings", lc.en_US, "Settings");
 DragOP.setLString("screen.updatemgr", lc.en_US, "Update Manager");
+DragOP.setLString("screen.about", lc.en_US, "About");
 //German
 DragOP.setLString("hacks.gamemode", lc.de_DE, "Spielmodus");
-DragOP.setLString("hacks.jumpspeed", lc.de_DE, "HasenTempo"); 
+DragOP.setLString("hacks.jumpspeed", lc.de_DE, "HasenTempo");
 DragOP.setLString("hacks.autojump", lc.de_DE, "Automatisches\nSpringen");
 DragOP.setLString("hacks.jesus", lc.de_DE, "Wasserlauf");
 DragOP.setLString("hacks.flight", lc.de_DE, "Fliegen");
@@ -1160,6 +1318,7 @@ var friendMgr = {
 	name: DragOP.getLString("special.friend_manager"),
 	desc: "Friends wont be aimed by AimAura or BowAimBot",
 	type: ModuleType.special,
+	category: ModCategory.MISC,
 	openFriendManager: function () {
 		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function () {
@@ -1371,6 +1530,7 @@ var target = {
 	name: DragOP.getLString("special.target"),
 	desc: "Let you choose the type of entitys that are targetted by Modules like AimAura and BowAimBot.",
 	type: ModuleType.special,
+	category: ModCategory.MISC,
 	getSettingsLayout: function (params) {
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
@@ -1421,6 +1581,7 @@ var bypass = {
 	name: DragOP.getLString("special.bypass"),
 	desc: "Mods will bypass AntiCheats or disable them if they can't.",
 	type: ModuleType.special,
+	category: ModCategory.MISC,
 	getSettingsLayout: function (params) {
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
@@ -1441,7 +1602,7 @@ var bypass = {
 		lbsg.setOnClickListener(new android.view.View.OnClickListener({
 			onClick: function (v) {
 				Utils.bypassMode = BypassMode.LBSG;
-				minibox.setBackground(Utils.bypassMode == BypassMode.MINIBOX ? enabledGradient : disabledGradient);
+				facility.setBackground(Utils.bypassMode == BypassMode.FACILITY ? enabledGradient : disabledGradient);
 				lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG ? enabledGradient : disabledGradient);
 				vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT ? enabledGradient : disabledGradient);
 			}
@@ -1455,28 +1616,28 @@ var bypass = {
 		vanilla.setOnClickListener(new android.view.View.OnClickListener({
 			onClick: function (v) {
 				Utils.bypassMode = BypassMode.DEFAULT;
-				minibox.setBackground(Utils.bypassMode == BypassMode.MINIBOX ? enabledGradient : disabledGradient);
+				facility.setBackground(Utils.bypassMode == BypassMode.FACILITY ? enabledGradient : disabledGradient);
 				lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG ? enabledGradient : disabledGradient);
 				vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT ? enabledGradient : disabledGradient);
 			}
 		}));
-		var minibox = new android.widget.Button(ctx);
-		minibox.setText("MiniBoxPE Anti-Cheat");
-		minibox.setTypeface(Utils.font);
+		var facility = new android.widget.Button(ctx);
+		facility.setText("facilityPE Anti-Cheat");
+		facility.setTypeface(Utils.font);
 
-		minibox.setBackground(Utils.bypassMode == BypassMode.MINIBOX ? enabledGradient : disabledGradient);
-		minibox.setTextColor(android.graphics.Color.BLACK);
-		minibox.setOnClickListener(new android.view.View.OnClickListener({
+		facility.setBackground(Utils.bypassMode == BypassMode.FACILITY ? enabledGradient : disabledGradient);
+		facility.setTextColor(android.graphics.Color.BLACK);
+		facility.setOnClickListener(new android.view.View.OnClickListener({
 			onClick: function (v) {
-				Utils.bypassMode = BypassMode.MINIBOX;
-				minibox.setBackground(Utils.bypassMode == BypassMode.MINIBOX ? enabledGradient : disabledGradient);
+				Utils.bypassMode = BypassMode.FACILITY;
+				facility.setBackground(Utils.bypassMode == BypassMode.FACILITY ? enabledGradient : disabledGradient);
 				lbsg.setBackground(Utils.bypassMode == BypassMode.LBSG ? enabledGradient : disabledGradient);
 				vanilla.setBackground(Utils.bypassMode == BypassMode.DEFAULT ? enabledGradient : disabledGradient);
 			}
 		}));
 		settings.addView(vanilla, params);
 		settings.addView(lbsg, params);
-		settings.addView(minibox, params);
+		settings.addView(facility, params);
 		return settings;
 	},
 	isStateMode: function () {
@@ -1501,6 +1662,7 @@ var panic = {
 	name: DragOP.getLString("special.panic"),
 	desc: "Disables all mods at once!",
 	type: ModuleType.mod,
+	category: ModCategory.MISC,
 	isStateMode: function () {
 		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
@@ -1529,6 +1691,7 @@ var gmhack = {
 	name: "Gamemode",
 	desc: "Changes your gamemode!",
 	type: ModuleType.mod,
+	category: ModCategory.PLAYER,
 	isStateMode: function () {
 		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
@@ -1557,9 +1720,11 @@ var aimaura = {
 	name: DragOP.getLString("hacks.aimaura"),
 	desc: "Automatically aims at near mobs!",
 	type: ModuleType.mod,
+	category: ModCategory.COMBAT,
 	state: false,
 	range: 7,
 	requestAim: false,
+
 	getSettingsLayout: function (params) {
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
@@ -1600,16 +1765,16 @@ var aimaura = {
 	onModTick: function () {
 		if(this.state) {
 			this.requestAim = true;
-			
+
 		}
 	},
 	onClick: function (btn) {
 		this.state = !this.state;
-		if (this.state){
+		if(this.state) {
 			var r = new java.lang.Runnable({
-				run: function(){
-					while (aimaura.state){
-						if (aimaura.requestAim){
+				run: function () {
+					while(aimaura.state) {
+						if(aimaura.requestAim) {
 							aimaura.requestAim = false;
 							try {
 								let ent = Utils.Entity.getNearestEntity(aimaura.range, true);
@@ -1618,14 +1783,14 @@ var aimaura = {
 								DragOP.ctoast(e);
 								aimaura.state = false;
 							}
-							
-						}else 
+
+						} else
 							java.lang.Thread.sleep(10);
 					}
 				}
 			});
-			var t = new java.lang.Thread (r);
-			t.start ();
+			var t = new java.lang.Thread(r);
+			t.start();
 		}
 	},
 	onRefresh: function (btn) {
@@ -1638,6 +1803,7 @@ var bowaimbot = {
 	name: DragOP.getLString("hacks.bowaimbot"),
 	desc: "Automatically aims with a bow at near mobs!",
 	type: ModuleType.mod,
+	category: ModCategory.COMBAT,
 	state: false,
 	range: 100,
 	isStateMode: function () {
@@ -1701,6 +1867,7 @@ var tpaura = {
 	name: DragOP.getLString("hacks.tpaura"),
 	desc: "Automatically teleports you around people so that they can\'t hit you.",
 	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
 	state: false,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -1768,6 +1935,7 @@ var clicktp = {
 	name: DragOP.getLString("hacks.clicktp"),
 	desc: "Teleports you to the place where you clicked",
 	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
 	state: false,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -1795,6 +1963,7 @@ var speed = {
 	name: DragOP.getLString("hacks.speed"),
 	desc: "Standard: Standard speed without any modifications\n" + DragOP.getLString("hacks.jumpspeed") + ": Jumps ~0.2 blocks high while walking\n" + DragOP.getLString("hacks.longjump") + ": Jumps up to 6 blocks long while walking!",
 	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
 	state: false,
 	extratick: 0,
 	getSettingsLayout: function (params) {
@@ -1866,7 +2035,7 @@ var speed = {
 		if(this.state && Utils.Player.onGround()) {
 			switch(Utils.speedMode) {
 			case SpeedMode.DEFAULT:
-				var max = Utils.bypassMode == BypassMode.LBSG ? 0.35 : 0.6;
+				var max = Utils.bypassMode == BypassMode.LBSG ? 0.4 : 0.8;
 				var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
 				var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
 				if(speed < 0.04) {
@@ -1954,6 +2123,7 @@ var flight = {
 	name: DragOP.getLString("hacks.flight"),
 	desc: "Makes you fly.",
 	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
 	state: false,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -1982,6 +2152,7 @@ var step = {
 	name: DragOP.getLString("hacks.step"),
 	desc: "Steps on full blocks like you will on a half slap",
 	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
 	state: false,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -2014,6 +2185,7 @@ var jesus = {
 	name: DragOP.getLString("hacks.jesus"),
 	desc: "Jesus used this hack 2000 years ago to walk over water\nFloat: Floats over water\nSolid: Makes liquids solid",
 	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
 	state: false,
 	mode: JesusMode.FLOAT,
 	isStateMode: function () {
@@ -2123,7 +2295,7 @@ var jesus = {
 			], 11, false, 4);
 			Block.setShape(10, 0, 0, 0, 1, 0.7, 1);
 			Block.setShape(11, 0, 0, 0, 1, 0.7, 1);
-		} else if (this.mode == JesusMode.SOLID) {
+		} else if(this.mode == JesusMode.SOLID) {
 			Block.defineLiquidBlock(8, "Water", [
 				["still_water", 0],
 				["still_water", 0]
@@ -2144,6 +2316,7 @@ var nodownglide = {
 	name: DragOP.getLString("hacks.nodownglide"),
 	desc: "Not letting you to move on y-axis (upwards & downwards)",
 	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
 	state: false,
 	startY: -1,
 	isStateMode: function () {
@@ -2156,7 +2329,7 @@ var nodownglide = {
 	},
 	onModTick: function () {
 		if(this.state) {
-			setVelY(getPlayerEnt(), -0.000000000001);
+			setVelY(getPlayerEnt(), 0.000000000001);
 			Entity.setPositionRelative(getPlayerEnt(), 0, this.startY - getPlayerY(), 0);
 		}
 	},
@@ -2174,8 +2347,9 @@ var glide = {
 	name: DragOP.getLString("hacks.glide"),
 	desc: "Let you glide through the air. Sometimes good to bypass anti cheats",
 	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
 	state: false,
-	motion: 0.001,
+	motion: -0.001,
 	glideGui: null,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -2216,10 +2390,10 @@ var glide = {
 				glide.motion = pro;
 			}
 		}));
-		if(Utils.bypassMode == BypassMode.MINIBOX) {
-			gmSlider.setEnabled(false);
-			gmText.setText("Settings not available in MiniBox bypass mode!");
-		}
+		//		if(Utils.bypassMode == BypassMode.FACILITY) {
+		//			gmSlider.setEnabled(false);
+		//			gmText.setText("Settings not available in MiniBox bypass mode!");
+		//		}
 		settings.addView(gmSlider, params);
 		settings.addView(gmText, params);
 
@@ -2289,14 +2463,6 @@ var glide = {
 						setVelY(getPlayerEnt(), -3);
 					}
 				break;
-			case BypassMode.MINIBOX:
-				if(tick1 % 5 == 0) {
-					setVelY(getPlayerEnt(), 0.036);
-
-				}
-				if(tick1 == 0 && Utils.Player.isCollidedHorizontally())
-					Entity.setPositionRelative(getPlayerEnt(), 0, 1, 0);
-				break;
 			}
 
 		}
@@ -2319,6 +2485,7 @@ var chesttracers = {
 	name: DragOP.getLString("hacks.chestTracer"),
 	desc: "Makes chests better visible",
 	type: ModuleType.mod,
+	category: ModCategory.RENDER,
 	state: false,
 	findTick: 0,
 	groundMode: true,
@@ -2599,6 +2766,7 @@ var criticals = {
 	name: DragOP.getLString("hacks.criticals"),
 	desc: "Most of your hits will be critical hits!",
 	type: ModuleType.mod,
+	category: ModCategory.COMBAT,
 	state: false,
 	tick: 0,
 	velTick: 0,
@@ -2646,6 +2814,7 @@ var coords = {
 	name: DragOP.getLString("hacks.coords"),
 	desc: "Displays your coordinates",
 	type: ModuleType.mod,
+	category: ModCategory.PLAYER,
 	state: false,
 	coordGui: null,
 	coordView: null,
@@ -2708,6 +2877,7 @@ var playerEsp = {
 	name: DragOP.getLString("hacks.playerEsp"),
 	desc: "Draws a box around players.",
 	type: ModuleType.mod,
+	category: ModCategory.RENDER,
 	state: false,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -2753,8 +2923,9 @@ var playerEsp = {
 DragOP.registerModule(playerEsp);
 var nuker = {
 	name: DragOP.getLString("hacks.nuker"),
-	desc: "Nukes blocks aroiund you.",
+	desc: "Nukes blocks around you.",
 	type: ModuleType.mod,
+	category: ModCategory.MISC,
 	state: false,
 	getSettingsLayout: function (params) {
 		let settings = new android.widget.LinearLayout(ctx);
@@ -2826,6 +2997,7 @@ var velocity = {
 	name: "Velocity",
 	desc: "Disables knockback",
 	type: ModuleType.mod,
+	category: ModCategory.COMBAT,
 	state: false,
 	attackTick: 0,
 	lastHealth: 0,
@@ -2960,7 +3132,7 @@ var webbrowser = {
 	}
 };
 DragOP.registerModule(webbrowser);
-if(DragOP.enableFastEat){
+if(DragOP.enableFastEat) {
 	try {
 		var items = "Ww0KICB7DQogICAgIm5hbWUiOiAiYXBwbGUiLA0KICAgICJpZCI6IDQsDQogICAgImljb24iOiAiYXBwbGUiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDQsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJsb3ciLA0KICAgICAgImlzX21lYXQiOiBmYWxzZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImdvbGRlbl9hcHBsZSIsDQogICAgImlkIjogNjYsDQogICAgImljb24iOiAiYXBwbGVfZ29sZGVuIiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQogICAgInN0YWNrX2J5X2RhdGEiOiB0cnVlLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJmb2lsIjogZmFsc2UsDQogICAgImhvdmVyX3RleHRfY29sb3IiOiAiYXF1YSIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA0LCANCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInN1cGVybmF0dXJhbCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlLCANCiAgICAgICJlZmZlY3RzIjogWw0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAicmVnZW5lcmF0aW9uIiwNCiAgICAgICAgICAiY2hhbmNlIjogMS4wLA0KICAgICAgICAgICJkdXJhdGlvbiI6IDUsDQogICAgICAgICAgImFtcGxpZmllciI6IDENCiAgICAgICAgfSwNCiAgICAgICAgew0KICAgICAgICAgICJuYW1lIjogImFic29ycHRpb24iLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMTIwLCANCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9DQogICAgICBdLA0KICAgICAgImVuY2hhbnRlZF9lZmZlY3RzIjogWw0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAicmVnZW5lcmF0aW9uIiwNCiAgICAgICAgICAiY2hhbmNlIjogMC42NiwNCiAgICAgICAgICAiZHVyYXRpb24iOiAzMCwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogNA0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiYWJzb3JwdGlvbiIsDQogICAgICAgICAgImNoYW5jZSI6IDAuNjYsDQogICAgICAgICAgImR1cmF0aW9uIjogMTIwLCANCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAicmVzaXN0YW5jZSIsIA0KICAgICAgICAgICJjaGFuY2UiOiAwLjY2LA0KICAgICAgICAgICJkdXJhdGlvbiI6IDMwMCwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiZmlyZV9yZXNpc3RhbmNlIiwNCiAgICAgICAgICAiY2hhbmNlIjogMC42NiwNCiAgICAgICAgICAiZHVyYXRpb24iOiAzMDAsDQogICAgICAgICAgImFtcGxpZmllciI6IDANCiAgICAgICAgfQ0KICAgICAgXQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImFwcGxlRW5jaGFudGVkIiwgDQogICAgImlkIjogMjEwLA0KICAgICJpY29uIjogImFwcGxlX2dvbGRlbiIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KICAgICJoYW5kX2VxdWlwcGVkIjogZmFsc2UsDQogICAgInN0YWNrX2J5X2RhdGEiOiB0cnVlLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJmb2lsIjogdHJ1ZSwNCiAgICAiaG92ZXJfdGV4dF9jb2xvciI6ICJsaWdodF9wdXJwbGUiLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogNCwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInN1cGVybmF0dXJhbCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlLA0KICAgICAgImVmZmVjdHMiOiBbDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJyZWdlbmVyYXRpb24iLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMzAsDQogICAgICAgICAgImFtcGxpZmllciI6IDQNCiAgICAgICAgfSwNCiAgICAgICAgew0KICAgICAgICAgICJuYW1lIjogImFic29ycHRpb24iLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMTIwLCANCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAicmVzaXN0YW5jZSIsIA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMzAwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0sDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJmaXJlX3Jlc2lzdGFuY2UiLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogMzAwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0NCiAgICAgIF0NCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJtdXNocm9vbV9zdGV3IiwNCiAgICAiaWQiOiAyNiwNCiAgICAiaWNvbiI6ICJtdXNocm9vbV9zdGV3IiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQogICAgIm1heF9zdGFja19zaXplIjogMSwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDYsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiBmYWxzZSwNCiAgICAgICJ1c2luZ19jb252ZXJ0c190byI6ICJpdGVtLmJvd2wiDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiYnJlYWQiLA0KICAgICJpZCI6IDQxLA0KICAgICJpY29uIjogImJyZWFkIiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA1LA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibm9ybWFsIiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJwb3JrY2hvcCIsDQogICAgImlkIjogNjMsDQogICAgImljb24iOiAicG9ya2Nob3BfcmF3IiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDMsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJsb3ciLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicG9ya2Nob3BfY29va2VkIiwNCiAgICAiaWQiOiA2NCwNCiAgICAiaWNvbiI6ICJwb3JrY2hvcF9jb29rZWQiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDgsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJnb29kIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImZpc2giLA0KICAgICJpZCI6IDkzLA0KICAgICJpY29uIjogImZpc2giLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJtYXhfZGFtYWdlIjogMCwNCiAgICAic3RhY2tlZF9ieV9kYXRhIjogdHJ1ZSwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDIsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJwb29yIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogInNhbG1vbiIsDQogICAgImlkIjogMjA0LA0KICAgICJpY29uIjogInNhbG1vbiIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQogICAgIm1heF9kYW1hZ2UiOiAwLA0KICAgICJzdGFja2VkX2J5X2RhdGEiOiB0cnVlLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogMiwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInBvb3IiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY2xvd25maXNoIiwNCiAgICAiaWQiOiAyMDUsDQogICAgImljb24iOiAiY2xvd25maXNoIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCiAgICAibWF4X2RhbWFnZSI6IDAsDQogICAgInN0YWNrZWRfYnlfZGF0YSI6IHRydWUsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAxLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAicG9vciIsDQogICAgICAiaXNfbWVhdCI6IHRydWUNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJwdWZmZXJmaXNoIiwNCiAgICAiaWQiOiAyMDYsDQogICAgImljb24iOiAicHVmZmVyZmlzaCIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQogICAgIm1heF9kYW1hZ2UiOiAwLA0KICAgICJzdGFja2VkX2J5X2RhdGEiOiB0cnVlLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogMSwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInBvb3IiLA0KICAgICAgImlzX21lYXQiOiB0cnVlLA0KICAgICAgImVmZmVjdHMiOiBbDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJwb2lzb24iLA0KICAgICAgICAgICJkdXJhdGlvbiI6IDYwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAzDQogICAgICAgIH0sDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJuYXVzZWEiLCANCiAgICAgICAgICAiZHVyYXRpb24iOiAxNSwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogMQ0KICAgICAgICB9LA0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiaHVuZ2VyIiwNCiAgICAgICAgICAiZHVyYXRpb24iOiAxNSwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogMg0KICAgICAgICB9DQogICAgICBdDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY29va2VkX2Zpc2giLA0KICAgICJpZCI6IDk0LA0KICAgICJpY29uIjogImNvb2tlZF9maXNoIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCiAgICAibWF4X2RhbWFnZSI6IDAsDQogICAgInN0YWNrZWRfYnlfZGF0YSI6IHRydWUsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA1LA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibm9ybWFsIiwNCiAgICAgICJlYXRfc291bmQiOiAicmFuZG9tLmJ1cnAiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY29va2VkX3NhbG1vbiIsDQogICAgImlkIjogMjA3LA0KICAgICJpY29uIjogImNvb2tlZF9zYWxtb24iLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJtYXhfZGFtYWdlIjogMCwNCiAgICAic3RhY2tlZF9ieV9kYXRhIjogdHJ1ZSwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDYsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJnb29kIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImNvb2tpZSIsDQogICAgImlkIjogMTAxLA0KICAgICJpY29uIjogImNvb2tpZSIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAicG9vciIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAibWVsb24iLA0KICAgICJpZCI6IDEwNCwNCiAgICAiaWNvbiI6ICJtZWxvbiIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJiZWVmIiwNCiAgICAiaWQiOiAxMDcsDQogICAgImljb24iOiAiYmVlZl9yYXciLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogMywNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogImxvdyIsDQogICAgICAiaXNfbWVhdCI6IHRydWUNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJzdGVhayIsDQogICAgImlkIjogMTA4LA0KICAgICJpY29uIjogImJlZWZfY29va2VkIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDgsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJnb29kIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImNoaWNrZW4iLA0KICAgICJpZCI6IDEwOSwNCiAgICAiaWNvbiI6ICJjaGlja2VuX3JhdyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZSwNCiAgICAgICJlZmZlY3RzIjogWw0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiaHVuZ2VyIiwNCiAgICAgICAgICAiY2hhbmNlIjogMC4zLA0KICAgICAgICAgICJkdXJhdGlvbiI6IDMwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0NCiAgICAgIF0NCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJjb29rZWRfY2hpY2tlbiIsDQogICAgImlkIjogMTEwLA0KICAgICJpY29uIjogImNoaWNrZW5fY29va2VkIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDYsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAibXV0dG9uUmF3IiwNCiAgICAiaWQiOiAxNjcsDQogICAgImljb24iOiAibXV0dG9uX3JhdyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogIm11dHRvbkNvb2tlZCIsDQogICAgImlkIjogMTY4LA0KICAgICJpY29uIjogIm11dHRvbl9jb29rZWQiLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogNiwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogImdvb2QiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicm90dGVuX2ZsZXNoIiwNCiAgICAiaWQiOiAxMTEsDQogICAgImljb24iOiAicm90dGVuX2ZsZXNoIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDQsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJwb29yIiwNCiAgICAgICJpc19tZWF0IjogdHJ1ZSwNCiAgICAgICJlZmZlY3RzIjogWw0KICAgICAgICB7DQogICAgICAgICAgIm5hbWUiOiAiaHVuZ2VyIiwNCiAgICAgICAgICAiY2hhbmNlIjogMC4zLA0KICAgICAgICAgICJkdXJhdGlvbiI6IDMwLA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0NCiAgICAgIF0NCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJzcGlkZXJfZXllIiwNCiAgICAiaWQiOiAxMTksDQogICAgImljb24iOiAic3BpZGVyX2V5ZSIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAiZ29vZCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlLA0KICAgICAgImVmZmVjdHMiOiBbDQogICAgICAgIHsNCiAgICAgICAgICAibmFtZSI6ICJwb2lzb24iLA0KICAgICAgICAgICJjaGFuY2UiOiAxLjAsDQogICAgICAgICAgImR1cmF0aW9uIjogNSwNCiAgICAgICAgICAiYW1wbGlmaWVyIjogMA0KICAgICAgICB9DQogICAgICBdDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY2Fycm90IiwNCiAgICAiaWQiOiAxMzUsDQogICAgImljb24iOiAiY2Fycm90IiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDMsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiBmYWxzZQ0KICAgIH0sDQogICAgInNlZWQiOiB7DQogICAgICAiY3JvcF9yZXN1bHQiOiAiY2Fycm90cyIsDQogICAgICAicGxhbnRfYXQiOiAiZmFybWxhbmQiDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicG90YXRvIiwNCiAgICAiaWQiOiAxMzYsDQogICAgImljb24iOiAicG90YXRvIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDEsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJsb3ciLA0KICAgICAgImlzX21lYXQiOiBmYWxzZQ0KICAgIH0sDQogICAgInNlZWQiOiB7DQogICAgICAiY3JvcF9yZXN1bHQiOiAicG90YXRvZXMiLA0KICAgICAgInBsYW50X2F0IjogImZhcm1sYW5kIg0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImJha2VkX3BvdGF0byIsDQogICAgImlkIjogMTM3LA0KICAgICJpY29uIjogInBvdGF0b19iYWtlZCIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA1LA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibm9ybWFsIiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJwb2lzb25vdXNfcG90YXRvIiwNCiAgICAiaWQiOiAxMzgsDQogICAgImljb24iOiAicG90YXRvX3BvaXNvbm91cyIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAyLA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UsDQogICAgICAiZWZmZWN0cyI6IFsNCiAgICAgICAgew0KICAgICAgICAgICJuYW1lIjogInBvaXNvbiIsDQogICAgICAgICAgImNoYW5jZSI6IDAuNiwNCiAgICAgICAgICAiZHVyYXRpb24iOiA1LA0KICAgICAgICAgICJhbXBsaWZpZXIiOiAwDQogICAgICAgIH0NCiAgICAgIF0NCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJnb2xkZW5fY2Fycm90IiwNCiAgICAiaWQiOiAxNDAsDQogICAgImljb24iOiAiY2Fycm90X2dvbGRlbiIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogNiwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogInN1cGVybmF0dXJhbCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicHVtcGtpbl9waWUiLA0KICAgICJpZCI6IDE0NCwNCiAgICAiaWNvbiI6ICJwdW1wa2luX3BpZSIsDQogICAgInVzZV9hbmltYXRpb24iOiAiZWF0IiwNCiAgICAidXNlX2R1cmF0aW9uIjogMzIsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiA4LA0KICAgICAgInNhdHVyYXRpb25fbW9kaWZpZXIiOiAibG93IiwNCiAgICAgICJpc19tZWF0IjogZmFsc2UNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJyYWJiaXQiLA0KICAgICJpZCI6IDE1NSwNCiAgICAiaWNvbiI6ICJyYWJiaXQiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDMsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJsb3ciLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiY29va2VkX3JhYmJpdCIsDQogICAgImlkIjogMTU2LA0KICAgICJpY29uIjogInJhYmJpdF9jb29rZWQiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDUsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiB0cnVlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAicmFiYml0X3N0ZXciLA0KICAgICJpZCI6IDE1NywNCiAgICAiaWNvbiI6ICJyYWJiaXRfc3RldyIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KICAgICJ1c2VfYW5pbWF0aW9uIjogImVhdCIsDQogICAgInVzZV9kdXJhdGlvbiI6IDMyLA0KICAgICJtYXhfc3RhY2tfc2l6ZSI6IDEsDQoNCiAgICAiZm9vZCI6IHsNCiAgICAgICJudXRyaXRpb24iOiAxMCwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogIm5vcm1hbCIsDQogICAgICAidXNpbmdfY29udmVydHNfdG8iOiAiYm93bCIsDQogICAgICAiaXNfbWVhdCI6IHRydWUNCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJiZWV0cm9vdCIsDQogICAgImlkIjogMjAxLA0KICAgICJpY29uIjogImJlZXRyb290IiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCg0KICAgICJmb29kIjogew0KICAgICAgIm51dHJpdGlvbiI6IDEsDQogICAgICAic2F0dXJhdGlvbl9tb2RpZmllciI6ICJub3JtYWwiLA0KICAgICAgImlzX21lYXQiOiBmYWxzZQ0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImJlZXRyb290X3NvdXAiLA0KICAgICJpZCI6IDIwMywNCiAgICAiaWNvbiI6ICJiZWV0cm9vdF9zb3VwIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJlYXQiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAzMiwNCiAgICAibWF4X3N0YWNrX3NpemUiOiAxLA0KDQogICAgImZvb2QiOiB7DQogICAgICAibnV0cml0aW9uIjogNiwNCiAgICAgICJzYXR1cmF0aW9uX21vZGlmaWVyIjogIm5vcm1hbCIsDQogICAgICAidXNpbmdfY29udmVydHNfdG8iOiAiYm93bCIsDQogICAgICAiaXNfbWVhdCI6IGZhbHNlDQogICAgfQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAid2hlYXRfc2VlZHMiLCANCiAgICAiaWQiOiAzOSwNCiAgICAiaWNvbiI6ICJzZWVkc193aGVhdCIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KDQogICAgInNlZWQiOiB7DQogICAgICAiY3JvcF9yZXN1bHQiOiAid2hlYXQiLCANCiAgICAgICJwbGFudF9hdCI6ICJmYXJtbGFuZCINCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJwdW1wa2luX3NlZWRzIiwNCiAgICAiaWQiOiAxMDUsDQogICAgImljb24iOiAic2VlZHNfcHVtcGtpbiIsDQogICAgImNhdGVnb3J5IjogIk1pc2NlbGxhbmVvdXMiLA0KDQogICAgInNlZWQiOiB7DQogICAgICAiY3JvcF9yZXN1bHQiOiAicHVtcGtpbl9zdGVtIiwNCiAgICAgICJwbGFudF9hdCI6ICJmYXJtbGFuZCINCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJtZWxvbl9zZWVkcyIsDQogICAgImlkIjogMTA2LA0KICAgICJpY29uIjogInNlZWRzX21lbG9uIiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQoNCiAgICAic2VlZCI6IHsNCiAgICAgICJjcm9wX3Jlc3VsdCI6ICJtZWxvbl9zdGVtIiwNCiAgICAgICJwbGFudF9hdCI6ICJmYXJtbGFuZCINCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJuZXRoZXJfd2FydCIsDQogICAgImlkIjogMTE2LA0KICAgICJpY29uIjogIm5ldGhlcl93YXJ0IiwNCiAgICAiY2F0ZWdvcnkiOiAiTWlzY2VsbGFuZW91cyIsDQoNCiAgICAic2VlZCI6IHsNCiAgICAgICJjcm9wX3Jlc3VsdCI6ICJuZXRoZXJfd2FydCIsDQogICAgICAicGxhbnRfYXQiOiAic291bF9zYW5kIg0KICAgIH0NCiAgfSwNCiAgew0KICAgICJuYW1lIjogImJlZXRyb290X3NlZWRzIiwNCiAgICAiaWQiOiAyMDIsDQogICAgImljb24iOiAic2VlZHNfYmVldHJvb3QiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCg0KICAgICJzZWVkIjogew0KICAgICAgImNyb3BfcmVzdWx0IjogImJlZXRyb290IiwNCiAgICAgICJwbGFudF9hdCI6ICJmYXJtbGFuZCINCiAgICB9DQogIH0sDQogIHsNCiAgICAibmFtZSI6ICJjYW1lcmEiLA0KICAgICJpZCI6IDI0MiwNCiAgICAiaWNvbiI6ICJjYW1lcmEiLA0KICAgICJjYXRlZ29yeSI6ICJNaXNjZWxsYW5lb3VzIiwNCiAgICAidXNlX2FuaW1hdGlvbiI6ICJjYW1lcmEiLA0KICAgICJ1c2VfZHVyYXRpb24iOiAxMDAwMDAsDQogICAgImJsb2NrIjogImNhbWVyYSIsDQoNCiAgICAiY2FtZXJhIjogew0KICAgICAgImJsYWNrX2JhcnNfZHVyYXRpb24iOiAwLjIsDQogICAgICAiYmxhY2tfYmFyc19zY3JlZW5fcmF0aW8iOiAwLjA4LA0KICAgICAgInNodXR0ZXJfZHVyYXRpb24iOiAwLjIsDQogICAgICAicGljdHVyZV9kdXJhdGlvbiI6IDEuMCwNCiAgICAgICJzbGlkZV9hd2F5X2R1cmF0aW9uIjogMC4yDQoNCiAgICB9DQogIH0NCl0NCg";
 		items = Utils.Base64.decode(items);
@@ -2974,7 +3146,7 @@ if(DragOP.enableFastEat){
 	} catch(e) {
 		DragOP.ctoast("Loading FastEat items not working! FastEat wont work.");
 	}
-}else
+} else
 	DragOP.ctoast("FastEat is not enabled! FastEat wont work.");
 
 
@@ -2982,6 +3154,7 @@ var fasteat = {
 	name: "FastEat",
 	desc: "You eat faster.\nEatTime: Time in ticks you need to eat one food Item",
 	type: ModuleType.mod,
+	category: ModCategory.PLAYER,
 	state: false,
 	eatTime: 4,
 	refreshFEat: function (eatTime) {
@@ -3055,6 +3228,7 @@ var tracers = {
 	name: "Tracers",
 	desc: "Draws lines from you to your enemy",
 	type: ModuleType.mod,
+	category: ModCategory.RENDER,
 	state: false,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -3105,6 +3279,7 @@ var fastbridge = {
 	name: "FastBridge",
 	desc: "You will be teleported to the block you placed",
 	type: ModuleType.mod,
+	category: ModCategory.PLAYER,
 	state: false,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -3151,6 +3326,7 @@ var spammer = {
 	name: "Spammer",
 	desc: "Spams a specified text" + (Utils.bypassMode != BypassMode.DEFAULT ? "" : ""),
 	type: ModuleType.mod,
+	category: ModCategory.MISC,
 	state: false,
 	lastTime: 0,
 	msg: "Spam! Spam! Spam!",
@@ -3176,13 +3352,6 @@ var spammer = {
 						progress = 40;
 						//DragOP.ctoast("Spammer delay below 4 seconds is not allowed in LBSG Bypass-Mode!");
 						seekBar.setProgress(40);
-					}
-					break;
-				case BypassMode.MINIBOX:
-					if(progress < 20) {
-						progress = 20;
-						//DragOP.ctoast("Spammer delay below 2 seconds is not allowed in MiniBox Bypass-Mode!");
-						seekBar.setProgress(20);
 					}
 					break;
 				}
@@ -3243,12 +3412,6 @@ var spammer = {
 				this.lastTime = java.lang.System.currentTimeMillis();
 			}
 			break;
-		case BypassMode.MINIBOX:
-			if(java.lang.System.currentTimeMillis() - this.lastTime > Math.max(this.delay, 2050)) {
-				Server.sendChat(this.msg);
-				this.lastTime = java.lang.System.currentTimeMillis();
-			}
-			break;
 		}
 
 	},
@@ -3267,6 +3430,7 @@ var autowalk = {
 	name: "AutoWalk",
 	desc: "Makes you walk automatically.",
 	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
 	state: false,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -3304,6 +3468,7 @@ var passhack = {
 	name: "Passhack",
 	desc: "Tries to crack a password.",
 	type: ModuleType.mod,
+	category: ModCategory.MISC,
 	state: false,
 	lastTime: 0,
 	delay: 100,
@@ -3382,8 +3547,9 @@ DragOP.registerModule(ghostmode);
 
 var fullbright = {
 	name: "Fullbright",
-	desc: "",
+	desc: "Let you see everything.",
 	type: ModuleType.mod,
+	category: ModCategory.RENDER,
 	state: false,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -3407,6 +3573,7 @@ var follow = {
 	name: "Follow",
 	desc: "Follows the nearest entity. This works with Target",
 	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
 	state: false,
 	lastTime: 0,
 	isStateMode: function () {
@@ -3452,6 +3619,7 @@ var lifedisplay = {
 	name: "LifeDisplay",
 	desc: "Displays your life stats",
 	type: ModuleType.mod,
+	category: ModCategory.PLAYER,
 	state: false,
 	lifeGui: null,
 	lifeView: null,
@@ -3486,6 +3654,7 @@ var lifedisplay = {
 					lifedisplay.lifeView.setTypeface(Utils.font);
 					lifedisplay.lifeView.setTextColor(android.graphics.Color.WHITE);
 					lifedisplay.lifeView.setBackground(bg);
+					lifedisplay.lifeView.setTextSize(dip2px(19));
 					lifedisplay.lifeView.setText(text);
 					lifedisplay.lifeGui = new android.widget.PopupWindow(lifedisplay.lifeView, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 					lifedisplay.lifeGui.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -3511,11 +3680,389 @@ var lifedisplay = {
 	}
 };
 DragOP.registerModule(lifedisplay);
+
+var teleport = {
+	name: "Teleport",
+	desc: "Teleports you",
+	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
+	state: false,
+	aimedBlock: [0, 0, 0],
+	selectedBlock: [0, 0, 0],
+	telGui: null,
+	telDelay: 100,
+	yMotion: true,
+	isThreadRunning: false,
+	getSettingsLayout: function (params) {
+		let settings = new android.widget.LinearLayout(ctx);
+		settings.setOrientation(1);
+		let delayText = new android.widget.TextView(ctx);
+		delayText.setText("Delay: " + (this.telDelay / 1000) + " Seconds");
+		delayText.setTextColor(android.graphics.Color.BLACK);
+		delayText.setTextSize(dip2px(9));
+		delayText.setGravity(android.view.Gravity.CENTER);
+		delayText.setTypeface(Utils.font);
+		let delaySlider = Utils.ModSettings.getSlider();
+		delaySlider.setMax(30);
+		//3 seconds
+		delaySlider.setProgress(this.telDelay / 100);
+		delaySlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener({
+			onProgressChanged: function (seekBar, progress, fromUser) {
+				switch(Utils.bypassMode) {
+				case BypassMode.LBSG:
+					if(progress < 5) {
+						progress = 5;
+						//DragOP.ctoast("Spammer delay below 4 seconds is not allowed in LBSG Bypass-Mode!");
+						seekBar.setProgress(5);
+					}
+					break;
+				}
+				delayText.setText("Delay: " + (progress / 10) + " Seconds");
+				if(progress == 0)
+					delayText.setText("Delay: Instant");
+			},
+			onStopTrackingTouch: function (seekbar) {
+				teleport.telDelay = seekbar.getProgress() * 100;
+			}
+		}));
+
+		let yMotCheck = new android.widget.CheckBox(ctx);
+		yMotCheck.setGravity(android.view.Gravity.CENTER);
+		yMotCheck.setTypeface(Utils.font);
+		yMotCheck.setText("YMotion (Deactivate for Fly-Bypass)");
+		yMotCheck.setTextColor(android.graphics.Color.BLACK);
+		yMotCheck.setChecked(teleport.yMotion);
+		yMotCheck.setOnClickListener(new android.view.View.OnClickListener({
+			onClick: function (view) {
+				teleport.yMotion = yMotCheck.isChecked();
+			}
+		}))
+
+		settings.addView(delaySlider, params);
+		settings.addView(delayText, params);
+		settings.addView(yMotCheck, params);
+
+		return settings;
+	},
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onModTick: function () {
+		if(teleport.threadRunning)
+			setVelY(getPlayerEnt(), 0);
+	},
+	tpThread: function () {
+		if(teleport.threadRunning)
+			return;
+		var t = new java.lang.Thread(new java.lang.Runnable({
+			run: function () {
+				teleport.threadRunning = true;
+				while(teleport.state && (Math.floor(teleport.selectedBlock[0]) != Math.floor(getPlayerX()) || (Math.floor(teleport.selectedBlock[1] + 2.8) != Math.floor(getPlayerY()) && teleport.yMotion) || Math.floor(teleport.selectedBlock[2]) != Math.floor(getPlayerZ()))) {
+					java.lang.Thread.sleep(teleport.telDelay);
+					let x = getPlayerX();
+					let y = getPlayerY();
+					let z = getPlayerZ();
+					let x2 = teleport.selectedBlock[0];
+					let y2 = teleport.selectedBlock[1] + 2.8;
+					let z2 = teleport.selectedBlock[2];
+					//let dist = Math.sqrt(Math.pow(x2 - x, 2) * Math.pow(y2 - y, 2) * Math.pow(z2- z, 2));
+					//if(dist < 0.1)
+					//break;
+					Entity.setPositionRelative(getPlayerEnt(), -Math.max(-3, Math.min(3, x - x2)), teleport.yMotion ? -Math.max(-2, Math.min(2, y - y2)) : 0, -Math.max(-3, Math.min(3, z - z2)));
+
+				}
+				teleport.threadRunning = false;
+			}
+		}));
+		t.start();
+	},
+	showGui: function () {
+		ctx.runOnUiThread(new java.lang.Runnable({
+			run: function () {
+				if(teleport.telGui == null || teleport.telGui.isShowing() == false) {
+					let setPosBtn = new android.widget.Button(ctx);
+					setPosBtn.setTypeface(Utils.font);
+					setPosBtn.setText("Set Position");
+					setPosBtn.getBackground().setAlpha(200);
+					setPosBtn.setPadding(10, 10, 10, 10);
+					setPosBtn.setOnClickListener(new android.view.View.OnClickListener({
+						onClick: function (btn) {
+							if(teleport.aimedBlock[1] <= 0) {
+								DragOP.cmsg("Please select a valid Position");
+								return;
+							}
+							teleport.selectedBlock = teleport.aimedBlock;
+							//Entity.setPosition(getPlayerEnt(), teleport.aimedBlock [0] + 0.5, teleport.aimedBlock[1] + 2.1, teleport.aimedBlock[2] + 0.5);
+							teleport.tpThread();
+
+						}
+					}));
+					teleport.telGui = new android.widget.PopupWindow(setPosBtn, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+					teleport.telGui.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.RIGHT | android.view.Gravity.CENTER, 0, -dip2px(50));
+				}
+			}
+		}));
+
+	},
+	startRayTr: function () {
+		var t = new java.lang.Thread(new java.lang.Runnable({
+			run: function () {
+				while(teleport.state) {
+					if(teleport.threadRunning == true)
+						continue;
+					let yaw = (getYaw() + 90) * (Math.PI / 180);
+
+					let pitch = getPitch() * -(Math.PI / 180);
+					var dir = [
+						Math.cos(yaw) * Math.cos(pitch),
+						Math.sin(pitch),
+						Math.sin(yaw) * Math.cos(pitch)
+					];
+					var res = Utils.Block.rayTrace([
+						dir[0], dir[1], dir[2]
+					], [getPlayerX(), getPlayerY() + 0.0, getPlayerZ()], 100);
+					if(res.hit) {
+						teleport.aimedBlock = [res.x, res.y, res.z];
+					} else {
+						teleport.aimedBlock = [0, 0, 0];
+					}
+
+				}
+			}
+		}));
+		t.start();
+	},
+	onRender: function (gl) {
+		if(teleport.state && teleport.aimedBlock[1] > 0)
+			Utils.Render.drawBox(gl, teleport.aimedBlock[0], teleport.aimedBlock[1] + 1, teleport.aimedBlock[2], 1, 1, 1);
+	},
+	onClick: function (btn) {
+		this.state = !this.state;
+		if(this.state) {
+			this.startRayTr();
+			this.showGui();
+		} else
+		if(teleport.telGui != null && teleport.telGui.isShowing() == true)
+			teleport.telGui.dismiss();
+	},
+	onRefresh: function (btn) {
+		if(btn != null) btn.setText(this.name);
+	}
+};
+DragOP.registerModule(teleport);
+var sbind = {
+	name: "SimpleBind",
+	desc: "Adds a button which can toggle a module without being in the menu.",
+	type: ModuleType.special,
+	state: false,
+	currentModule: null,
+	sgui: null,
+	sbtn: null,
+	getSettingsLayout: function (params) {
+		let settings = new android.widget.LinearLayout(ctx);
+		settings.setOrientation(1);
+		let enabledGradient = new android.graphics.drawable.GradientDrawable();
+		enabledGradient.setColor(android.graphics.Color.argb(150, 0, 200, 0));
+		enabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
+		enabledGradient.setCornerRadius(dip2px(3));
+		let disabledGradient = new android.graphics.drawable.GradientDrawable();
+		disabledGradient.setColor(android.graphics.Color.argb(130, 200, 0, 0));
+		disabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
+		disabledGradient.setCornerRadius(dip2px(3));
+		let scroll = new android.widget.ScrollView(ctx);
+		let modList = new android.widget.LinearLayout(ctx);
+		modList.setOrientation(1);
+		DragOP.mods.forEach(function (entry) {
+			if(entry.type == ModuleType.mod) {
+				let btn = new android.widget.Button(ctx);
+				btn.setText(entry.name);
+				btn.setTypeface(Utils.font);
+				btn.setTextColor(android.graphics.Color.BLACK);
+				btn.setBackground(sbind.currentModule == null ? disabledGradient : sbind.currentModule.name == entry.name ? enabledGradient : disabledGradient);
+				btn.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function (view) {
+						sbind.currentModule = entry;
+						let childct = modList.getChildCount();
+						for(let i = 0; i < childct; i++) {
+							let v = modList.getChildAt(i);
+							v.setBackground(sbind.currentModule == null ? disabledGradient : sbind.currentModule.name == v.getText() ? enabledGradient : disabledGradient);
+						}
+						sbind.showBtn();
+					}
+				}));
+				modList.addView(btn);
+			}
+		});
+		scroll.addView(modList);
+		settings.addView(scroll);
+		return settings;
+	},
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	showBtn: function () {
+		ctx.runOnUiThread(new java.lang.Runnable({
+			run: function () {
+				if(sbind.sgui == null || sbind.sgui.isShowing() == false) {
+					let bg = DragOP.getStyledBtnBackground(false, false);
+					if(sbind.currentModule.isStateMode())
+						bg = DragOP.getStyledBtnBackground(sbind.currentModule.state, true);
+					bg.setCornerRadius(dip2px(3));
+					sbind.sbtn = new android.widget.Button(ctx);
+					sbind.sbtn.setTypeface(Utils.font);
+					sbind.sbtn.setTextColor(android.graphics.Color.WHITE);
+					sbind.sbtn.setBackground(bg);
+					sbind.sbtn.setText(sbind.currentModule.name);
+					sbind.sbtn.setOnClickListener(new android.view.View.OnClickListener({
+						onClick: function (view) {
+							sbind.currentModule.onClick(null);
+							sbind.showBtn();
+						}
+					}));
+					let moving2 = false;
+					let dx2 = 0;
+					let dy2 = 0;
+					let mPosX2 = 100;
+					let mPosY2 = 0;
+					sbind.sbtn.setOnTouchListener(new android.view.View.OnTouchListener({
+						onTouch: function (view, motionEvent) {
+							try {
+								DragOP.cmsg(motionEvent.getAction());
+								if(!moving2) return false;
+								switch(motionEvent.getAction()) {
+								case android.view.MotionEvent.ACTION_DOWN:
+									dx2 = mPosX2 - motionEvent.getRawX();
+									dy2 = mPosY2 - motionEvent.getRawY();
+									break;
+								case android.view.MotionEvent.ACTION_MOVE:
+									mPosX2 = (motionEvent.getRawX() + dx2);
+									mPosY2 = (motionEvent.getRawY() + dy2);
+									sbind.sgui.update(mPosX2, mPosY2, -1, -1);
+									break;
+								case android.view.MotionEvent.ACTION_UP:
+								case android.view.MotionEvent.ACTION_CANCEL:
+									moving2 = false;
+									break;
+								}
+							} catch(e) {
+								DragOP.ctoast("Error: " + e);
+							}
+
+							return true;
+						}
+					}));
+					sbind.sbtn.setOnLongClickListener(new android.view.View.OnLongClickListener({
+						onLongClick: function (v, t) {
+							ctx.getSystemService(android.content.Context.VIBRATOR_SERVICE)
+								.vibrate(60);
+							moving2 = true;
+							return true;
+						}
+					}));
+					sbind.sgui = new android.widget.PopupWindow(sbind.sbtn, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+					sbind.sgui.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+					sbind.sgui.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, ctx.getWindowManager()
+						.getDefaultDisplay()
+						.getWidth() / 16 * 0, ctx.getWindowManager()
+						.getDefaultDisplay()
+						.getHeight() / 2);
+				} else {
+					sbind.sbtn.setText(sbind.currentModule.name);
+					let bg = DragOP.getStyledBtnBackground(false, false);
+					if(sbind.currentModule.isStateMode())
+						bg = DragOP.getStyledBtnBackground(sbind.currentModule.state, true);
+					bg.setCornerRadius(dip2px(3));
+					sbind.sbtn.setBackground(bg);
+
+				}
+			}
+		}));
+	},
+	onClick: function (btn) {
+		this.state = !this.state;
+		if(this.state) {
+			DragOP.showModDialog(this);
+			menu.dismiss();
+		} else {
+			sbind.currentModule = null;
+			if(sbind.sgui != null && sbind.sgui.isShowing())
+				sbind.sgui.dismiss();
+		}
+
+
+	},
+	onRefresh: function (btn) {
+		if(btn != null) btn.setText(this.name);
+	}
+};
+DragOP.registerModule(sbind);
+var autosword = {
+	name: "AutoSword",
+	desc: "Automatically selects the best sword in your hotbar if an enemy is near you",
+	type: ModuleType.mod,
+	category: ModCategory.COMBAT,
+	state: false,
+	isTrRunning: false,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	startThread: function(){
+		if(autosword.isTrRunning)
+			return;
+		let t = new java.lang.Thread(new java.lang.Runnable({
+			run: function(){
+				autosword.isTrRunning = true;
+				while(autosword.state){
+					if(Utils.Entity.getNearestEntity(5, true) != null){
+						let bestsword = [-1, -1];
+						for(let i = 0; i < 8; i++){
+							let dmg = Utils.Item.getDamage(Player.getInventorySlot(i));
+							if(dmg > bestsword[0]){
+								bestsword[0] = dmg;
+								bestsword[1] = i;
+							}
+						}
+						if(bestsword[1] != -1)
+							Player.setSelectedSlotId(bestsword[1]);
+					}
+					java.lang.Thread.sleep(50);
+				}
+				autosword.isTrRunning = false;
+			}
+		}));
+		t.start();
+	},
+	onClick: function (btn) {
+		this.state = !this.state;
+		if(this.state)
+			this.startThread();
+	},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(autosword);
 /*
 var statehack = {
 	name: "Hack",
 	desc: "Some Desc",
 	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
 	state: false,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -3840,7 +4387,7 @@ function showCaterMenu() {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
 			try {
-				//TODO Add a category parameter to every module
+				
 			} catch(e) {
 				DragOP.ctoast("Cater Menu Error(" + e.lineNumber + "): " + e);
 			}
@@ -3993,7 +4540,7 @@ function showNavigatorMenu() {
 				roundGradient.setColor(android.graphics.Color.argb(200, 30, 30, 30));
 				roundGradient.setCornerRadius(dip2px(20));
 				roundGradient.setStroke(dip2px(1), android.graphics.Color.argb(150, 0, 0, 0));
-				
+
 				let dashBtn = new android.widget.Button(ctx);
 				dashBtn.setText(DragOP.getLString("special.more"));
 				dashBtn.setCompoundDrawablesWithIntrinsicBounds(0, android.R.drawable.ic_menu_more, 0, 0);
@@ -4042,6 +4589,7 @@ function showNavigatorMenu() {
 }
 var updatemgrDialog;
 var settingDialog;
+var aboutDialog;
 var SettingMode = {
 	MODE_TOGGLE: 1,
 	MODE_LIST: 2
@@ -4170,9 +4718,9 @@ function openSettingScreen() {
 				], null)
 				content.addView(setCommandEnable);
 				let commandPrefix = SettingEntry("Command Prefix", SettingMode.MODE_LIST, [
-				                                                                           ["command_prefix", "."],
-				                                                                           [".", "@", "&", "*", "~"]
-				                                                                           ], null);
+					["command_prefix", "."],
+					[".", "@", "&", "*", "~"]
+				], null);
 				content.addView(commandPrefix);
 
 				//footer
@@ -4221,6 +4769,137 @@ function openSettingScreen() {
 				closeButton.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (view) {
 						settingDialog.dismiss();
+					}
+				}));
+			} catch(e) {
+				DragOP.ctoast("Error: " + e);
+			}
+		}
+	}));
+}
+
+function openAboutScreen() {
+	ctx.runOnUiThread(new java.lang.Runnable({
+		run: function () {
+			try {
+				let display = new android.util.DisplayMetrics();
+				com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
+					.getWindowManager()
+					.getDefaultDisplay()
+					.getMetrics(display);
+				let dialogLayout = new android.widget.RelativeLayout(ctx);
+				dialogLayout.setBackgroundDrawable(DragOP.getStyledBackground());
+				//default content
+				let title = new android.widget.TextView(ctx);
+				title.setText(android.text.Html.fromHtml("<u>" + DragOP.getLString("screen.about") + "</u>"));
+				title.setTextSize(dip2px(20));
+				title.setGravity(android.view.Gravity.CENTER);
+				title.setTextColor(android.graphics.Color.BLACK);
+				title.setTypeface(Utils.font);
+				title.setId(94771);
+				
+				let about = new android.widget.TextView (ctx);
+				about.setTextSize(dip2px(10));
+				about.setText ("DragOP was made by GodSoft029");
+				about.setGravity(android.view.Gravity.CENTER | android.view.Gravity.TOP);
+				about.setTextColor(android.graphics.Color.BLACK);
+				about.setTypeface(Utils.font);
+				about.setId(96751);
+				
+				let yt = new android.widget.Button (ctx);
+				yt.setText ("YouTube");
+				yt.setTypeface (Utils.font);
+				yt.setGravity (android.view.Gravity.CENTER);
+				yt.setTextColor (android.graphics.Color.BLACK);
+				yt.setId (63619);
+				yt.setOnClickListener (new android.view.View.OnClickListener ({
+					onClick: function (view){
+						ctx.startActivity (new android.content.Intent (android.content.Intent.ACTION_VIEW, android.net.Uri.parse ("https://youtube.com/c/godsoft029")));
+					}
+				}));
+				
+				let twitter = new android.widget.Button (ctx);
+				twitter.setText ("Twitter");
+				twitter.setTypeface (Utils.font);
+				twitter.setGravity (android.view.Gravity.CENTER);
+				twitter.setTextColor (android.graphics.Color.BLACK);
+				twitter.setId (13827);
+				twitter.setOnClickListener (new android.view.View.OnClickListener ({
+					onClick: function (view){
+						ctx.startActivity (new android.content.Intent (android.content.Intent.ACTION_VIEW, android.net.Uri.parse ("https://twitter.com/godsoft029")));
+					}
+				}));
+				
+				let github = new android.widget.Button(ctx);
+				github.setText ("Github");
+				github.setTypeface (Utils.font);
+				github.setGravity (android.view.Gravity.CENTER);
+				github.setTextColor (android.graphics.Color.BLACK);
+				github.setId (28472);
+				github.setOnClickListener (new android.view.View.OnClickListener ({
+					onClick: function (view){
+						ctx.startActivity (new android.content.Intent (android.content.Intent.ACTION_VIEW, android.net.Uri.parse ("https://github.com/godsoft029")));
+					}
+				}));
+
+				//footer
+				let closeButton = new styledBtn();
+				closeButton.setText("Close");
+				closeButton.setPadding(0.5, closeButton.getPaddingTop(), 0.5, closeButton.getPaddingBottom());
+				closeButton.setId(10472);
+				closeButton.setTypeface(Utils.font);
+				closeButton.setTextColor(android.graphics.Color.BLACK);
+				closeButton.setTypeface(Utils.font);
+				//layout alignement....
+				
+				let params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule (android.widget.RelativeLayout.BELOW, title.getId ());
+				params.addRule (android.widget.RelativeLayout.ABOVE, yt.getId ());
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				dialogLayout.addView (about, params);
+				params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule (android.widget.RelativeLayout.ABOVE, closeButton.getId ());
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				params.addRule(android.widget.RelativeLayout.LEFT_OF, github.getId ());
+				dialogLayout.addView (yt, params);
+				params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule (android.widget.RelativeLayout.ABOVE, closeButton.getId ());
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				params.addRule (android.widget.RelativeLayout.RIGHT_OF, github.getId ());
+				dialogLayout.addView (twitter, params);
+				params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule (android.widget.RelativeLayout.ABOVE, closeButton.getId ());
+				params.addRule (android.widget.RelativeLayout.CENTER_IN_PARENT);
+				dialogLayout.addView(github, params);
+				
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				dialogLayout.addView(title, params);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				dialogLayout.addView(closeButton, params);
+				//Dialog Stuff
+				aboutDialog = new android.app.Dialog(ctx);
+				aboutDialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+				aboutDialog.getWindow()
+					.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				aboutDialog.setContentView(dialogLayout);
+				aboutDialog.setCanceledOnTouchOutside(true);
+				aboutDialog.setTitle(DragOP.getLString("special.about"));
+				aboutDialog.setOnDismissListener(new android.content.DialogInterface.OnDismissListener({
+					onDismiss: function () {
+
+					}
+				}));
+				aboutDialog.show();
+				let window = aboutDialog.getWindow();
+				window.setLayout(mwidth, display.heightPixels);
+				closeButton.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function (view) {
+						aboutDialog.dismiss();
 					}
 				}));
 			} catch(e) {
@@ -4479,6 +5158,19 @@ function openABoard() {
 				updateBtn.setOnTouchListener(btnListener);
 				content.addView(updateBtn);
 
+				let aboutBtn = new android.widget.Button(ctx);
+				aboutBtn.setText(DragOP.getLString("screen.about"));
+				aboutBtn.setTypeface(Utils.font);
+				aboutBtn.setBackground(btnBg);
+				aboutBtn.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.ic_menu_info_details, 0);
+				aboutBtn.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function (v) {
+						aboard.dismiss();
+						openAboutScreen();
+					}
+				}));
+				aboutBtn.setOnTouchListener(btnListener);
+				content.addView(aboutBtn);
 				//footer
 				let closeButton = new styledBtn();
 				closeButton.setText("Close");
@@ -4535,10 +5227,10 @@ function openABoard() {
 }
 
 function refreshMenu() {
-	if(mlist != null) {
+	if(mlist != null && mlist != Undefined) {
 		mlist.removeAllViews();
 		let genmenu = DragOP.generateMenu(search.getText() + "");
-		if (mlist != null)mlist.addView(genmenu);
+		if(mlist != null) mlist.addView(genmenu);
 	}
 }
 DragOP.mt = ModuleType;
@@ -4725,6 +5417,7 @@ function rptask() {
 								(aboard == null || !aboard.isShowing()) &&
 								(settingDialog == null || !settingDialog.isShowing()) &&
 								(updatemgrDialog == null || !updatemgrDialog.isShowing()) &&
+								(aboutDialog == null || !aboutDialog.isShowing()) &&
 								(webbrowser.browser == null || !webbrowser.browser.isShowing())) {
 								showMenuBtn();
 							}
@@ -4757,7 +5450,6 @@ function rptask() {
 
 rptask();
 DragOP.loadModsAnim(0);
-Utils.Render.init();
 
 function chatHook(text) {
 
@@ -4853,5 +5545,7 @@ function modTick() {
 }
 
 function screenChangeHook(screen) {
+	if(screen.toString().startsWith("progress_screen") && !Utils.Render.initted)
+		Utils.Render.init();
 	Utils.currentScreen = screen;
 }
