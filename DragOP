@@ -5547,11 +5547,11 @@ function showMenuBtn() {
 		run: function () {
 			try {
 				let bg = new android.graphics.drawable.GradientDrawable();
-				bg.setStroke(5, android.graphics.Color.argb(200, 10, 12, 10));
-				bg.setColor(android.graphics.Color.argb(130, 10, 12, 10));
-				bg.setShape( android.graphics.drawable.GradientDrawable.RADIAL_GRADIENT);
+				bg.setStroke(2, android.graphics.Color.argb(255, 0, 0, 0));
+				bg.setColor(android.graphics.Color.argb(130, 200, 202, 200));
+				bg.setShape( android.graphics.drawable.GradientDrawable.RECTANGLE);
 				menuBtn.setText("D");
-				menuBtn.setTextColor(android.graphics.Color.WHITE);
+				menuBtn.setTextColor(android.graphics.Color.BLACK);
 				menuBtn.setTypeface(Utils.font);
 				menuBtn.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (viewarg) {
