@@ -26,7 +26,8 @@ var DragOP = {
 	lightMode: false,
 	ghostMode: false,
 	enableOpenGL: true,
-	enableFastEat: true
+	enableFastEat: true,
+	enableTimings: true
 };
 
 var sharedPref = ctx.getPreferences(ctx.MODE_PRIVATE);
@@ -121,6 +122,22 @@ var Settings = {
 };
 Settings.init();
 
+var Timings = {
+	processing: new org.json.JSONObject(),
+	timingData: new org.json.JSONObject(),
+	startTiming: function(funcName){
+		this.processing.put(funcName, java.lang.System.currentTimeMillis());
+	},
+	stopTiming: function(funcName){
+		this.timingData.put(funcName,java.lang.System.currentTimeMillis() - this.processing.optLong(funcName, -1));
+	},
+	getTimingData: function(){
+		return this.timingData;
+	},
+	resetTiming: function(funcName){
+		this.timingData.put(funcName, 0);
+	}
+};
 var CommandManager = {
 	cmdModules: new Array(),
 	cmdNames: new Array(),
@@ -149,7 +166,7 @@ var CommandManager = {
 	isBlacklisted: function (cmd) {
 		cmd = cmd.split(" ").shift().toLowerCase();
 		this.cmdBlacklist.forEach(function (entry) {
-			if(entry == cmd)
+			if(entry.equals(cmd))
 				return true;
 		});
 		return false;
@@ -406,12 +423,14 @@ var Utils = {
 					gl.glLoadIdentity();
 				},
 				onDrawFrame: function (gl) {
+					Timings.startTiming("gl_clear");
 					let GL10 = javax.microedition.khronos.opengles.GL10;
 					gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
 					gl.glLoadIdentity();
-
+					Timings.stopTiming("gl_clear");
 					if(playerEsp.state || chesttracers.state || tracers.state || teleport.state) {
 						try {
+							Timings.startTiming("gl_lookAt");
 							gl.glDisable(GL10.GL_LIGHTING);
 							let yaw = getYaw() % 360;
 							let pitch = getPitch() % 360;
@@ -428,17 +447,23 @@ var Utils = {
 							let centerY = eyeY - dCenterY;
 
 							android.opengl.GLU.gluLookAt(gl, eyeX, eyeY, eyeZ, centerX, centerY, centerZ, 0, 1.0, 0);
-
+							
+							Timings.stopTiming("gl_lookAt");
+							Timings.startTiming("gl_onRender");
 							DragOP.mods.forEach(function (entry, index, array) {
 								try {
 									if((!entry.isStateMode() || entry.state) && entry.hasOwnProperty("onRender"))
 										entry.onRender(gl);
 								} catch(e) {}
 							});
+							Timings.stopTiming("gl_onRender");
 						} catch(e) {
 							DragOP.ctoast("RenderProblem: " + e);
 						}
 
+					}else{
+						Timings.resetTiming("gl_lookAt");
+						Timings.resetTiming("gl_onRender");
 					}
 				}
 			});
@@ -889,34 +914,34 @@ var Utils = {
 				let x = Entity.getX(entry) - getPlayerX();
 				let y = Entity.getY(entry) - getPlayerY();
 				let z = Entity.getZ(entry) - getPlayerZ();
-
-
-				let cancel = false;
+				
+				let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+				
+				if(dist >= small || dist <= 0.001)return;
 
 				if(bypass && y > 0.8) {
 					let xVel = Entity.getVelX(entry);
 					let yVel = Entity.getVelY(entry);
 					let zVel = Entity.getVelZ(entry);
 					if(xVel == 0 && yVel == 0 && zVel == 0)
-						cancel = true;
+						return;
 				}
 
 
 				if(Entity.getEntityTypeId(entry) == 63 && Entity.getNameTag(entry) == "")
-					cancel = true;
+					return;
 
-				let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+				
 
-				let allowed = false;
-				if(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(entry) == 63) allowed = true;
-				if(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(entry) < 63) allowed = true;
+				if(!(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(entry) == 63) &&
+				!(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(entry) < 63))return;
 
-				if(dist < small && dist > 0 && allowed == true && cancel == false && Entity.getHealth(entry) > 0) {
-					if(Entity.getNameTag(entry) == "" || FriendManager.isFriend(Entity.getNameTag(entry)) == false) {
+				
+					if(Entity.getHealth(entry)> 0 && Entity.getNameTag(entry) == "" || FriendManager.isFriend(Entity.getNameTag(entry)) == false) {
 						small = dist;
 						ent = entry;
 					}
-				}
+				
 
 			});
 
@@ -924,28 +949,34 @@ var Utils = {
 				let x = Entity.getX(entry) - getPlayerX();
 				let y = Entity.getY(entry) - getPlayerY();
 				let z = Entity.getZ(entry) - getPlayerZ();
-				let cancel = false;
+				
+				let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
+				
+				if(dist >= small || dist <= 0.001)return;
 
-				if(bypass && y > 0.3) {
+				if(bypass && y > 0.8) {
 					let xVel = Entity.getVelX(entry);
 					let yVel = Entity.getVelY(entry);
 					let zVel = Entity.getVelZ(entry);
 					if(xVel == 0 && yVel == 0 && zVel == 0)
-						cancel = true;
+						return;
 				}
 
 
 				if(Entity.getEntityTypeId(entry) == 63 && Entity.getNameTag(entry) == "")
-					cancel = true;
-				let allowed = false;
-				if(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(entry) == 63) allowed = true;
-				if(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(entry) < 63) allowed = true;
-				let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
-				if(FriendManager.isFriend(Entity.getNameTag(entry)) == true) allowed = false;
-				if(dist < small && dist > 0 && allowed == true && Entity.getHealth(entry) >= 1) {
-					small = dist;
-					ent = entry;
-				}
+					return;
+
+				
+
+				if(!(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(entry) == 63) &&
+				!(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(entry) < 63))return;
+
+				
+					if(Entity.getHealth(entry)> 0 && Entity.getNameTag(entry) == "" || FriendManager.isFriend(Entity.getNameTag(entry)) == false) {
+						small = dist;
+						ent = entry;
+					}
+				
 			});
 
 			return ent;
@@ -954,7 +985,7 @@ var Utils = {
 };
 
 var UpdateManager = {
-	version: "1.1.0",
+	version: "1.1.1",
 	stableVer: "Loading",
 	stableInfo: null,
 	devInfo: null,
@@ -1717,7 +1748,7 @@ var aimaura = {
 	state: false,
 	range: 7,
 	requestAim: false,
-
+	curEnt: null,
 	getSettingsLayout: function (params) {
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
@@ -1755,6 +1786,11 @@ var aimaura = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
+	onTick: function(){
+		if(this.curEnt !=null){
+			Utils.Entity.crosshairAimAt(this.curEnt);
+		}
+	},
 	onModTick: function () {
 		if(this.state) {
 			this.requestAim = true;
@@ -1770,8 +1806,12 @@ var aimaura = {
 						if(aimaura.requestAim) {
 							aimaura.requestAim = false;
 							try {
-								let ent = Utils.Entity.getNearestEntity(aimaura.range, true);
-								if(ent != null) Utils.Entity.crosshairAimAt(ent);
+								Timings.startTiming("aimaura-thread");
+								
+								aimaura.curEnt = Utils.Entity.getNearestEntity(aimaura.range, true);
+								
+								
+								Timings.stopTiming("aimaura-thread");
 							} catch(e) {
 								DragOP.ctoast(e);
 								aimaura.state = false;
@@ -1780,6 +1820,7 @@ var aimaura = {
 						} else
 							java.lang.Thread.sleep(10);
 					}
+					Timings.resetTiming("aimaura-thread");
 				}
 			});
 			var t = new java.lang.Thread(r);
@@ -3773,6 +3814,7 @@ var teleport = {
 				while(teleport.state) {
 					if(teleport.threadRunning == true)
 						continue;
+					Timings.startTiming("teleport-rayTrThread");
 					let yaw = (getYaw() + 90) * (Math.PI / 180);
 
 					let pitch = getPitch() * -(Math.PI / 180);
@@ -3789,7 +3831,7 @@ var teleport = {
 					} else {
 						teleport.aimedBlock = [0, 0, 0];
 					}
-
+					Timings.stopTiming("teleport-rayTrThread");
 				}
 			}
 		}));
@@ -4272,7 +4314,7 @@ DragOP.getHighestPageNumber = function () {
 		pages++;
 	}
 	return pages;
-}
+};
 
 DragOP.showHelpPage = function (page) {
 	DragOP.cmsg("Showing help page " + page + "/" + DragOP.getHighestPageNumber());
@@ -4281,7 +4323,7 @@ DragOP.showHelpPage = function (page) {
 			DragOP.cmsg("." + element.alias[0] + " " + element.syntax);
 		}
 	});
-}
+};
 
 var help = {
 	syntax: "<page>",
@@ -4308,7 +4350,7 @@ var help = {
 		}
 
 	}
-}
+};
 
 DragOP.registerModule(help);
 
@@ -4344,7 +4386,7 @@ var toggle = {
 			DragOP.cmsg(".toggle <module>");
 		}
 	}
-}
+};
 
 DragOP.registerModule(toggle);
 
@@ -4379,7 +4421,7 @@ var friend = {
 			DragOP.cmsg("." + this.alias[0] + " " + this.syntax);
 		}
 	}
-}
+};
 
 DragOP.registerModule(friend);
 
@@ -4403,7 +4445,7 @@ var vclip = {
 			DragOP.cmsg(".vclip <height>");
 		}
 	}
-}
+};
 
 DragOP.registerModule(vclip);
 
@@ -4427,10 +4469,64 @@ var spamcmd = {
 			spammer.delay = delay;
 			DragOP.cmsg("Spammer delay has been set to " + delay + " milliseconds");
 			break;
+		default:
+			DragOP.cmsg("Usage: spammer <message|delay>");
 		}
 	}
-}
+};
 DragOP.registerModule(spamcmd);
+
+var timingsCmd = {
+	syntax: "",
+	alias: ["timings"],
+	type: ModuleType.command,
+	isStateMod: function () {
+		return false;
+	},
+	onCall: function (cmd) {
+		DragOP.cmsg(Timings.getTimingData().toString());
+	}
+};
+DragOP.registerModule(timingsCmd);
+
+var debug = {
+	syntax: "<subcmd>",
+	alias: ["debug"],
+	type: ModuleType.command,
+	isStateMod: function () {
+		return false;
+	},
+	onCall: function (cmd) {
+		switch(cmd[0].toLowerCase()){
+			case "winfo":
+				let wInfo = "";
+				wInfo += "World Info:\n";
+				wInfo += Utils.Entity.getAll().length + " Entitys\n";
+				wInfo += Server.getAllPlayers().length + " Players";
+				DragOP.cmsg(wInfo);
+				break;
+			default:
+				DragOP.cmsg("Usage: debug <winfo>");
+		}
+	}
+};
+DragOP.registerModule(debug);
+
+/*
+var command = {
+	syntax: "<args>",
+	alias: ["aliases"],
+	type: ModuleType.command,
+	isStateMod: function () {
+		return false;
+	},
+	onCall: function (cmd) {
+		
+	}
+};
+
+*/
+
 
 //Menu open Button
 var menuBtn;
@@ -5615,7 +5711,7 @@ function rptask() {
 		run: function () {
 
 			while(true) {
-
+				//Timings.resetData();
 				let randString = "";
 
 				if(DragOP.modi) {
@@ -5640,14 +5736,16 @@ function rptask() {
 					ModPE.langEdit("pauseScreen.invite", randString);
 					ModPE.langEdit("playscreen.new", randString);
 				}
+				Timings.startTiming("onTick");
 				DragOP.mods.forEach(function (entry, index, array) {
 					try {
 						if(entry.hasOwnProperty("onTick") && (entry.state || entry.isStateMode() == false)) entry.onTick();
 					} catch(e) {}
 				});
+				Timings.stopTiming("onTick");
 				if(Utils.Render.initted)
 					Utils.Render.glSurface.requestRender();
-
+				Timings.startTiming("misc");
 				if(DragOP.inGame == true && Player.getEntity() != -1 && getPlayerEnt() != 0) {
 					if(Utils.Player.onGround()) Utils.flyTick = 0;
 					else Utils.flyTick++;
@@ -5665,12 +5763,12 @@ function rptask() {
 					editor.commit();
 					DragOP.ctoast("Achievement get: Scroll 1 km", true, android.R.drawable.star_big_off);
 				}
-
+				Timings.stopTiming("misc");
 				tick1++;
 				if(tick1 > 50) tick1 = 0;
 
 
-				if(tick1 % 25 == 0)
+				if(tick1 % 25 == 0){Timings.startTiming("workaround");
 					ctx.runOnUiThread(new java.lang.Runnable({
 						run: function () {
 
@@ -5705,6 +5803,8 @@ function rptask() {
 
 						}
 					}));
+					Timings.stopTiming("workaround");
+					}
 				java.lang.Thread.sleep(20);
 			}
 		}
