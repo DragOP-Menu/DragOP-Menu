@@ -265,8 +265,28 @@ var ModCategory = {
 	RENDER: 3,
 	MISC: 4,
 	PLAYER: 5,
+	WORLD: 7,
 	SPECIAL: 6,
-	CHAT: 7
+	toName: function(c){
+		switch(c){
+			case 1:
+			return "Movement";
+			case 2:
+			return "Combat";
+			case 3:
+			return "Render";
+			case 4:
+			return "Misc";
+			case 5:
+			return "Player";
+			case 6:
+			return "Special";
+			case 7:
+			return "World";
+			default:
+			return "UNKNOWN("+c+")";
+		}
+	}
 };
 var l = new Array();
 l.push(new Array()); //Codes
@@ -789,6 +809,9 @@ var Utils = {
 		isOnLadder: function () {
 			if(getTile(getPlayerX() + 0.5, getPlayerY() - 1.5, getPlayerZ() + 0.5) == 65 || getTile(getPlayerX() + 0.5, getPlayerY() - 1.5, getPlayerZ() + 0.5) == 106) return true;
 			return false;
+		},
+		isAtEdge: function(){
+			
 		},
 		onGround: function () {
 			let y = getPlayerY();
@@ -1372,7 +1395,7 @@ var friendMgr = {
 	name: DragOP.getLString("special.friend_manager"),
 	desc: "Friends wont be aimed by AimAura or BowAimBot",
 	type: ModuleType.special,
-	category: ModCategory.MISC,
+	category: ModCategory.SPECIAL,
 	openFriendManager: function () {
 		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function () {
@@ -1584,7 +1607,7 @@ var target = {
 	name: DragOP.getLString("special.target"),
 	desc: "Let you choose the type of entitys that are targetted by Modules like AimAura and BowAimBot.",
 	type: ModuleType.special,
-	category: ModCategory.MISC,
+	category: ModCategory.SPECIAL,
 	getSettingsLayout: function (params) {
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
@@ -1635,7 +1658,7 @@ var bypass = {
 	name: DragOP.getLString("special.bypass"),
 	desc: "Mods will bypass AntiCheats or disable them if they can't.",
 	type: ModuleType.special,
-	category: ModCategory.MISC,
+	category: ModCategory.SPECIAL,
 	getSettingsLayout: function (params) {
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
@@ -1924,7 +1947,7 @@ var tpaura = {
 	name: DragOP.getLString("hacks.tpaura"),
 	desc: "Automatically teleports you around people so that they can\'t hit you.",
 	type: ModuleType.mod,
-	category: ModCategory.MOVEMENT,
+	category: ModCategory.COMBAT,
 	state: false,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -3492,7 +3515,7 @@ var passhack = {
 	state: false,
 	lastTime: 0,
 	delay: 100,
-	loginPattern: "./login {password}",
+	loginPattern: "/login {password}",
 	passes: "lol",
 	usedPasses: 0,
 	downloadPasses: function () {
@@ -4076,7 +4099,7 @@ var singsong = {
 	name: "SingSong",
 	desc: "Choose a song and let the mod sing for you.",
 	type: ModuleType.special,
-	category: ModCategory.MISC,
+	category: ModCategory.SPECIAL,
 	state: false,
 	lastTime: 0,
 	selectedSong: [0, -1], //[song index, word index]
@@ -4301,82 +4324,6 @@ var safewalk = {
 	}
 };
 DragOP.registerModule(safewalk);
-var leetspeak = {
-	name: "LeetSpeak",
-	desc: "Turns sent messages into L33T M3ss4g3s",
-	type: ModuleType.mod,
-	category: ModCategory.MISC,
-	state: false,
-	onChatHook: function(text){
-		preventDefault();
-		
-		try {
-			com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
-				.updateTextboxText("");
-			com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
-				.nativeSetTextboxText("");
-
-		} catch(e) {
-			//Not-BlockLauncher-Error
-		}
-		let end = text.toUpperCase();
-		let normal = new Array("FOR","TOO","TO","ONE","A","C", "D", "F", "H", "I", "K", "L", "M", "N", "O", "S", "V", "W");
-		let leet = new Array("4","2","2","1","α", "(", "[)", "ƒ","|-|","¡","|{","|_","|\\/|","|\\|","0","$","\\/","\\/\\/");
-		for(i = 0; i < normal.length; i++) {
-			end = end.replace(new RegExp(normal[i], 'g'), leet[i]);
-		}
-		Server.sendChat(end);
-	},
-	isStateMode: function () {
-		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
-		//Call hack.state = !hack.state; to toggle 
-	},
-	isToggleAble: function () {
-		return true; //MUST be true if isStateMode = true
-		//Call hack.onClick() to toggle
-	},
-	onClick: function (btn) {this.state = !this.state},
-	onRefresh: function (btn) {
-		if(btn != null)btn.setText(this.name);
-	}
-};
-DragOP.registerModule(leetspeak);
-
-var illuminati = {
-	name: "Illuminati",
-	desc: "Displays a message from the illuminati in the chat!",
-	type: ModuleType.mod,
-	category: ModCategory.CHAT,
-	delay: 200,
-	isStateMode: function () {
-		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
-		//Call hack.state = !hack.state; to toggle 
-	},
-	isToggleAble: function () {
-		return true; //MUST be true if isStateMode = true
-		//Call hack.onClick() to toggle
-	},
-	onClick: function (btn) {
-		var t = new java.lang.Thread(new java.lang.Runnable({
-			run: function(){
-				Server.sendChat("      /\\");
-				java.lang.Thread.sleep(illuminati.delay);
-				Server.sendChat("     /  \\");
-				java.lang.Thread.sleep(illuminati.delay);
-				Server.sendChat("    /    \\");
-				java.lang.Thread.sleep(illuminati.delay);
-				Server.sendChat("   /   @  \\");
-				java.lang.Thread.sleep(illuminati.delay);
-				Server.sendChat("  /_______\\");
-			}
-		}));
-		t.start();
-	},
-	onRefresh: function (btn) {
-		if(btn != null)btn.setText(this.name);
-	}
-};
-DragOP.registerModule(illuminati);
 /*
 var statehack = {
 	name: "Hack",
@@ -4756,6 +4703,9 @@ function showMenu() {
 function getCaterList(category){
 	let list = new android.widget.LinearLayout(ctx);
 	list.setOrientation(1);
+	let bg = new android.graphics.drawable.GradientDrawable();
+	bg.setStroke(dip2px(1), android.graphics.Color.argb(255, 0, 0, 0));
+	list.setBackground(bg);
 	DragOP.mods.forEach(function(entry){
 		if(entry.type != ModuleType.cmd && entry.category == category || (category == ModCategory.SPECIAL && entry.type == ModuleType.special)){
 			let btn = new android.widget.Button(ctx);
@@ -4797,16 +4747,86 @@ function getCaterList(category){
 	return scroll;
 }
 function showCaterMenu() {
-	DragOP.ctoast("Still not done here!");
+	/*DragOP.ctoast("Still not done here!");
 	showAlternateMenu();
-	return;
+	return;*/
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
 			try {
 				let categoryHolder = new android.widget.LinearLayout(ctx);
-				let categoryParam = new android.widget.LinearLayout.LayoutParams() 
+				categoryHolder.setId(492817);
+				let categoryParam = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1);
 				let currentCategory = ModCategory.MOVEMENT;
+				
+				let cateGradient = new android.graphics.drawable.GradientDrawable();
+				cateGradient.setColor(android.graphics.Color.argb(190, 0, 0, 0));
+				cateGradient.setStroke(dip2px(1), android.graphics.Color.argb(200, 255, 255, 255));
+				categoryHolder.setBackground(cateGradient);
+				let enabGradient = new android.graphics.drawable.GradientDrawable();
+				enabGradient.setStroke(dip2px(2), android.graphics.Color.GREEN);
+				let categoryBtn = function(category){
+				let btn = new android.widget.Button(ctx);
+					btn.setText(ModCategory.toName(category));
+					btn.setTextColor(android.graphics.Color.WHITE);
+					btn.setTextSize(dip2px(8));
+					btn.setEllipsize(android.text.TextUtils.TruncateAt.MARQUEE);
+					btn.setMarqueeRepeatLimit(-1);
+					btn.setSingleLine();
+					btn.setHorizontallyScrolling(true);
+					btn.setSelected(true);
+					btn.setBackground(currentCategory == category?enabGradient:null);
+					btn.setOnClickListener(new android.view.View.OnClickListener({
+						onClick: function(v){
+							currentCategory = category;
+							toplayout.removeView(categoryHolder);
+							categoryHolder.removeAllViews();
+							cateBtns = [
+				categoryBtn(ModCategory.MOVEMENT),
+				categoryBtn(ModCategory.COMBAT),
+				categoryBtn(ModCategory.MISC),
+				categoryBtn(ModCategory.RENDER),
+				categoryBtn(ModCategory.PLAYER),
+				categoryBtn(ModCategory.WORLD),
+				categoryBtn(ModCategory.SPECIAL)
+				];
+				cateBtns.forEach(function(entry){
+					categoryHolder.addView(entry, categoryParam);
+					categoryParam = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1);
+				});
+				lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
+				toplayout.addView(categoryHolder, lparam);
+							toplayout.removeView(caterList);
+							caterList = getCaterList(currentCategory);
+							lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+							lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+							lparam.addRule(android.widget.RelativeLayout.BELOW, categoryHolder.getId());
+							lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
+							toplayout.addView(caterList, lparam);
+							
+						}
+					}));
+					return btn;
+				};
+				let cateBtns = [
+				categoryBtn(ModCategory.MOVEMENT),
+				categoryBtn(ModCategory.COMBAT),
+				categoryBtn(ModCategory.MISC),
+				categoryBtn(ModCategory.RENDER),
+				categoryBtn(ModCategory.PLAYER),
+				categoryBtn(ModCategory.WORLD),
+				categoryBtn(ModCategory.SPECIAL)
+				];
+				cateBtns.forEach(function(entry){
+					categoryHolder.addView(entry, categoryParam);
+					categoryParam = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1);
+				});
+				
+				
+				
 				let caterList = getCaterList(currentCategory);
+				
 				
 				let toplayout = new android.widget.RelativeLayout(ctx);
 				toplayout.setOnClickListener(new android.view.View.OnClickListener({
@@ -4831,7 +4851,12 @@ function showCaterMenu() {
 				}));
 				
 				let lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+				lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
+				toplayout.addView(categoryHolder, lparam);
+				lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
+				lparam.addRule(android.widget.RelativeLayout.BELOW, categoryHolder.getId());
 				lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
 				toplayout.addView(caterList, lparam);
 				lparam = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -5929,12 +5954,6 @@ function chatHook(text) {
 			//Not-BlockLauncher-Error
 		}
 		CommandManager.onCommand(text.substring(1, text.length));
-	}else{
-		DragOP.mods.forEach(function (entry, index, array) {
-			try {
-				if(entry.hasOwnProperty("onChatHook") && (entry.state || entry.isStateMode() == false)) entry.onChatHook(text);
-			} catch(e) {}
-		});
 	}
 }
 this.Item.getEnchantType = function (id) {
