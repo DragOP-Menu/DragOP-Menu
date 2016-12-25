@@ -6115,7 +6115,8 @@ function modTick() {
 }
 
 function screenChangeHook(screen) {
-	if(screen.toString().startsWith("progress_screen") && !Utils.Render.initted)
+	if(screen.toString().indexOf("progress_screen") > -1&& !Utils.Render.initted)
 		Utils.Render.init();
+	//DragOP.ctoast(screen);
 	Utils.currentScreen = screen;
 }
