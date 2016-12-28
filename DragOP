@@ -265,7 +265,7 @@ var ModCategory = {
 	RENDER: 3,
 	MISC: 4,
 	PLAYER: 5,
-	WORLD: 7,
+	GROUP: 7,
 	SPECIAL: 6,
 	toName: function(c){
 		switch(c){
@@ -282,7 +282,7 @@ var ModCategory = {
 			case 6:
 			return "Special";
 			case 7:
-			return "World";
+			return "Group";
 			default:
 			return "UNKNOWN("+c+")";
 		}
@@ -1775,8 +1775,7 @@ var gmhack = {
 	onEnable: function (btn) { /*Not used*/ },
 	onDisable: function (btn) { /*Not used*/ },
 	onClick: function (btn) {
-		if(this.extra == 1) this.extra = 0;
-		else this.extra = 1;
+		this.extra = -(Level.getGameMode() -1);
 		Level.setGameMode(this.extra);
 	},
 	onRefresh: function (btn) {
@@ -3701,6 +3700,7 @@ var lifedisplay = {
 					lifedisplay.lifeView.setText(text);
 					lifedisplay.lifeGui = new android.widget.PopupWindow(lifedisplay.lifeView, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 					lifedisplay.lifeGui.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+					lifedisplay.lifeGui.setTouchable(false);
 					lifedisplay.lifeGui.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, 0, 0);
 				} else {
 					lifedisplay.lifeView.setText(text);
@@ -4369,7 +4369,7 @@ var illuminati = {
 	name: "Illuminati",
 	desc: "Displays a message from the illuminati in the chat!",
 	type: ModuleType.mod,
-	category: ModCategory.CHAT,
+	category: ModCategory.MISC,
 	delay: 200,
 	isStateMode: function () {
 		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -4400,6 +4400,50 @@ var illuminati = {
 	}
 };
 DragOP.registerModule(illuminati);
+var pvpgroup = {
+	name: "PVP-Group",
+	desc: "Activates all modules which help in Combat",
+	type: ModuleType.mod,
+	category: ModCategory.GROUP,
+	state: false,
+	modules: [
+	aimaura,
+	bowaimbot,
+	velocity,
+	autosword,
+	
+	speed,
+	jesus,
+	//step,
+	
+	lifedisplay
+	],
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onClick: function (btn) {
+		this.state = !this.state;
+		if(this.state){
+			this.modules.forEach(function(entry){
+				if(entry.isStateMode() && !entry.state) entry.onClick(null);
+			});
+			Level.setGameMode(1);
+		}else{
+			this.modules.forEach(function(entry){
+				if(entry.isStateMode() && entry.state) entry.onClick(null);
+			});
+		}
+	},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(pvpgroup);
 /*
 var statehack = {
 	name: "Hack",
@@ -4661,7 +4705,7 @@ var mPosX = ctx.getWindowManager()
 //Main Menu
 var mwidth = ctx.getWindowManager()
 	.getDefaultDisplay()
-	.getWidth() / 100 * 70;
+	.getWidth() / 100 * 72;
 var menu;
 
 var styledBtn = function () {
@@ -4832,7 +4876,7 @@ function showCaterMenu() {
 				let categoryHolder = new android.widget.LinearLayout(ctx);
 				categoryHolder.setId(492817);
 				let categoryParam = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1);
-				let currentCategory = ModCategory.MOVEMENT;
+				let currentCategory = ModCategory.GROUP;
 				
 				let cateGradient = new android.graphics.drawable.GradientDrawable();
 				cateGradient.setColor(android.graphics.Color.argb(190, 0, 0, 0));
@@ -4841,8 +4885,10 @@ function showCaterMenu() {
 				let enabGradient = new android.graphics.drawable.GradientDrawable();
 				enabGradient.setStroke(dip2px(2), android.graphics.Color.GREEN);
 				let categoryBtn = function(category){
-				let btn = new android.widget.Button(ctx);
+				let btn = new android.widget.TextView(ctx);
 					btn.setText(ModCategory.toName(category));
+					
+					btn.setGravity(android.view.Gravity.CENTER);
 					btn.setTextColor(android.graphics.Color.WHITE);
 					btn.setTextSize(dip2px(8));
 					btn.setEllipsize(android.text.TextUtils.TruncateAt.MARQUEE);
@@ -4857,19 +4903,19 @@ function showCaterMenu() {
 							toplayout.removeView(categoryHolder);
 							categoryHolder.removeAllViews();
 							cateBtns = [
+				categoryBtn(ModCategory.GROUP),
 				categoryBtn(ModCategory.MOVEMENT),
 				categoryBtn(ModCategory.COMBAT),
 				categoryBtn(ModCategory.MISC),
 				categoryBtn(ModCategory.RENDER),
 				categoryBtn(ModCategory.PLAYER),
-				categoryBtn(ModCategory.WORLD),
 				categoryBtn(ModCategory.SPECIAL)
 				];
 				cateBtns.forEach(function(entry){
 					categoryHolder.addView(entry, categoryParam);
 					categoryParam = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1);
 				});
-				lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, dip2px(50));
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
 				toplayout.addView(categoryHolder, lparam);
@@ -4886,12 +4932,12 @@ function showCaterMenu() {
 					return btn;
 				};
 				let cateBtns = [
+				categoryBtn(ModCategory.GROUP),
 				categoryBtn(ModCategory.MOVEMENT),
 				categoryBtn(ModCategory.COMBAT),
 				categoryBtn(ModCategory.MISC),
 				categoryBtn(ModCategory.RENDER),
 				categoryBtn(ModCategory.PLAYER),
-				categoryBtn(ModCategory.WORLD),
 				categoryBtn(ModCategory.SPECIAL)
 				];
 				cateBtns.forEach(function(entry){
@@ -4926,7 +4972,7 @@ function showCaterMenu() {
 					}
 				}));
 				
-				let lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				let lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, dip2px(50));
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
 				toplayout.addView(categoryHolder, lparam);
