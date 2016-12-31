@@ -4,9 +4,9 @@ A Hacked Client / mod menu for MCPE inspired by many other mod menus and PC Hack
 © 2016 - brought to you by the DragOP team: Godsoft029 (ServiceHack) and peacestorm (Vertex Client PE).
 
 ##Todo:
-- [ ] New menu (Cater)
+- [x] New menu (Cater)
  - [x] Add a category parameter to every Module
- - [ ] Finish the Menu itself
+ - [x] Finish the Menu itself
  - [x] Add the Category Types: Movement, Combat, Render, Misc
 - [ ] Themes
 - [ ] Advanced Bug Handling
