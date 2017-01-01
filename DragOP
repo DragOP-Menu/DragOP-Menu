@@ -4425,6 +4425,7 @@ var pvpgroup = {
 	bowaimbot,
 	velocity,
 	autosword,
+	hitboxes,
 	
 	speed,
 	jesus,
