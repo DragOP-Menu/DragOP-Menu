@@ -4493,7 +4493,7 @@ var noclip = {
 	type: ModuleType.mod,
 	category: ModCategory.MOVEMENT,
 	state: false,
-	tick; 0,
+	tick: 0,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
