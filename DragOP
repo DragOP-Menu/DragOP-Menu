@@ -52,12 +52,12 @@ function dip2px(dips) {
 }
 var enabledGradient = new android.graphics.drawable.GradientDrawable();
 		enabledGradient.setColor(android.graphics.Color.argb(150, 0, 200, 0));
-		enabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
-		enabledGradient.setCornerRadius(dip2px(3));
+		enabledGradient.setStroke(dip2px(2), android.graphics.Color.BLACK);
+		enabledGradient.setCornerRadius(1);
 var disabledGradient = new android.graphics.drawable.GradientDrawable();
 		disabledGradient.setColor(android.graphics.Color.argb(130, 200, 0, 0));
-		disabledGradient.setStroke(dip2px(3), android.graphics.Color.BLACK);
-		disabledGradient.setCornerRadius(dip2px(3));
+		disabledGradient.setStroke(dip2px(2), android.graphics.Color.BLACK);
+		disabledGradient.setCornerRadius(1);
 var Settings = {
 	settings: new org.json.JSONObject(),
 	resetConfig: function () {
@@ -3906,7 +3906,7 @@ var sbind = {
 	desc: "Adds a button which can toggle a module without being in the menu.",
 	type: ModuleType.special,
 	state: false,
-	currentModule: null,
+	currentModule: [],
 	sgui: null,
 	sbtn: null,
 	getSettingsLayout: function (params) {
@@ -3921,16 +3921,19 @@ var sbind = {
 				btn.setText(entry.name);
 				btn.setTypeface(Utils.font);
 				btn.setTextColor(android.graphics.Color.BLACK);
-				btn.setBackground(sbind.currentModule == null ? disabledGradient : sbind.currentModule.name == entry.name ? enabledGradient : disabledGradient);
+				btn.setBackground(sbind.currentModule.indexOf(entry) <= -1? disabledGradient : /*sbind.currentModule.name == entry.name ? */enabledGradient /*: disabledGradient*/);
 				btn.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (view) {
-						sbind.currentModule = entry;
-						let childct = modList.getChildCount();
-						for(let i = 0; i < childct; i++) {
-							let v = modList.getChildAt(i);
-							v.setBackground(sbind.currentModule == null ? disabledGradient : sbind.currentModule.name == v.getText() ? enabledGradient : disabledGradient);
-						}
+						
+						if(sbind.currentModule.indexOf(entry) <= -1){
+						sbind.currentModule.push(entry);
+						view.setBackground(enabledGradient);
 						sbind.showBtn();
+						}else{
+							sbind.currentModule.splice(sbind.currentModule.indexOf(entry), 1);
+							view.setBackground(disabledGradient);
+							sbind.showBtn();
+						}
 					}
 				}));
 				modList.addView(btn);
@@ -3951,28 +3954,17 @@ var sbind = {
 	showBtn: function () {
 		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function () {
-				if(sbind.sgui == null || sbind.sgui.isShowing() == false) {
-					let bg = DragOP.getStyledBtnBackground(false, false);
-					if(sbind.currentModule.isStateMode())
-						bg = DragOP.getStyledBtnBackground(sbind.currentModule.state, true);
-					bg.setCornerRadius(dip2px(3));
-					sbind.sbtn = new android.widget.Button(ctx);
-					sbind.sbtn.setTypeface(Utils.font);
-					sbind.sbtn.setTextColor(android.graphics.Color.WHITE);
-					sbind.sbtn.setBackground(bg);
-					sbind.sbtn.setText(sbind.currentModule.name);
-					sbind.sbtn.setOnClickListener(new android.view.View.OnClickListener({
-						onClick: function (view) {
-							sbind.currentModule.onClick(null);
-							sbind.showBtn();
-						}
-					}));
-					let moving2 = false;
+				
+				if(sbind.sgui != null && sbind.sgui.isShowing())sbind.sgui.dismiss();
+				let slayout = new android.widget.LinearLayout(ctx);
+				slayout.setOrientation(1);
+				let moving2 = false;
 					let dx2 = 0;
 					let dy2 = 0;
 					let mPosX2 = 100;
 					let mPosY2 = 0;
-					sbind.sbtn.setOnTouchListener(new android.view.View.OnTouchListener({
+					
+					let touchListen = new android.view.View.OnTouchListener({
 						onTouch: function (view, motionEvent) {
 							try {
 								if(!moving2) return false;
@@ -3997,31 +3989,53 @@ var sbind = {
 
 							return true;
 						}
-					}));
-					sbind.sbtn.setOnLongClickListener(new android.view.View.OnLongClickListener({
+					});
+					let longListen = new android.view.View.OnLongClickListener({
 						onLongClick: function (v, t) {
 							ctx.getSystemService(android.content.Context.VIBRATOR_SERVICE)
 								.vibrate(60);
 							moving2 = true;
 							return true;
 						}
+					});
+					sbind.currentModule.forEach(function(entry3){
+						let btn = new android.widget.Button(ctx);
+					btn.setTypeface(Utils.font);
+					btn.setTextColor(android.graphics.Color.WHITE);
+					btn.setBackground(entry3.isStateMode() ? entry3.state ? enabledGradient:disabledGradient :DragOP.getStyledBtnBackground(false, false));
+					btn.setText(entry3.name);
+					btn.setOnTouchListener(touchListen);
+					btn.setOnLongClickListener(longListen);
+					btn.setOnClickListener(new android.view.View.OnClickListener({
+						onClick: function (view) {
+							entry3.onClick(null);
+							btn.setBackground(entry3.isStateMode() ? entry3.state ? enabledGradient:disabledGradient :DragOP.getStyledBtnBackground(false, false));
+							let childct = slayout.getChildCount();
+						for(let i = 0; i < childct; i++) {
+							let v = slayout.getChildAt(i);
+							for(let i2 = 0; i2 < sbind.currentModule.length; i2++){
+								if(sbind.currentModule[i2].name == v.getText()){
+									let m= sbind.currentModule[i2];
+								v.setBackground(m.isStateMode() ? m.state ? enabledGradient:disabledGradient :DragOP.getStyledBtnBackground(false, false));
+								break;
+								}
+							}
+						
+						}
+						}
 					}));
-					sbind.sgui = new android.widget.PopupWindow(sbind.sbtn, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+					slayout.addView(btn);
+					});
+					
+					sbind.sgui = new android.widget.PopupWindow(slayout, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 					sbind.sgui.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 					sbind.sgui.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, ctx.getWindowManager()
 						.getDefaultDisplay()
 						.getWidth() / 16 * 0, ctx.getWindowManager()
 						.getDefaultDisplay()
 						.getHeight() / 2);
-				} else {
-					sbind.sbtn.setText(sbind.currentModule.name);
-					let bg = DragOP.getStyledBtnBackground(false, false);
-					if(sbind.currentModule.isStateMode())
-						bg = DragOP.getStyledBtnBackground(sbind.currentModule.state, true);
-					bg.setCornerRadius(dip2px(3));
-					sbind.sbtn.setBackground(bg);
-
-				}
+				
+					
 			}
 		}));
 	},
@@ -4031,7 +4045,7 @@ var sbind = {
 			DragOP.showModDialog(this);
 			menu.dismiss();
 		} else {
-			sbind.currentModule = null;
+			//sbind.currentModule = null;
 			if(sbind.sgui != null && sbind.sgui.isShowing())
 				sbind.sgui.dismiss();
 		}
@@ -4444,6 +4458,68 @@ var pvpgroup = {
 	}
 };
 DragOP.registerModule(pvpgroup);
+var hitboxes = {
+	name: "HitBoxes",
+	desc: "Increases the size of near Targets defined in the Target Module",
+	type: ModuleType.mod,
+	category: ModCategory.COMBAT,
+	state: false,
+	tick: 0,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function () {
+		this.tick++;
+		if(this.tick >= 5){
+			this.tick = 0;
+			let ent = Utils.Entity.getNearestEntity(10, true);
+			if(ent != null) Entity.setCollisionSize(ent, 10, 10);
+		}
+	},
+	onClick: function (btn) {this.state = !this.state},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(hitboxes);
+var noclip = {
+	name: "NoClip",
+	desc: "Walk through walls as if there are no walls!",
+	type: ModuleType.mod,
+	category: ModCategory.MOVEMENT,
+	state: false,
+	tick; 0,
+	isStateMode: function () {
+		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		//Call hack.state = !hack.state; to toggle 
+	},
+	isToggleAble: function () {
+		return true; //MUST be true if isStateMode = true
+		//Call hack.onClick() to toggle
+	},
+	onTick: function(){
+		tick++;
+		if(tick < 20)return;
+		tick = 0;
+		Entity.setCollisionSize(getPlayerEnt(), 0, 0);
+	},
+	onClick: function (btn) {
+		this.state = !this.state;
+		if(this.state)
+		Entity.setCollisionSize(getPlayerEnt(), 0, 0);
+		else
+		Entity.setCollisionSize(getPlayerEnt(), 0.6, 0.6);
+	},
+	onRefresh: function (btn) {
+		if(btn != null)btn.setText(this.name);
+	}
+};
+DragOP.registerModule(noclip);
 /*
 var statehack = {
 	name: "Hack",
