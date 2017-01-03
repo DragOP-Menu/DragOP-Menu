@@ -51,13 +51,13 @@ function dip2px(dips) {
 		.density);
 }
 var enabledGradient = new android.graphics.drawable.GradientDrawable();
-		enabledGradient.setColor(android.graphics.Color.argb(150, 0, 200, 0));
-		enabledGradient.setStroke(dip2px(2), android.graphics.Color.BLACK);
-		enabledGradient.setCornerRadius(1);
+enabledGradient.setColor(android.graphics.Color.argb(150, 0, 200, 0));
+enabledGradient.setStroke(dip2px(2), android.graphics.Color.BLACK);
+enabledGradient.setCornerRadius(1);
 var disabledGradient = new android.graphics.drawable.GradientDrawable();
-		disabledGradient.setColor(android.graphics.Color.argb(130, 200, 0, 0));
-		disabledGradient.setStroke(dip2px(2), android.graphics.Color.BLACK);
-		disabledGradient.setCornerRadius(1);
+disabledGradient.setColor(android.graphics.Color.argb(130, 200, 0, 0));
+disabledGradient.setStroke(dip2px(2), android.graphics.Color.BLACK);
+disabledGradient.setCornerRadius(1);
 var Settings = {
 	settings: new org.json.JSONObject(),
 	resetConfig: function () {
@@ -125,16 +125,16 @@ Settings.init();
 var Timings = {
 	processing: new org.json.JSONObject(),
 	timingData: new org.json.JSONObject(),
-	startTiming: function(funcName){
+	startTiming: function (funcName) {
 		this.processing.put(funcName, java.lang.System.currentTimeMillis());
 	},
-	stopTiming: function(funcName){
-		this.timingData.put(funcName,java.lang.System.currentTimeMillis() - this.processing.optLong(funcName, -1));
+	stopTiming: function (funcName) {
+		this.timingData.put(funcName, java.lang.System.currentTimeMillis() - this.processing.optLong(funcName, -1));
 	},
-	getTimingData: function(){
+	getTimingData: function () {
 		return this.timingData;
 	},
-	resetTiming: function(funcName){
+	resetTiming: function (funcName) {
 		this.timingData.put(funcName, 0);
 	}
 };
@@ -267,24 +267,24 @@ var ModCategory = {
 	PLAYER: 5,
 	GROUP: 7,
 	SPECIAL: 6,
-	toName: function(c){
-		switch(c){
-			case 1:
+	toName: function (c) {
+		switch(c) {
+		case 1:
 			return "Movement";
-			case 2:
+		case 2:
 			return "Combat";
-			case 3:
+		case 3:
 			return "Render";
-			case 4:
+		case 4:
 			return "Misc";
-			case 5:
+		case 5:
 			return "Player";
-			case 6:
+		case 6:
 			return "Special";
-			case 7:
+		case 7:
 			return "Group";
-			default:
-			return "UNKNOWN("+c+")";
+		default:
+			return "UNKNOWN(" + c + ")";
 		}
 	}
 };
@@ -430,7 +430,7 @@ var Utils = {
 					gl.glClearColor(0, 0, 0, 0);
 					gl.glShadeModel(GL10.GL_SMOOTH);
 					gl.glClearDepthf(1.0);
-					gl.glDisable (GL10.GL_DITHER);
+					gl.glDisable(GL10.GL_DITHER);
 					gl.glEnable(GL10.GL_DEPTH_TEST);
 					gl.glDepthFunc(GL10.GL_LEQUAL);
 					gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
@@ -468,7 +468,7 @@ var Utils = {
 							let centerY = eyeY - dCenterY;
 
 							android.opengl.GLU.gluLookAt(gl, eyeX, eyeY, eyeZ, centerX, centerY, centerZ, 0, 1.0, 0);
-							
+
 							Timings.stopTiming("gl_lookAt");
 							Timings.startTiming("gl_onRender");
 							DragOP.mods.forEach(function (entry, index, array) {
@@ -482,7 +482,7 @@ var Utils = {
 							DragOP.ctoast("RenderProblem: " + e);
 						}
 
-					}else{
+					} else {
 						Timings.resetTiming("gl_lookAt");
 						Timings.resetTiming("gl_onRender");
 					}
@@ -543,19 +543,19 @@ var Utils = {
 			let polyIndices = [
 				0, 1, 4,
 				1, 4, 5,
-				
+
 				2, 3, 6,
 				7, 6, 3,
-				
+
 				1, 3, 7,
 				7, 1, 5,
-				
+
 				0, 2, 6,
 				6, 0, 4,
-				
+
 				0, 1, 2,
 				3, 1, 2,
-				
+
 				4, 5, 6,
 				7, 5, 6
 			];
@@ -810,8 +810,8 @@ var Utils = {
 			if(getTile(getPlayerX() + 0.5, getPlayerY() - 1.5, getPlayerZ() + 0.5) == 65 || getTile(getPlayerX() + 0.5, getPlayerY() - 1.5, getPlayerZ() + 0.5) == 106) return true;
 			return false;
 		},
-		isAtEdge: function(){
-			
+		isAtEdge: function () {
+
 		},
 		onGround: function () {
 			let y = getPlayerY();
@@ -857,9 +857,9 @@ var Utils = {
 		}
 	},
 	Item: {
-		getDamage: function(id){
-			switch(id){
-			//Swords
+		getDamage: function (id) {
+			switch(id) {
+				//Swords
 			case 268:
 			case 283:
 				return 5;
@@ -873,7 +873,7 @@ var Utils = {
 			case 276:
 				return 8;
 				break;
-			//Axe
+				//Axe
 			case 271:
 			case 286:
 				return 4;
@@ -960,10 +960,10 @@ var Utils = {
 				let x = Entity.getX(entry) - getPlayerX();
 				let y = Entity.getY(entry) - getPlayerY();
 				let z = Entity.getZ(entry) - getPlayerZ();
-				
+
 				let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
-				
-				if(dist >= small || dist <= 0.001)return;
+
+				if(dist >= small || dist <= 0.001) return;
 
 				if(bypass && y > 0.8) {
 					let xVel = Entity.getVelX(entry);
@@ -977,17 +977,17 @@ var Utils = {
 				if(Entity.getEntityTypeId(entry) == 63 && Entity.getNameTag(entry) == "")
 					return;
 
-				
+
 
 				if(!(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(entry) == 63) &&
-				!(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(entry) < 63))return;
+					!(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(entry) < 63)) return;
 
-				
-					if(Entity.getHealth(entry)> 0 && Entity.getNameTag(entry) == "" || FriendManager.isFriend(Entity.getNameTag(entry)) == false) {
-						small = dist;
-						ent = entry;
-					}
-				
+
+				if(Entity.getHealth(entry) > 0 && Entity.getNameTag(entry) == "" || FriendManager.isFriend(Entity.getNameTag(entry)) == false) {
+					small = dist;
+					ent = entry;
+				}
+
 
 			});
 
@@ -995,10 +995,10 @@ var Utils = {
 				let x = Entity.getX(entry) - getPlayerX();
 				let y = Entity.getY(entry) - getPlayerY();
 				let z = Entity.getZ(entry) - getPlayerZ();
-				
+
 				let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
-				
-				if(dist >= small || dist <= 0.001)return;
+
+				if(dist >= small || dist <= 0.001) return;
 
 				if(bypass && y > 0.8) {
 					let xVel = Entity.getVelX(entry);
@@ -1012,17 +1012,17 @@ var Utils = {
 				if(Entity.getEntityTypeId(entry) == 63 && Entity.getNameTag(entry) == "")
 					return;
 
-				
+
 
 				if(!(Utils.Entity.targettedMobs[1] == true && Entity.getEntityTypeId(entry) == 63) &&
-				!(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(entry) < 63))return;
+					!(Utils.Entity.targettedMobs[0] == true && Entity.getEntityTypeId(entry) < 63)) return;
 
-				
-					if(Entity.getHealth(entry)> 0 && Entity.getNameTag(entry) == "" || FriendManager.isFriend(Entity.getNameTag(entry)) == false) {
-						small = dist;
-						ent = entry;
-					}
-				
+
+				if(Entity.getHealth(entry) > 0 && Entity.getNameTag(entry) == "" || FriendManager.isFriend(Entity.getNameTag(entry)) == false) {
+					small = dist;
+					ent = entry;
+				}
+
 			});
 
 			return ent;
@@ -1377,7 +1377,7 @@ DragOP.showModDialog = function (mod) {
 					}
 				}));
 			} catch(e) {
-				DragOP.ctoast("Error(#"+e.lineNumber+"): " + e);
+				DragOP.ctoast("Error(#" + e.lineNumber + "): " + e);
 			}
 		}
 	}));
@@ -1745,11 +1745,11 @@ var panic = {
 	onEnable: function (btn) {},
 	onDisable: function (btn) {},
 	onClick: function (btn) {
-		
+
 		DragOP.mods.forEach(function (entry, index, array) {
 			if(entry.isStateMode() && entry.state) entry.onClick(null);
 		});
-		if (btn != null)menu.dismiss ();
+		if(btn != null) menu.dismiss();
 	},
 	onRefresh: function (btn) {
 		if(btn != null)
@@ -1775,7 +1775,7 @@ var gmhack = {
 	onEnable: function (btn) { /*Not used*/ },
 	onDisable: function (btn) { /*Not used*/ },
 	onClick: function (btn) {
-		this.extra = -(Level.getGameMode() -1);
+		this.extra = -(Level.getGameMode() - 1);
 		Level.setGameMode(this.extra);
 	},
 	onRefresh: function (btn) {
@@ -1831,8 +1831,8 @@ var aimaura = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function(){
-		if(this.curEnt !=null){
+	onTick: function () {
+		if(this.curEnt != null) {
 			Utils.Entity.crosshairAimAt(this.curEnt);
 		}
 	},
@@ -1852,10 +1852,10 @@ var aimaura = {
 							aimaura.requestAim = false;
 							try {
 								Timings.startTiming("aimaura-thread");
-								
+
 								aimaura.curEnt = Utils.Entity.getNearestEntity(aimaura.range, true);
-								
-								
+
+
 								Timings.stopTiming("aimaura-thread");
 							} catch(e) {
 								DragOP.ctoast(e);
@@ -2126,11 +2126,11 @@ var speed = {
 				break;
 			case SpeedMode.LONGJUMP:
 				var speed = Math.sqrt(Math.pow(Entity.getVelX(getPlayerEnt()), 2) + Math.pow(Entity.getVelZ(getPlayerEnt()), 2));
-				if (Utils.Player.onGround ())this.extraTick++;
-				if(speed > 0.105 && this.extraTick > 1 && Utils.Player.onGround ()) {
+				if(Utils.Player.onGround()) this.extraTick++;
+				if(speed > 0.105 && this.extraTick > 1 && Utils.Player.onGround()) {
 					this.extraTick = 0;
 					var lastSpeed = Math.sqrt(Math.pow(Utils.Vel.lastX, 2) + Math.pow(Utils.Vel.lastZ, 2));
-					if (speed <= lastSpeed - 0.001)return;
+					if(speed <= lastSpeed - 0.001) return;
 					var vector = new Array();
 					var yaw = (getYaw(getPlayerEnt()) + 90) * (Math.PI / 180);
 					var pitch = 0;
@@ -2207,10 +2207,10 @@ var step = {
 
 	onTick: function () {
 		if(this.state && Utils.Player.isCollidedHorizontally()) {
-			if(Utils.bypassMode == BypassMode.VANILLA){
+			if(Utils.bypassMode == BypassMode.VANILLA) {
 				Entity.setPositionRelative(getPlayerEnt(), 0, 1.6, 0);
-				setVelY(getPlayerEnt (), 0.1);
-			}else if (Utils.Player.onGround ())
+				setVelY(getPlayerEnt(), 0.1);
+			} else if(Utils.Player.onGround())
 				Entity.setPositionRelative(getPlayerEnt(), 0, 1.1, 0);
 			else
 				setVelY(getPlayerEnt(), 0.42);
@@ -2227,7 +2227,8 @@ var step = {
 DragOP.registerModule(step);
 var JesusMode = {
 	FLOAT: 0,
-	Solid: 1
+	Solid: 1,
+	DOLPHIN: 2
 };
 var jesus = {
 	name: DragOP.getLString("hacks.jesus"),
@@ -2235,7 +2236,7 @@ var jesus = {
 	type: ModuleType.mod,
 	category: ModCategory.MOVEMENT,
 	state: false,
-	mode: JesusMode.FLOAT,
+	mode: JesusMode.DOLPHIN,
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
@@ -2247,6 +2248,28 @@ var jesus = {
 	getSettingsLayout: function (params) {
 		var settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
+		var dolphin = new android.widget.Button(ctx);
+		dolphin.setText("Dolphin");
+		dolphin.setTypeface(Utils.font);
+		dolphin.setBackground(this.mode == JesusMode.DOLPHIN ? enabledGradient : disabledGradient);
+		dolphin.setTextColor(android.graphics.Color.BLACK);
+		dolphin.setOnClickListener(new android.view.View.OnClickListener({
+			onClick: function (v) {
+				/*Block.defineLiquidBlock(8, "Water", [
+					["still_water", 0],
+					["still_water", 0]
+				], 8);
+				Block.defineLiquidBlock(10, "Lava", [
+					["still_lava", 0],
+					["still_lava", 0]
+				], 10);*/
+				jesus.mode = JesusMode.DOLPHIN;
+				dolphin.setBackground(this.mode == JesusMode.DOLPHIN ? enabledGradient : disabledGradient);
+				float.setBackground(this.mode == JesusMode.FLOAT ? enabledGradient : disabledGradient);
+				solid.setBackground(this.mode == JesusMode.SOLID ? enabledGradient : disabledGradient);
+			}
+		}));
+
 		var float = new android.widget.Button(ctx);
 		float.setText("Float");
 		float.setTypeface(Utils.font);
@@ -2255,15 +2278,16 @@ var jesus = {
 		float.setTextColor(android.graphics.Color.BLACK);
 		float.setOnClickListener(new android.view.View.OnClickListener({
 			onClick: function (v) {
-				Block.defineLiquidBlock(8, "Water", [
+				/*Block.defineLiquidBlock(8, "Water", [
 					["still_water", 0],
 					["still_water", 0]
 				], 8);
 				Block.defineLiquidBlock(10, "Lava", [
 					["still_lava", 0],
 					["still_lava", 0]
-				], 10);
+				], 10);*/
 				jesus.mode = JesusMode.FLOAT;
+				dolphin.setBackground(this.mode == JesusMode.DOLPHIN ? enabledGradient : disabledGradient);
 				float.setBackground(this.mode == JesusMode.FLOAT ? enabledGradient : disabledGradient);
 				solid.setBackground(this.mode == JesusMode.SOLID ? enabledGradient : disabledGradient);
 			}
@@ -2276,7 +2300,8 @@ var jesus = {
 		solid.setTextColor(android.graphics.Color.BLACK);
 		solid.setOnClickListener(new android.view.View.OnClickListener({
 			onClick: function (v) {
-				jesus.mode = JesusMode.SOLID;
+				/*jesus.mode = JesusMode.SOLID;
+				dolphin.setBackground(this.mode == JesusMode.DOLPHIN ? enabledGradient : disabledGradient);
 				solid.setBackground(this.mode == JesusMode.SOLID ? enabledGradient : disabledGradient);
 				float.setBackground(this.mode == JesusMode.FLOAT ? enabledGradient : disabledGradient);
 				if(jesus.state) {
@@ -2296,23 +2321,31 @@ var jesus = {
 					], 11, false, 4);
 					Block.setShape(10, 0, 0, 0, 1, 0.7, 1);
 					Block.setShape(11, 0, 0, 0, 1, 0.7, 1);
-				}
-
-
+				}*/
+				DragOP.ctoast("Solid Mode is disabled in 0.17 due to crashes");
 			}
 		}));
+		settings.addView(dolphin, params);
 		settings.addView(float, params);
 		settings.addView(solid, params);
 		return settings;
 	},
 	onTick: function () {
-		if(this.state && this.mode == JesusMode.FLOAT) {
-			if((getTile(getPlayerX(), getPlayerY() - 0.8, getPlayerZ() - 1) >= 8 && getTile(getPlayerX(), getPlayerY() - 0.8, getPlayerZ() - 1) <= 11)) {
-				setVelY(getPlayerEnt(), 0.2);
-			} else if((getTile(getPlayerX(), getPlayerY() - 1.3, getPlayerZ() - 1) >= 8 && getTile(getPlayerX(), getPlayerY() - 1.3, getPlayerZ() - 1) <= 11)) {
-				setVelY(getPlayerEnt(), 0.05);
-			} else if((getTile(getPlayerX(), getPlayerY() - 1.68, getPlayerZ() - 1) >= 8 && getTile(getPlayerX(), getPlayerY() - 1.68, getPlayerZ() - 1) <= 11)) {
-				setVelY(getPlayerEnt(), 0.015);
+		if(this.state) {
+			if(this.mode == JesusMode.FLOAT) {
+				if((getTile(getPlayerX(), getPlayerY() - 0.8, getPlayerZ()) >= 8 && getTile(getPlayerX(), getPlayerY() - 0.8, getPlayerZ()) <= 11)) {
+					setVelY(getPlayerEnt(), 0.2);
+				} else if((getTile(getPlayerX(), getPlayerY() - 1.3, getPlayerZ()) >= 8 && getTile(getPlayerX(), getPlayerY() - 1.3, getPlayerZ()) <= 11)) {
+					setVelY(getPlayerEnt(), 0.05);
+				} else if((getTile(getPlayerX(), getPlayerY() - 1.68, getPlayerZ()) >= 8 && getTile(getPlayerX(), getPlayerY() - 1.68, getPlayerZ()) <= 11))
+					setVelY(getPlayerEnt(), 0.015);
+
+			} else if(this.mode == JesusMode.DOLPHIN) {
+				if((getTile(getPlayerX(), getPlayerY() - 1.3, getPlayerZ()) >= 8 && getTile(getPlayerX(), getPlayerY() - 1.3, getPlayerZ()) <= 11)) {
+					setVelY(getPlayerEnt(), 0.4);
+					setVelX(getPlayerEnt(), Entity.getVelX(getPlayerEnt()) * 1.2);
+					setVelZ(getPlayerEnt(), Entity.getVelZ(getPlayerEnt()) * 1.2);
+				}
 			}
 		}
 	},
@@ -3292,8 +3325,8 @@ var tracers = {
 			let z = Entity.getZ(entry) - pz;
 
 			let dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
-			
-			
+
+
 
 			if(dist <= 200 && dist > 0.1 && Entity.getEntityTypeId(entry) <= 63)
 				Utils.Render.drawLine(gl, px, py + 0.8, pz, Entity.getX(entry), Entity.getY(entry) + 1, Entity.getZ(entry));
@@ -3921,15 +3954,15 @@ var sbind = {
 				btn.setText(entry.name);
 				btn.setTypeface(Utils.font);
 				btn.setTextColor(android.graphics.Color.BLACK);
-				btn.setBackground(sbind.currentModule.indexOf(entry) <= -1? disabledGradient : /*sbind.currentModule.name == entry.name ? */enabledGradient /*: disabledGradient*/);
+				btn.setBackground(sbind.currentModule.indexOf(entry) <= -1 ? disabledGradient : /*sbind.currentModule.name == entry.name ? */ enabledGradient /*: disabledGradient*/ );
 				btn.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (view) {
-						
-						if(sbind.currentModule.indexOf(entry) <= -1){
-						sbind.currentModule.push(entry);
-						view.setBackground(enabledGradient);
-						sbind.showBtn();
-						}else{
+
+						if(sbind.currentModule.indexOf(entry) <= -1) {
+							sbind.currentModule.push(entry);
+							view.setBackground(enabledGradient);
+							sbind.showBtn();
+						} else {
 							sbind.currentModule.splice(sbind.currentModule.indexOf(entry), 1);
 							view.setBackground(disabledGradient);
 							sbind.showBtn();
@@ -3954,88 +3987,88 @@ var sbind = {
 	showBtn: function () {
 		ctx.runOnUiThread(new java.lang.Runnable({
 			run: function () {
-				
-				if(sbind.sgui != null && sbind.sgui.isShowing())sbind.sgui.dismiss();
+
+				if(sbind.sgui != null && sbind.sgui.isShowing()) sbind.sgui.dismiss();
 				let slayout = new android.widget.LinearLayout(ctx);
 				slayout.setOrientation(1);
 				let moving2 = false;
-					let dx2 = 0;
-					let dy2 = 0;
-					let mPosX2 = 100;
-					let mPosY2 = 0;
-					
-					let touchListen = new android.view.View.OnTouchListener({
-						onTouch: function (view, motionEvent) {
-							try {
-								if(!moving2) return false;
-								switch(motionEvent.getAction()) {
-								case android.view.MotionEvent.ACTION_DOWN:
-									dx2 = mPosX2 - motionEvent.getRawX();
-									dy2 = mPosY2 - motionEvent.getRawY();
-									break;
-								case android.view.MotionEvent.ACTION_MOVE:
-									mPosX2 = (motionEvent.getRawX() + dx2);
-									mPosY2 = (motionEvent.getRawY() + dy2);
-									sbind.sgui.update(mPosX2, mPosY2, -1, -1);
-									break;
-								case android.view.MotionEvent.ACTION_UP:
-								case android.view.MotionEvent.ACTION_CANCEL:
-									moving2 = false;
-									break;
-								}
-							} catch(e) {
-								DragOP.ctoast("Error: " + e);
-							}
+				let dx2 = 0;
+				let dy2 = 0;
+				let mPosX2 = 100;
+				let mPosY2 = 0;
 
-							return true;
+				let touchListen = new android.view.View.OnTouchListener({
+					onTouch: function (view, motionEvent) {
+						try {
+							if(!moving2) return false;
+							switch(motionEvent.getAction()) {
+							case android.view.MotionEvent.ACTION_DOWN:
+								dx2 = mPosX2 - motionEvent.getRawX();
+								dy2 = mPosY2 - motionEvent.getRawY();
+								break;
+							case android.view.MotionEvent.ACTION_MOVE:
+								mPosX2 = (motionEvent.getRawX() + dx2);
+								mPosY2 = (motionEvent.getRawY() + dy2);
+								sbind.sgui.update(mPosX2, mPosY2, -1, -1);
+								break;
+							case android.view.MotionEvent.ACTION_UP:
+							case android.view.MotionEvent.ACTION_CANCEL:
+								moving2 = false;
+								break;
+							}
+						} catch(e) {
+							DragOP.ctoast("Error: " + e);
 						}
-					});
-					let longListen = new android.view.View.OnLongClickListener({
-						onLongClick: function (v, t) {
-							ctx.getSystemService(android.content.Context.VIBRATOR_SERVICE)
-								.vibrate(60);
-							moving2 = true;
-							return true;
-						}
-					});
-					sbind.currentModule.forEach(function(entry3){
-						let btn = new android.widget.Button(ctx);
+
+						return true;
+					}
+				});
+				let longListen = new android.view.View.OnLongClickListener({
+					onLongClick: function (v, t) {
+						ctx.getSystemService(android.content.Context.VIBRATOR_SERVICE)
+							.vibrate(60);
+						moving2 = true;
+						return true;
+					}
+				});
+				sbind.currentModule.forEach(function (entry3) {
+					let btn = new android.widget.Button(ctx);
 					btn.setTypeface(Utils.font);
 					btn.setTextColor(android.graphics.Color.WHITE);
-					btn.setBackground(entry3.isStateMode() ? entry3.state ? enabledGradient:disabledGradient :DragOP.getStyledBtnBackground(false, false));
+					btn.setBackground(entry3.isStateMode() ? entry3.state ? enabledGradient : disabledGradient : DragOP.getStyledBtnBackground(false, false));
 					btn.setText(entry3.name);
 					btn.setOnTouchListener(touchListen);
 					btn.setOnLongClickListener(longListen);
 					btn.setOnClickListener(new android.view.View.OnClickListener({
 						onClick: function (view) {
 							entry3.onClick(null);
-							btn.setBackground(entry3.isStateMode() ? entry3.state ? enabledGradient:disabledGradient :DragOP.getStyledBtnBackground(false, false));
+							btn.setBackground(entry3.isStateMode() ? entry3.state ? enabledGradient : disabledGradient : DragOP.getStyledBtnBackground(false, false));
 							let childct = slayout.getChildCount();
-						for(let i = 0; i < childct; i++) {
-							let v = slayout.getChildAt(i);
-							for(let i2 = 0; i2 < sbind.currentModule.length; i2++){
-								if(sbind.currentModule[i2].name == v.getText()){
-									let m= sbind.currentModule[i2];
-								v.setBackground(m.isStateMode() ? m.state ? enabledGradient:disabledGradient :DragOP.getStyledBtnBackground(false, false));
-								break;
+							for(let i = 0; i < childct; i++) {
+								let v = slayout.getChildAt(i);
+								for(let i2 = 0; i2 < sbind.currentModule.length; i2++) {
+									if(sbind.currentModule[i2].name == v.getText()) {
+										let m = sbind.currentModule[i2];
+										v.setBackground(m.isStateMode() ? m.state ? enabledGradient : disabledGradient : DragOP.getStyledBtnBackground(false, false));
+										break;
+									}
 								}
+
 							}
-						
-						}
 						}
 					}));
 					slayout.addView(btn);
-					});
-					
-					sbind.sgui = new android.widget.PopupWindow(slayout, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-					sbind.sgui.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-					sbind.sgui.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, ctx.getWindowManager()
-						.getDefaultDisplay()
-						.getWidth() / 16 * 0, ctx.getWindowManager()
-						.getDefaultDisplay()
-						.getHeight() / 2);
-				
-					
+				});
+
+				sbind.sgui = new android.widget.PopupWindow(slayout, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				sbind.sgui.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+				sbind.sgui.showAtLocation(ctx.getWindow().getDecorView(), android.view.Gravity.LEFT | android.view.Gravity.TOP, ctx.getWindowManager()
+					.getDefaultDisplay()
+					.getWidth() / 16 * 0, ctx.getWindowManager()
+					.getDefaultDisplay()
+					.getHeight() / 2);
+
+
 			}
 		}));
 	},
@@ -4072,18 +4105,18 @@ var autosword = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	startThread: function(){
+	startThread: function () {
 		if(autosword.isTrRunning)
 			return;
 		let t = new java.lang.Thread(new java.lang.Runnable({
-			run: function(){
+			run: function () {
 				autosword.isTrRunning = true;
-				while(autosword.state){
-					if(Utils.Entity.getNearestEntity(5, true) != null){
+				while(autosword.state) {
+					if(Utils.Entity.getNearestEntity(5, true) != null) {
 						let bestsword = [-1, -1];
-						for(let i = 0; i < 10; i++){
+						for(let i = 0; i < 10; i++) {
 							let dmg = Utils.Item.getDamage(Player.getInventorySlot(i));
-							if(dmg > bestsword[0]){
+							if(dmg > bestsword[0]) {
 								bestsword[0] = dmg;
 								bestsword[1] = i;
 							}
@@ -4104,7 +4137,7 @@ var autosword = {
 			this.startThread();
 	},
 	onRefresh: function (btn) {
-		if(btn != null)btn.setText(this.name);
+		if(btn != null) btn.setText(this.name);
 	}
 };
 DragOP.registerModule(autosword);
@@ -4118,21 +4151,21 @@ var singsong = {
 	lastTime: 0,
 	selectedSong: [0, -1], //[song index, word index]
 	delay: 1500,
-	songList: [//[song name, song text splitted with \n]
-	           ["Adele - Hello", "Hello,\nit's me\nI was wondering if after all these years\nYou'd like to meet,\nto go over\nEverything\n\nThey say that time's supposed to heal ya\nBut I ain't done much healing\nHello, can you hear me?\nI'm in California dreaming about who we used to be\n\nWhen we were younger\nand free\n\nI've forgotten how it felt before the world fell at our feet\nThere's such a difference\nbetween us\nAnd a million miles\n\nHello from the other side\nI must've called a thousand times\nto tell you I'm sorry\nfor everything that I've done\n\nBut when I call you never\nseem to be home\nHello from the outside\nAt least I can say that I've tried\nto tell you I'm sorry\nfor breaking your heart\nBut it don't matter,\nit clearly doesn't tear you apart anymore\n\nHello\nhow are you?\nIt's so typical of me to talk about myself\nI'm sorry\n\nI hope\nthat you're well\nDid you ever make it out of that town\nWhere nothing ever happened?\nIt's no secret\nThat the both of us are running out of time\nHello from the other side\nI must've called a thousand times\nto tell you I'm sorry\nfor everything that I've done\nBut when I call you never seem to be home\n\nHello from the outside\nAt least I can say that I've tried\nto tell you I'm sorry\nfor breaking your heart\nBut it don't matter,\nit clearly doesn't tear you apart anymore\nOoooohh, anymore\nOoooohh, anymore\nOoooohh, anymore\nAnymore\n\nHello from the other side\nI must've called a thousand times\nto tell you I'm sorry\nfor everything that I've done\nBut when I call you never seem to be home\nHello from the outside\nAt least I can say that I've tried\nto tell you I'm sorry\nfor breaking your heart\nBut it don't matter, it clearly doesn't tear you apart anymore".split("\n")],
-	           ["Rag'n'Bone Man - Human", "Maybe I'm foolish, maybe I'm blind\nThinking I can see through this and see what's behind\nGot no way to prove it so maybe I'm blind\nBut I'm only human after all, I'm only human after all\nDon't put your blame on me\nTake a look in the mirror and what do you see\nDo you see it clearer or are you deceived in what you believe\nCos I'm only human after all, you're only human after all\nDon't put the blame on me\nDon't put your blame on me\nSome people got the real problems\nSome people out of luck\nSome people think I can solve them\nLord heavens above\nI'm only human after all, I'm only human after all\nDon't put the blame on me\nDon't put the blame on me\nDon't ask my opinion, don't ask me to lie\nThen beg for forgiveness for making you cry, making you cry\nCos I'm only human after all, I'm only human after all\nDon't put your blame on me, don't put the blame on me\nSome people got the real problems\nSome people out of luck\nSome people think I can solve them\nLord heavens above\nI'm only human after all, I'm only human after all\nDon't put the blame on me\nDon't put the blame on me\nI'm only human I make mistakes\nI'm only human that's all it takes to put the blame on me\nDon't put your blame on me\nI'm no prophet or messiah\nShould go looking somewhere higher\nI'm only human after all, I'm only human after all\nDon't put the blame on me, don't put the blame on me\nI'm only human I do what I can\nI'm just a man, I do what I can\nDon't put the blame on me\nDon't put your blame on me".split("\n")],
-	           ["Beginner - Ahnma", "Ey yo, ich komm mit großem Herz und Pauken und Trompeten\nfür die Obernerds und die saufenden Proleten\nDie Messdiener, Crackdealer, Alt-68er\nalle sind happy, denn der Testsieger rappt wieder\nEizi Eiz - heißer Scheiß!\nJeder, den du kennst, kennt eine meiner Lines\nHammertyp, Hammerflow, Hammersprüche\nDarum hängt mein Bild in Marsimotos Mamas Küche\nSchreib Gedichte, schreib damit Geschichte\nJeder, der mich disste, ist bereits Geschichte\nAlter, ich kam schon mit K-Zwo und Hammerhart,\nals ihr noch irgendwo im Sack von eurem Vadder wart\nDer Veteran von der Reeperbahn\nHab Hamburg hinter mi als wär ich Uwe Seeler, man\nUnd die Sonnenbrille - sie ist am Start, Baby\nSie ist der letzte Rest Privatsphäre\nWas los Digger, Ahnma\nWie wir gucken, wie wir labern\nJeder sagt Digger heutzutage\nWir packen Hamburg wieder auf die Karte\nWas los Digger, Ahnma\nWie wir gucken, wie wir labern\nJeder sagt Digger heutzutage\nWir packen Hamburg wieder auf die Karte\nDem can't get we out\nNo matter how dem gon' shout\nDa one ya name trample all doubt\nDem can't get we out\nStill around, still I move the crowd\nFrom Hamburg way down to south\nIch komm mit großem Herz, dickem Kopf und kleinem Bauch\nWortgewalttätig, aber masterpeacig drauf\nTriple A Pass - fremd im eigenem Land\nFette Anlageberater - Afrodeutsche Bank\nDenyo - ich komme rein\nHalt ne Basspredigt und die Sonne scheint\nWas Rap ist in der Sinnkrise?\nGuck, wie ich es hinbiege, mit Armen wie Tim Wiese\nIst n positiver Film den ich schieb, Typ\nVom Eppendorfer Weg bis zur Beatstreet\nHier kommt die Band mit Geschmack\nwenn jeder Jens Peter einen auf Endgegner macht\nUnd irgendwo zwischen Itzehoe und Idaho\nkommt noch einer mit Jason Derulo featuring Tyga Flow\nIs leider so - für uns n Haufen Scherben\ndoch wir lassen uns die legendäre Stimmung nicht verderben\nWas los Digger, Ahnma\nWie wir gucken, wie wir labern\nJeder sagt Digger heutzutage\nWir packen Hamburg wieder auf die Karte\nWas los Digger, Ahnma\nWie wir gucken, wie wir labern\nJeder sagt Digger heutzutage\nWir packen Hamburg wieder auf die Karte\nDem can't get we out\nNo matter how dem gon' shout\nDa one ya name trample all doubt\nDem can't get we out\nStill around, still I move the crowd\nFrom Hamburg way down to south".split("\n")],
-	           ["Scooter - Hyper Hyper", "Miscellaneous\nHyper Hyper\nIs everybody on the floor?\nWe put some energy into this place!\nI want to ask you something...\nAre you ready for the sound of Scooter?\nI want to see you sweat\nI said... I want to see you sweat!\nYeaah.\nHyper, hyper!\nHyper, hyper!\nHyper, hyper!\nExcuse me! Where is the bass drum?\nWe need the bass drum!\nCome on!\nHyper, hyper!\nHyper, hyper!\nIt's so beautiful to see your hands in the air!\nPut your hands in the air!\nCome on!\nThis is Scooter!\nWe want to sing a big shout to US, and to all ravers in the world!\nAnd to Westbam, Marusha, Steve Mason, The Mystic Man, DJ Dick, Carl Cox, The Hooligan, Cosmic...\nKid Paul, Dag, Mike VanDike, Jens Lissat, Lenny D., Sven Vath, Mark Spoon, Marco Zaffarano...\nHell, Paul Elstac, Mate Galic, Roland Casper, Sylvie, Miss Djax, Jens Mahlstedt, Tanith, Laurent Garnier...\nSpecial, Pascal F.E.O.S., Gary D., Scotty, Gizmo... and to all DJs all over the World!\nKeep the Vibes... Hyper, hyper!\nHyper, hyper!\nHyper, hyper!\nI'll have to ask you again...\nDo you like it hardcore?\nDo you like it hardcore?\nWe need the hardcore!\nCome on! Come on! Come on!\nHyper, hyper!\nSit there.\nBe good.\nBye, Bye!".split("\n")],
-	           ["Justin Bieber - Baby", "Ohh wooaah Ohh wooaah Ohh wooaah\nYou know you love me, I know you care\nJust shout whenever, And I'll be there\nYou are my love, You are my heart\nAnd we will never ever-ever be apart\nAre we an item. Girl quit playing\n\"We're just friends\"\nWhat are you sayin?\nsaid theres another and look right in my eyes\nMy first love broke my heart for the first time,\nAnd I was like\nBaby, baby, baby ooh\nLike baby, baby, baby noo\nLike baby, baby, baby ooh\nThought you'd always be mine, mine\nBaby, baby, baby oohh\nLike baby, baby, baby noo\nLike baby, baby, baby ohh\nThought you'd always be mine, mine\nFor you, i would have done what ever\nAnd I just cant believe we ain't together\nAnd I wanna play it cool, But I'm losing you\nI'll buy you anything, ill buy you any ring\nAnd I'm in pieces, Baby fix me\nand just shake me til' you wake me from this bad dream\nI'm going down, down, down, down\nAnd I just can't believe, my first love won't be around\nAnd I'm like,\nBaby, baby, baby oooh\nLike baby, baby, baby noo\nLike baby, baby, baby ooh\nThought you'd always be mine, mine\nBaby, baby, baby oooh\nLike baby, baby, baby noo\nLike baby, baby, baby ooh\nThought you'd always be mine, mine\nLuda, When I was thirteen, I had my first love\nThere was nobody that compaired to my baby\nAnd nobody came between us\nor could ever come above\nShe had me going crazy\nOh I was starstruck\nShe woke me up daily\nDon't need no Starbucks\nShe make my heart pound\nand skip a beat when I see her in the street\nand, At school, on the playground\nBut I really wanna see her on the weekend\nShe know she got me dazing\nCuz she was so amazing\nAnd now, my heart is breakin'\nBut I just keep on sayin'\nBaby, baby, baby ohh\nLike baby, baby, baby noo\nLike baby, baby, baby ohh\nThought you'd always be mine, mine\nBaby, baby, baby ooh\nLike baby, baby, baby noo\nLike baby, baby, baby oooh\nThought you'd always be mine, mine\n(Now I'm all gone)\nYeah, Yeah, Yeah\nYeah Yeah Yeah\n(Now I'm all gone)\nYeah, Yeah, Yeah\nYeah, Yeah, Yeah\n(Now I'm all gone)\nYeah, Yeah, Yeah\nYeah, Yeah, Yeah\nNow I'm all gone, gone, gone, ooh\nI'm gone".split("\n")],
-	           ["Robin Schulz - Sugar", "She got cherry lips\nAngel eyes\nShe knows exactly how to tantalize\nShe's out to get you, danger by design\nCold blooded vixen, she don't compromise\nShe's optimistic of the coded lights\nSo far from typical, but take my advice\nBefore you play with fire, do things twice\nAnd if you get burned, don't be surprised\nGot me tripping higher than the ceiling\nOoh baby it's the ultimate feeling\nYou got me lifted feeling so gifted\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nWe're talking lady\nLove how you in tight\nSugar we're just a rider, man spies\nSean Penn a little bit ethic, one's desire\nShe's out to get you, you can't burn, you can't hide\nShe's optimistic of the coded lights\nSo far from typical, but take my advice\nBefore you play with fire, do things twice\nAnd if you get burned, don't be surprised\nGot me tripping higher than the ceiling\nOoh baby it's the ultimate feeling\nYou got me lifted feeling so gifted\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nBut you won't get me tonight\nGot me tripping higher than the ceiling\nOoh baby it's the ultimate feeling\nYou got me lifted feeling so gifted\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly".split("\n")],
-	           ["Cash Cash - Millionaire", "I feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound\nI feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound\nShe smell like money when she walk by\nAll heat, no smoke, but she on fire\nIf they suicide doors, then she gon' ride\nShe got that passport pussy cause she\ndon't fly, no love\nShe gon' make you pay to see you work it\nShe only twerk it for a Birkin\nI gotta see if shawty worth it\nHey, she must be the money\nI feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound\nI feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound\nShawty work her way, the way she go down\nShawty worth her weight, her weight in gold pounds\nCall me young money, put that milli on me\nShe gon' make you pay to see you work it\nShe only twerk it for a Birkin\nI gotta see if shawty worth it\nHey, she must be the money\nShe must be the money\nShe only looking like money\nI feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound\nI feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound\nI feel like a\nI feel like a\nI feel like a\nI feel like a millionaire\nI feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound".split("\n")],
-	           ["Scooter - Bigroom Blitz", "Chapter five\nBigroom blitz\nInternational bitch\nIt's, it's the bigroom blitz\nTurn it up\nShotta got the plan, man\nAlways like a Grand Slam\nBig shot, hole in one\nShotalot is on the run\nCrack of the whip, snap attack\nBars so tight front to back\nI reach my fate at the gates\nGod says Shotta you was great\nWhen I'm shopping\nAnd my bad filled with options\nSo don't ask what it cost\nI'm in a Maserati coupe\nGoin' so fast that I lost 'em\nAnd my bitch got so much swag\nThat these bad bitches on us\nAh, killin' y'all, pow\nBigroom blitz\nIt's, it's the bigroom blitz\nBring the noise\nI jack them hoes, direct them hoes\nTake 'em home and let them hoes\nGo live out their fantasies\nThey're popping pills, I'm rolling weed\nEven got a couple bad bitches overseas\nShotta got the slo-mo\nYou can call it pro flow\nEvery shot a straight flush\nShotalot is in a rush\nBack on the floor, lyrical madness\nOn the mic, Jack the cactus\nReach my fate at the gates\nGod says Shotta you was great\nShotta got the chicks\nIt's, it's the bigroom blitz\nHee-haa\nYeah\nNobody's hotter than Shotta\nThank you".split("\n")],
-	           ["257ers - Holz", "Ich und mein Holz\nIch und mein Holz\nOk der Song beginnt, und er bekommt ein Thema\nIch und mein Holz\nUnd das Thema heute, es heißt Holz\nIch und mein, ich und mein Holz\nHolz sieht sehr schön aus, Holz ist vielseitig\nIch und mein Holz\nDu kannst es verbrennen, du kannst es sägen\nIch und mein, ich und mein Holz\nJa, wenn du es verbrennst, dann spendet es Wärme\nIch und mein, ich und mein Holz\nAber wenn du es sägst, dann nicht, oh\nUnd jetzt mal alle in this wood, yo\nIch und mein Holz, ich und mein Holz (Holzi, Holzi, Holz)\nIch und mein Holz, ich und mein Holz\nIch und mein, ich und mein Holz, mein Holz\nIch und mein Holz, ich und mein Holz (Holzi, Holzi, Holz)\nIch und mein Holz, ich und mein Holz\nIch und mein, ich und mein Holz, mein Holz\nIch und mein Holz, best friends forever\nHdgdl, wir sind unzertrennlich\nUnverständlich warum heutzutage nicht jeder Besitzer eines wunderbaren Exemplarers Holz sein will\nund nicht nur weil man es sich wunderschön ins Wohnzimmer stellen kann\nNein, man kann es auch lackieren\nSo und jetzt nochmal alle in this wood, yo\nIch und mein Holz, ich und mein Holz (Holzi, Holzi, Holz)\nIch und mein Holz, ich und mein Holz\nIch und mein, ich und mein Holz, mein Holz\nIch und mein Holz, ich und mein Holz (Holzi, Holzi, Holz)\nIch und mein Holz, ich und mein Holz\nIch und mein, ich und mein Holz, mein Holz\nMit Holz kann man voll gut nen Staudamm bauen\nund wenn der Stau dann bricht ihm auch vertrauen,\ndenn das ist crazy dieses Zeug, rettet nämlich Leute,\nwie die Baywatch flitchen oder dieser David Hasselholt\nDu hast ein (Paysi Pet?) aus Gold, ich bin auf Kettensäge stolz\nDer (?) Proll, ich bin kein (?) unters Volk\n(?) am Holz vor Gebrauchsgegenstände\nEs beginnt ein neues Leben, wenn ein Baumleben endet\nMeine Bank, mein Tisch, meine Treppe, meine Besen,\nmeine Vase, dein Zuhause, mein Kopf\nMeine Gedanken, mein Herz, mein Leben,\nmeine Welt ist der schwerste und der heftigste Stock\nPut your hands in the air\nIch und mein Holz, ich und mein Holz (Holzi, Holzi, Holz)\nIch und mein Holz, ich und mein Holz\nIch und mein, ich und mein Holz, mein Holz\nIch und mein Holz, ich und mein Holz (Holzi, Holzi, Holz)\nIch und mein Holz, ich und mein Holz\nIch und mein, ich und mein Holz, mein Holz\nIch und mein Holz, ich und mein Holz\nIch und mein Holz, ich und mein Holz\nIch und mein Holz, ich und mein Holz\nIch und mein Holz, ich und mein Holz".split("\n")],
-	           ["Anthony B - Smoke Weed Everyday", "da da da da daaaa it's tha motha fuckin' D O double G (Snoop dogg) da da da da daaaa You know im mobbin' with the D.\nR.\nyeah yeah yeah you know who's back up in this mothafucker\nWhat what what what\nso blaze the weed out there\nBlaze it up\nBlaze that shit up nigga Yeah waz up snoop\none: Top dogg buy them all nigga burn this shit up D-P-G-C my nigga turn that shit up CPT, LBC yeah we hookin' back up N' when they bang this in the club baby you gotta get up thug niggas, drug dealers yeah they givin' it up low life, your life boy we livin' it up take a chance thats why we dancin' in the party fo' sho' slip my ho a fourty four n' she crept in it back do' bitches lookin' at me strange but you know i don't care step up in this mothafucker just to swingin' my hair Bitch quit talkin' Crip walk If you down with the set Take a Bullet with some dick take this dope from this jet outta town put it down for father of rap n' if your ass get crack bitch shut your trap come back get back thats the part of success n' if you believe the X then you'll relievin' your stress\nmusic in between\nda da da da daaaa\nit's the mothafuckin' D-R-E\nDr.\nDre mothafucker what what what what\nda da da da daaaa\ntwo: you know im mobbing with the D O double G Straight off the fuckin' street's of CPT King of the beats n' you ride to em' in your fleet wood or Coupe De\nVille rollin on dubs How you feel?\nWhoopty whoop nigga what?\nDre n' snoop chronic'ed out In the 'llac with doc in the back Sippin' 'gnac, clip in the strap Dippin' through hoods What hoods?\nCompton, longbeach, ingelwood South central out to the westside (westside) It's california love this california bud Got a nigga gang of pub I'm on one, I might bail up in the Century Club With my jeans on n' my team's strong Get my drink on n' my smoke on Then go home with somethin' to poke on (waz up bitch) Loc' it's on for the two tripple oh Comin' real it's the next episode *\nhold up.\nheeeeey For my niggas who be thinkin' we soft We don't.\nplaaaay We gonna rockin' til the weels fall of Hold up.\nheeeeey For my niggas who be acting to bold Take a.\nseeeeat Hope you ready for the next episode heeeeeey".split("\n")],
-	           ["Critical Hit - Pokemon Main Theme", "I wanna be the very best,\nLike no one ever was.\nTo catch them all is my real test,\nTo train them is my cause.\nI will travel across the land,\nSearching far and wide.\nTeach Pokemon to understand\nThe power that's inside\nPokemon, gotta catch them all its you and me\nI know its my destiny\nPokemon, oh, you're my best friend\nIn a world we must defend\nPokemon, gotta catch them all a heart so true\nOur courage will pull us through\nYou teach me and I'll teach you\nPo-ke-mon Gotta catch 'em all\nEvery challenge along the way\nWith courage I will face\nI will battle every day\nTo claim my rightful place\nCome with me, the time is right\nThere's no better team\nArm in arm we'll win the fight\nIt's always been our dream\nPokemon!\nGotta catch 'em all\nIt's you and me\nI know it's my destiny\nPokemon!\nOh, you're my best friend,\nIn a world we must defend.\nPokemon!\nA heart so true.\nOur courage will pull us through.\nYou teach me and I'll teach you.\nPokemon!\nGotta catch 'em all\nGotta catch 'em all\nGotta catch 'em all\nGotta catch 'em all\nGotta catch 'em all\nYeah!\nPokemon!\nIt's you and me\nI know it's my destiny\nPokemon!\nOh, you're my best friend,\nIn a world we must defend.\nPokemon!\nA heart so true.\nOur courage will pull us through.\nYou teach me and I'll teach you.\nPOKEMON!\nGotta catch 'em all\nGotta catch 'em all\nPokemon!".split("\n")],
-	           ["Sia - Cheap Thrills", "Come on, come on, turn the radio on\nIt's Friday night and I won't be long\nGotta do my hair, I put my make up on\nIt's Friday night and I won't be long\nTil I hit the dance floor\nHit the dance floor\nI got all I need\nNo I ain't got cash\nNo I ain't got cash\nBut I got you baby\nBaby I don't need dollar bills to have fun tonight\nI love cheap thrills\nBaby I don't need dollar bills to have fun tonight\nI love cheap thrills\nBut I don't need no money\nAs long as I can feel the beat\nI don't need no money\nAs long as I keep dancing\nCome on, come on, turn the radio on\nIt's Saturday and I won't be long\nGotta paint my nails, put my high heels on\nIt's Saturday and I won't be long\nTil I hit the dance floor\nHit the dance floor\nI got all I need\nNo I ain't got cash\nNo I ain't got cash\nBut I got you baby\nBaby I don't need dollar bills to have fun tonight\nI love cheap thrills\nBaby I don't need dollar bills to have fun tonight\nI love cheap thrills\nBut I don't need no money\nAs long as I can feel the beat\nI don't need no money\nAs long as I keep dancing\nI love cheap thrills\nI love cheap thrills\nI don't need no money\nAs long as I can feel the beat\nI don't need no money\nAs long as I keep dancing\nOh, oh\nBaby I don't need dollar bills to have fun tonight\nI love cheap thrills\nBaby I don't need dollar bills to have fun tonight\nI love cheap thrills\nI don't need no money\nAs long as I can feel the beat\nI don't need no money\nAs long as I keep dancing\nLa, la, la, la, la, la\nI love cheap thrills\nLa, la, la, la, la, la\nI love cheap thrills\nLa, la, la, la, la, la\nI love cheap thrills\nLa, la, la, la, la\nI love cheap thrills".split("\n")],
-	           ["PSY - Gangnam Style", "Oppan Gangnam style\nGangnam style\nNajeneun ttasaroun inganjeokin yeoja\nKeopi hanjaneu yeoyureul aneun pumgyeok inneun yeoja\nBami omyeon simjangi tteugeowojineun yeoja\nGeureon banjeon inneun yeoja\nNaneun sanai\nNajeneun neomankeum ttasaroun geureon sanai\nKeopi sikgido jeone wonsyat ttaerineun sanai\nBami omyeon simjangi teojyeobeorineun sanai\nGeureon sanai\nAreumdawo sarangseureowo\nGeurae neo, hey, geurae baro neo, hey\nAreumdawo sarangseureowo\nGeurae neo, hey, geurae baro neo, hey\nJigeumbuteo gal ddekkaji gabolkka\nOppan Gangnam style\nGangnam style\nOp, op, op, op\nOppan Gangnam style\nGangnam style\nOp, op, op, op\nOppan Gangnam style\nEeeeeh, sexy lady\nOp, op, op, op\nOppan Gangnam style\nEeeeeh, sexy lady\nOp, op, op, op\nEh-eh, eh-eh-eh-eh\nJeongsukhae boijiman nol ttaen noneun yeoja\nIttaeda sipeumyeon mukkeotdeon meori puneun yeoja\nGaryeotjiman wenmanhan nochulboda yahan yeoja\nGeureon gamgakjeogin yeoja\nNaneun sanai\nJeomjanha boijiman nol ttaen noneun sanai\nTtaega doemyeon wanjeon michyeobeorineun sanai\nGeunyukboda sasangi ultungbultunghan sanai\nGeureon sanai\nAreumdawo sarangseureowo\nGeurae neo, hey, geurae baro neo, hey\nAreumdawo sarangseureowo\nGeurae neo, hey, geurae baro neo, hey\nJigeumbuteo gal ddekkaji gabolkka\nOppan Gangnam style\nGangnam style\nOp, op, op, op\nOppan Gangnam style\nGangnam style\nOp, op, op, op\nOppan Gangnam style\nEeeeeh, sexy lady\nOp, op, op, op\nOppan Gangnam style\nEeeeeh, sexy lady\nOp, op, op, op\nEh-eh, eh-eh-eh-eh\nTtwineun nom geu wiae naneun nom\nBaby, baby, naneun mwol jom aneun nom\nTtwineun nom geu wiae naneun nom\nBaby, baby, naneun mwol jom aneun nom\nYou know what I'm saying\nOppan Gangnam style\nEh-eh, eh-eh-eh-eh\nEeeeeh, sexy lady\nOp, op, op, op\nOppan Gangnam style\nEeeeeh, sexy lady\nOp, op, op, op\nEh-eh, eh-eh-eh-eh\nOppan Gangnam style".split("\n")]
-	           ],
+	songList: [ //[song name, song text splitted with \n]
+		["Adele - Hello", "Hello,\nit's me\nI was wondering if after all these years\nYou'd like to meet,\nto go over\nEverything\n\nThey say that time's supposed to heal ya\nBut I ain't done much healing\nHello, can you hear me?\nI'm in California dreaming about who we used to be\n\nWhen we were younger\nand free\n\nI've forgotten how it felt before the world fell at our feet\nThere's such a difference\nbetween us\nAnd a million miles\n\nHello from the other side\nI must've called a thousand times\nto tell you I'm sorry\nfor everything that I've done\n\nBut when I call you never\nseem to be home\nHello from the outside\nAt least I can say that I've tried\nto tell you I'm sorry\nfor breaking your heart\nBut it don't matter,\nit clearly doesn't tear you apart anymore\n\nHello\nhow are you?\nIt's so typical of me to talk about myself\nI'm sorry\n\nI hope\nthat you're well\nDid you ever make it out of that town\nWhere nothing ever happened?\nIt's no secret\nThat the both of us are running out of time\nHello from the other side\nI must've called a thousand times\nto tell you I'm sorry\nfor everything that I've done\nBut when I call you never seem to be home\n\nHello from the outside\nAt least I can say that I've tried\nto tell you I'm sorry\nfor breaking your heart\nBut it don't matter,\nit clearly doesn't tear you apart anymore\nOoooohh, anymore\nOoooohh, anymore\nOoooohh, anymore\nAnymore\n\nHello from the other side\nI must've called a thousand times\nto tell you I'm sorry\nfor everything that I've done\nBut when I call you never seem to be home\nHello from the outside\nAt least I can say that I've tried\nto tell you I'm sorry\nfor breaking your heart\nBut it don't matter, it clearly doesn't tear you apart anymore".split("\n")],
+		["Rag'n'Bone Man - Human", "Maybe I'm foolish, maybe I'm blind\nThinking I can see through this and see what's behind\nGot no way to prove it so maybe I'm blind\nBut I'm only human after all, I'm only human after all\nDon't put your blame on me\nTake a look in the mirror and what do you see\nDo you see it clearer or are you deceived in what you believe\nCos I'm only human after all, you're only human after all\nDon't put the blame on me\nDon't put your blame on me\nSome people got the real problems\nSome people out of luck\nSome people think I can solve them\nLord heavens above\nI'm only human after all, I'm only human after all\nDon't put the blame on me\nDon't put the blame on me\nDon't ask my opinion, don't ask me to lie\nThen beg for forgiveness for making you cry, making you cry\nCos I'm only human after all, I'm only human after all\nDon't put your blame on me, don't put the blame on me\nSome people got the real problems\nSome people out of luck\nSome people think I can solve them\nLord heavens above\nI'm only human after all, I'm only human after all\nDon't put the blame on me\nDon't put the blame on me\nI'm only human I make mistakes\nI'm only human that's all it takes to put the blame on me\nDon't put your blame on me\nI'm no prophet or messiah\nShould go looking somewhere higher\nI'm only human after all, I'm only human after all\nDon't put the blame on me, don't put the blame on me\nI'm only human I do what I can\nI'm just a man, I do what I can\nDon't put the blame on me\nDon't put your blame on me".split("\n")],
+		["Beginner - Ahnma", "Ey yo, ich komm mit großem Herz und Pauken und Trompeten\nfür die Obernerds und die saufenden Proleten\nDie Messdiener, Crackdealer, Alt-68er\nalle sind happy, denn der Testsieger rappt wieder\nEizi Eiz - heißer Scheiß!\nJeder, den du kennst, kennt eine meiner Lines\nHammertyp, Hammerflow, Hammersprüche\nDarum hängt mein Bild in Marsimotos Mamas Küche\nSchreib Gedichte, schreib damit Geschichte\nJeder, der mich disste, ist bereits Geschichte\nAlter, ich kam schon mit K-Zwo und Hammerhart,\nals ihr noch irgendwo im Sack von eurem Vadder wart\nDer Veteran von der Reeperbahn\nHab Hamburg hinter mi als wär ich Uwe Seeler, man\nUnd die Sonnenbrille - sie ist am Start, Baby\nSie ist der letzte Rest Privatsphäre\nWas los Digger, Ahnma\nWie wir gucken, wie wir labern\nJeder sagt Digger heutzutage\nWir packen Hamburg wieder auf die Karte\nWas los Digger, Ahnma\nWie wir gucken, wie wir labern\nJeder sagt Digger heutzutage\nWir packen Hamburg wieder auf die Karte\nDem can't get we out\nNo matter how dem gon' shout\nDa one ya name trample all doubt\nDem can't get we out\nStill around, still I move the crowd\nFrom Hamburg way down to south\nIch komm mit großem Herz, dickem Kopf und kleinem Bauch\nWortgewalttätig, aber masterpeacig drauf\nTriple A Pass - fremd im eigenem Land\nFette Anlageberater - Afrodeutsche Bank\nDenyo - ich komme rein\nHalt ne Basspredigt und die Sonne scheint\nWas Rap ist in der Sinnkrise?\nGuck, wie ich es hinbiege, mit Armen wie Tim Wiese\nIst n positiver Film den ich schieb, Typ\nVom Eppendorfer Weg bis zur Beatstreet\nHier kommt die Band mit Geschmack\nwenn jeder Jens Peter einen auf Endgegner macht\nUnd irgendwo zwischen Itzehoe und Idaho\nkommt noch einer mit Jason Derulo featuring Tyga Flow\nIs leider so - für uns n Haufen Scherben\ndoch wir lassen uns die legendäre Stimmung nicht verderben\nWas los Digger, Ahnma\nWie wir gucken, wie wir labern\nJeder sagt Digger heutzutage\nWir packen Hamburg wieder auf die Karte\nWas los Digger, Ahnma\nWie wir gucken, wie wir labern\nJeder sagt Digger heutzutage\nWir packen Hamburg wieder auf die Karte\nDem can't get we out\nNo matter how dem gon' shout\nDa one ya name trample all doubt\nDem can't get we out\nStill around, still I move the crowd\nFrom Hamburg way down to south".split("\n")],
+		["Scooter - Hyper Hyper", "Miscellaneous\nHyper Hyper\nIs everybody on the floor?\nWe put some energy into this place!\nI want to ask you something...\nAre you ready for the sound of Scooter?\nI want to see you sweat\nI said... I want to see you sweat!\nYeaah.\nHyper, hyper!\nHyper, hyper!\nHyper, hyper!\nExcuse me! Where is the bass drum?\nWe need the bass drum!\nCome on!\nHyper, hyper!\nHyper, hyper!\nIt's so beautiful to see your hands in the air!\nPut your hands in the air!\nCome on!\nThis is Scooter!\nWe want to sing a big shout to US, and to all ravers in the world!\nAnd to Westbam, Marusha, Steve Mason, The Mystic Man, DJ Dick, Carl Cox, The Hooligan, Cosmic...\nKid Paul, Dag, Mike VanDike, Jens Lissat, Lenny D., Sven Vath, Mark Spoon, Marco Zaffarano...\nHell, Paul Elstac, Mate Galic, Roland Casper, Sylvie, Miss Djax, Jens Mahlstedt, Tanith, Laurent Garnier...\nSpecial, Pascal F.E.O.S., Gary D., Scotty, Gizmo... and to all DJs all over the World!\nKeep the Vibes... Hyper, hyper!\nHyper, hyper!\nHyper, hyper!\nI'll have to ask you again...\nDo you like it hardcore?\nDo you like it hardcore?\nWe need the hardcore!\nCome on! Come on! Come on!\nHyper, hyper!\nSit there.\nBe good.\nBye, Bye!".split("\n")],
+		["Justin Bieber - Baby", "Ohh wooaah Ohh wooaah Ohh wooaah\nYou know you love me, I know you care\nJust shout whenever, And I'll be there\nYou are my love, You are my heart\nAnd we will never ever-ever be apart\nAre we an item. Girl quit playing\n\"We're just friends\"\nWhat are you sayin?\nsaid theres another and look right in my eyes\nMy first love broke my heart for the first time,\nAnd I was like\nBaby, baby, baby ooh\nLike baby, baby, baby noo\nLike baby, baby, baby ooh\nThought you'd always be mine, mine\nBaby, baby, baby oohh\nLike baby, baby, baby noo\nLike baby, baby, baby ohh\nThought you'd always be mine, mine\nFor you, i would have done what ever\nAnd I just cant believe we ain't together\nAnd I wanna play it cool, But I'm losing you\nI'll buy you anything, ill buy you any ring\nAnd I'm in pieces, Baby fix me\nand just shake me til' you wake me from this bad dream\nI'm going down, down, down, down\nAnd I just can't believe, my first love won't be around\nAnd I'm like,\nBaby, baby, baby oooh\nLike baby, baby, baby noo\nLike baby, baby, baby ooh\nThought you'd always be mine, mine\nBaby, baby, baby oooh\nLike baby, baby, baby noo\nLike baby, baby, baby ooh\nThought you'd always be mine, mine\nLuda, When I was thirteen, I had my first love\nThere was nobody that compaired to my baby\nAnd nobody came between us\nor could ever come above\nShe had me going crazy\nOh I was starstruck\nShe woke me up daily\nDon't need no Starbucks\nShe make my heart pound\nand skip a beat when I see her in the street\nand, At school, on the playground\nBut I really wanna see her on the weekend\nShe know she got me dazing\nCuz she was so amazing\nAnd now, my heart is breakin'\nBut I just keep on sayin'\nBaby, baby, baby ohh\nLike baby, baby, baby noo\nLike baby, baby, baby ohh\nThought you'd always be mine, mine\nBaby, baby, baby ooh\nLike baby, baby, baby noo\nLike baby, baby, baby oooh\nThought you'd always be mine, mine\n(Now I'm all gone)\nYeah, Yeah, Yeah\nYeah Yeah Yeah\n(Now I'm all gone)\nYeah, Yeah, Yeah\nYeah, Yeah, Yeah\n(Now I'm all gone)\nYeah, Yeah, Yeah\nYeah, Yeah, Yeah\nNow I'm all gone, gone, gone, ooh\nI'm gone".split("\n")],
+		["Robin Schulz - Sugar", "She got cherry lips\nAngel eyes\nShe knows exactly how to tantalize\nShe's out to get you, danger by design\nCold blooded vixen, she don't compromise\nShe's optimistic of the coded lights\nSo far from typical, but take my advice\nBefore you play with fire, do things twice\nAnd if you get burned, don't be surprised\nGot me tripping higher than the ceiling\nOoh baby it's the ultimate feeling\nYou got me lifted feeling so gifted\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nWe're talking lady\nLove how you in tight\nSugar we're just a rider, man spies\nSean Penn a little bit ethic, one's desire\nShe's out to get you, you can't burn, you can't hide\nShe's optimistic of the coded lights\nSo far from typical, but take my advice\nBefore you play with fire, do things twice\nAnd if you get burned, don't be surprised\nGot me tripping higher than the ceiling\nOoh baby it's the ultimate feeling\nYou got me lifted feeling so gifted\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nBut you won't get me tonight\nGot me tripping higher than the ceiling\nOoh baby it's the ultimate feeling\nYou got me lifted feeling so gifted\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly\nSugar how you get so fly".split("\n")],
+		["Cash Cash - Millionaire", "I feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound\nI feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound\nShe smell like money when she walk by\nAll heat, no smoke, but she on fire\nIf they suicide doors, then she gon' ride\nShe got that passport pussy cause she\ndon't fly, no love\nShe gon' make you pay to see you work it\nShe only twerk it for a Birkin\nI gotta see if shawty worth it\nHey, she must be the money\nI feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound\nI feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound\nShawty work her way, the way she go down\nShawty worth her weight, her weight in gold pounds\nCall me young money, put that milli on me\nShe gon' make you pay to see you work it\nShe only twerk it for a Birkin\nI gotta see if shawty worth it\nHey, she must be the money\nShe must be the money\nShe only looking like money\nI feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound\nI feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound\nI feel like a\nI feel like a\nI feel like a\nI feel like a millionaire\nI feel like a millionaire\nI feel like a millionaire\nWhenever she comes around\nWhenever I hear her sound".split("\n")],
+		["Scooter - Bigroom Blitz", "Chapter five\nBigroom blitz\nInternational bitch\nIt's, it's the bigroom blitz\nTurn it up\nShotta got the plan, man\nAlways like a Grand Slam\nBig shot, hole in one\nShotalot is on the run\nCrack of the whip, snap attack\nBars so tight front to back\nI reach my fate at the gates\nGod says Shotta you was great\nWhen I'm shopping\nAnd my bad filled with options\nSo don't ask what it cost\nI'm in a Maserati coupe\nGoin' so fast that I lost 'em\nAnd my bitch got so much swag\nThat these bad bitches on us\nAh, killin' y'all, pow\nBigroom blitz\nIt's, it's the bigroom blitz\nBring the noise\nI jack them hoes, direct them hoes\nTake 'em home and let them hoes\nGo live out their fantasies\nThey're popping pills, I'm rolling weed\nEven got a couple bad bitches overseas\nShotta got the slo-mo\nYou can call it pro flow\nEvery shot a straight flush\nShotalot is in a rush\nBack on the floor, lyrical madness\nOn the mic, Jack the cactus\nReach my fate at the gates\nGod says Shotta you was great\nShotta got the chicks\nIt's, it's the bigroom blitz\nHee-haa\nYeah\nNobody's hotter than Shotta\nThank you".split("\n")],
+		["257ers - Holz", "Ich und mein Holz\nIch und mein Holz\nOk der Song beginnt, und er bekommt ein Thema\nIch und mein Holz\nUnd das Thema heute, es heißt Holz\nIch und mein, ich und mein Holz\nHolz sieht sehr schön aus, Holz ist vielseitig\nIch und mein Holz\nDu kannst es verbrennen, du kannst es sägen\nIch und mein, ich und mein Holz\nJa, wenn du es verbrennst, dann spendet es Wärme\nIch und mein, ich und mein Holz\nAber wenn du es sägst, dann nicht, oh\nUnd jetzt mal alle in this wood, yo\nIch und mein Holz, ich und mein Holz (Holzi, Holzi, Holz)\nIch und mein Holz, ich und mein Holz\nIch und mein, ich und mein Holz, mein Holz\nIch und mein Holz, ich und mein Holz (Holzi, Holzi, Holz)\nIch und mein Holz, ich und mein Holz\nIch und mein, ich und mein Holz, mein Holz\nIch und mein Holz, best friends forever\nHdgdl, wir sind unzertrennlich\nUnverständlich warum heutzutage nicht jeder Besitzer eines wunderbaren Exemplarers Holz sein will\nund nicht nur weil man es sich wunderschön ins Wohnzimmer stellen kann\nNein, man kann es auch lackieren\nSo und jetzt nochmal alle in this wood, yo\nIch und mein Holz, ich und mein Holz (Holzi, Holzi, Holz)\nIch und mein Holz, ich und mein Holz\nIch und mein, ich und mein Holz, mein Holz\nIch und mein Holz, ich und mein Holz (Holzi, Holzi, Holz)\nIch und mein Holz, ich und mein Holz\nIch und mein, ich und mein Holz, mein Holz\nMit Holz kann man voll gut nen Staudamm bauen\nund wenn der Stau dann bricht ihm auch vertrauen,\ndenn das ist crazy dieses Zeug, rettet nämlich Leute,\nwie die Baywatch flitchen oder dieser David Hasselholt\nDu hast ein (Paysi Pet?) aus Gold, ich bin auf Kettensäge stolz\nDer (?) Proll, ich bin kein (?) unters Volk\n(?) am Holz vor Gebrauchsgegenstände\nEs beginnt ein neues Leben, wenn ein Baumleben endet\nMeine Bank, mein Tisch, meine Treppe, meine Besen,\nmeine Vase, dein Zuhause, mein Kopf\nMeine Gedanken, mein Herz, mein Leben,\nmeine Welt ist der schwerste und der heftigste Stock\nPut your hands in the air\nIch und mein Holz, ich und mein Holz (Holzi, Holzi, Holz)\nIch und mein Holz, ich und mein Holz\nIch und mein, ich und mein Holz, mein Holz\nIch und mein Holz, ich und mein Holz (Holzi, Holzi, Holz)\nIch und mein Holz, ich und mein Holz\nIch und mein, ich und mein Holz, mein Holz\nIch und mein Holz, ich und mein Holz\nIch und mein Holz, ich und mein Holz\nIch und mein Holz, ich und mein Holz\nIch und mein Holz, ich und mein Holz".split("\n")],
+		["Anthony B - Smoke Weed Everyday", "da da da da daaaa it's tha motha fuckin' D O double G (Snoop dogg) da da da da daaaa You know im mobbin' with the D.\nR.\nyeah yeah yeah you know who's back up in this mothafucker\nWhat what what what\nso blaze the weed out there\nBlaze it up\nBlaze that shit up nigga Yeah waz up snoop\none: Top dogg buy them all nigga burn this shit up D-P-G-C my nigga turn that shit up CPT, LBC yeah we hookin' back up N' when they bang this in the club baby you gotta get up thug niggas, drug dealers yeah they givin' it up low life, your life boy we livin' it up take a chance thats why we dancin' in the party fo' sho' slip my ho a fourty four n' she crept in it back do' bitches lookin' at me strange but you know i don't care step up in this mothafucker just to swingin' my hair Bitch quit talkin' Crip walk If you down with the set Take a Bullet with some dick take this dope from this jet outta town put it down for father of rap n' if your ass get crack bitch shut your trap come back get back thats the part of success n' if you believe the X then you'll relievin' your stress\nmusic in between\nda da da da daaaa\nit's the mothafuckin' D-R-E\nDr.\nDre mothafucker what what what what\nda da da da daaaa\ntwo: you know im mobbing with the D O double G Straight off the fuckin' street's of CPT King of the beats n' you ride to em' in your fleet wood or Coupe De\nVille rollin on dubs How you feel?\nWhoopty whoop nigga what?\nDre n' snoop chronic'ed out In the 'llac with doc in the back Sippin' 'gnac, clip in the strap Dippin' through hoods What hoods?\nCompton, longbeach, ingelwood South central out to the westside (westside) It's california love this california bud Got a nigga gang of pub I'm on one, I might bail up in the Century Club With my jeans on n' my team's strong Get my drink on n' my smoke on Then go home with somethin' to poke on (waz up bitch) Loc' it's on for the two tripple oh Comin' real it's the next episode *\nhold up.\nheeeeey For my niggas who be thinkin' we soft We don't.\nplaaaay We gonna rockin' til the weels fall of Hold up.\nheeeeey For my niggas who be acting to bold Take a.\nseeeeat Hope you ready for the next episode heeeeeey".split("\n")],
+		["Critical Hit - Pokemon Main Theme", "I wanna be the very best,\nLike no one ever was.\nTo catch them all is my real test,\nTo train them is my cause.\nI will travel across the land,\nSearching far and wide.\nTeach Pokemon to understand\nThe power that's inside\nPokemon, gotta catch them all its you and me\nI know its my destiny\nPokemon, oh, you're my best friend\nIn a world we must defend\nPokemon, gotta catch them all a heart so true\nOur courage will pull us through\nYou teach me and I'll teach you\nPo-ke-mon Gotta catch 'em all\nEvery challenge along the way\nWith courage I will face\nI will battle every day\nTo claim my rightful place\nCome with me, the time is right\nThere's no better team\nArm in arm we'll win the fight\nIt's always been our dream\nPokemon!\nGotta catch 'em all\nIt's you and me\nI know it's my destiny\nPokemon!\nOh, you're my best friend,\nIn a world we must defend.\nPokemon!\nA heart so true.\nOur courage will pull us through.\nYou teach me and I'll teach you.\nPokemon!\nGotta catch 'em all\nGotta catch 'em all\nGotta catch 'em all\nGotta catch 'em all\nGotta catch 'em all\nYeah!\nPokemon!\nIt's you and me\nI know it's my destiny\nPokemon!\nOh, you're my best friend,\nIn a world we must defend.\nPokemon!\nA heart so true.\nOur courage will pull us through.\nYou teach me and I'll teach you.\nPOKEMON!\nGotta catch 'em all\nGotta catch 'em all\nPokemon!".split("\n")],
+		["Sia - Cheap Thrills", "Come on, come on, turn the radio on\nIt's Friday night and I won't be long\nGotta do my hair, I put my make up on\nIt's Friday night and I won't be long\nTil I hit the dance floor\nHit the dance floor\nI got all I need\nNo I ain't got cash\nNo I ain't got cash\nBut I got you baby\nBaby I don't need dollar bills to have fun tonight\nI love cheap thrills\nBaby I don't need dollar bills to have fun tonight\nI love cheap thrills\nBut I don't need no money\nAs long as I can feel the beat\nI don't need no money\nAs long as I keep dancing\nCome on, come on, turn the radio on\nIt's Saturday and I won't be long\nGotta paint my nails, put my high heels on\nIt's Saturday and I won't be long\nTil I hit the dance floor\nHit the dance floor\nI got all I need\nNo I ain't got cash\nNo I ain't got cash\nBut I got you baby\nBaby I don't need dollar bills to have fun tonight\nI love cheap thrills\nBaby I don't need dollar bills to have fun tonight\nI love cheap thrills\nBut I don't need no money\nAs long as I can feel the beat\nI don't need no money\nAs long as I keep dancing\nI love cheap thrills\nI love cheap thrills\nI don't need no money\nAs long as I can feel the beat\nI don't need no money\nAs long as I keep dancing\nOh, oh\nBaby I don't need dollar bills to have fun tonight\nI love cheap thrills\nBaby I don't need dollar bills to have fun tonight\nI love cheap thrills\nI don't need no money\nAs long as I can feel the beat\nI don't need no money\nAs long as I keep dancing\nLa, la, la, la, la, la\nI love cheap thrills\nLa, la, la, la, la, la\nI love cheap thrills\nLa, la, la, la, la, la\nI love cheap thrills\nLa, la, la, la, la\nI love cheap thrills".split("\n")],
+		["PSY - Gangnam Style", "Oppan Gangnam style\nGangnam style\nNajeneun ttasaroun inganjeokin yeoja\nKeopi hanjaneu yeoyureul aneun pumgyeok inneun yeoja\nBami omyeon simjangi tteugeowojineun yeoja\nGeureon banjeon inneun yeoja\nNaneun sanai\nNajeneun neomankeum ttasaroun geureon sanai\nKeopi sikgido jeone wonsyat ttaerineun sanai\nBami omyeon simjangi teojyeobeorineun sanai\nGeureon sanai\nAreumdawo sarangseureowo\nGeurae neo, hey, geurae baro neo, hey\nAreumdawo sarangseureowo\nGeurae neo, hey, geurae baro neo, hey\nJigeumbuteo gal ddekkaji gabolkka\nOppan Gangnam style\nGangnam style\nOp, op, op, op\nOppan Gangnam style\nGangnam style\nOp, op, op, op\nOppan Gangnam style\nEeeeeh, sexy lady\nOp, op, op, op\nOppan Gangnam style\nEeeeeh, sexy lady\nOp, op, op, op\nEh-eh, eh-eh-eh-eh\nJeongsukhae boijiman nol ttaen noneun yeoja\nIttaeda sipeumyeon mukkeotdeon meori puneun yeoja\nGaryeotjiman wenmanhan nochulboda yahan yeoja\nGeureon gamgakjeogin yeoja\nNaneun sanai\nJeomjanha boijiman nol ttaen noneun sanai\nTtaega doemyeon wanjeon michyeobeorineun sanai\nGeunyukboda sasangi ultungbultunghan sanai\nGeureon sanai\nAreumdawo sarangseureowo\nGeurae neo, hey, geurae baro neo, hey\nAreumdawo sarangseureowo\nGeurae neo, hey, geurae baro neo, hey\nJigeumbuteo gal ddekkaji gabolkka\nOppan Gangnam style\nGangnam style\nOp, op, op, op\nOppan Gangnam style\nGangnam style\nOp, op, op, op\nOppan Gangnam style\nEeeeeh, sexy lady\nOp, op, op, op\nOppan Gangnam style\nEeeeeh, sexy lady\nOp, op, op, op\nEh-eh, eh-eh-eh-eh\nTtwineun nom geu wiae naneun nom\nBaby, baby, naneun mwol jom aneun nom\nTtwineun nom geu wiae naneun nom\nBaby, baby, naneun mwol jom aneun nom\nYou know what I'm saying\nOppan Gangnam style\nEh-eh, eh-eh-eh-eh\nEeeeeh, sexy lady\nOp, op, op, op\nOppan Gangnam style\nEeeeeh, sexy lady\nOp, op, op, op\nEh-eh, eh-eh-eh-eh\nOppan Gangnam style".split("\n")]
+	],
 	getSettingsLayout: function (params) {
 		let settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
@@ -4160,7 +4193,7 @@ var singsong = {
 					if(progress < 1)
 						seekBar.setProgress(1);
 				}
-				delayText.setText("Delay: " + (progress / 10) + " Seconds"+(Utils.bypassMode == BypassMode.LBSG?" (LBSG Bypass)":""));
+				delayText.setText("Delay: " + (progress / 10) + " Seconds" + (Utils.bypassMode == BypassMode.LBSG ? " (LBSG Bypass)" : ""));
 
 			},
 			onStopTrackingTouch: function (seekbar) {
@@ -4168,7 +4201,7 @@ var singsong = {
 			}
 		}));
 		let songNames = [];
-		singsong.songList.forEach(function(entry, index){
+		singsong.songList.forEach(function (entry, index) {
 			songNames.push(singsong.songList[index][0]);
 		});
 		let spinner = new android.widget.Spinner(ctx);
@@ -4177,38 +4210,38 @@ var singsong = {
 		spinner.setAdapter(arrAdapter);
 		spinner.setSelection(singsong.selectedSong[0]);
 		spinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener({
-			onItemSelected: function(parent, v, pos, id){
+			onItemSelected: function (parent, v, pos, id) {
 				if(singsong.selectedSong[0] == pos)
 					return;
 				if(singsong.selectedSong[1] > -1)
 					DragOP.cmsg("Started playing");
 				singsong.selectedSong[0] = pos;
 				singsong.selectedSong[1] = -1;
-				sing.setText((singsong.selectedSong[1] == -1?"Start":"Stop") + " playing");
-				sing.setBackground(singsong.selectedSong[1] == -1?disabledGradient:enabledGradient);
+				sing.setText((singsong.selectedSong[1] == -1 ? "Start" : "Stop") + " playing");
+				sing.setBackground(singsong.selectedSong[1] == -1 ? disabledGradient : enabledGradient);
 			},
-			onNothingSelected: function(parent) {
+			onNothingSelected: function (parent) {
 				spinner.setSelection(singsong.selectedSong[0]);
 			}
 		}));
 		let sing = new android.widget.Button(ctx);
 		sing.setTypeface(Utils.font);
-		sing.setText((singsong.selectedSong[1] == -1?"Start":"Stop") + " playing");
-		sing.setBackground(singsong.selectedSong[1] == -1?disabledGradient:enabledGradient);
+		sing.setText((singsong.selectedSong[1] == -1 ? "Start" : "Stop") + " playing");
+		sing.setBackground(singsong.selectedSong[1] == -1 ? disabledGradient : enabledGradient);
 		sing.setTextColor(android.graphics.Color.BLACK);
 		sing.setOnClickListener(new android.view.View.OnClickListener({
-			onClick: function(v){
+			onClick: function (v) {
 				if(singsong.selectedSong[1] > -1)
 					singsong.selectedSong[1] = -1;
 				else
 					singsong.selectedSong[1] = 0;
 				singsong.lastTime = java.lang.System.currentTimeMillis() - 10000;
-				sing.setText((singsong.selectedSong[1] == -1?"Start":"Stop") + " playing");
-				DragOP.cmsg((singsong.selectedSong[1] == -1?"Stopped":"Started") + " playing.");
-				sing.setBackground(singsong.selectedSong[1] == -1?disabledGradient:enabledGradient);
+				sing.setText((singsong.selectedSong[1] == -1 ? "Start" : "Stop") + " playing");
+				DragOP.cmsg((singsong.selectedSong[1] == -1 ? "Stopped" : "Started") + " playing.");
+				sing.setBackground(singsong.selectedSong[1] == -1 ? disabledGradient : enabledGradient);
 			}
 		}));
-		
+
 		settings.addView(delaySlider, params);
 		settings.addView(delayText, params);
 		settings.addView(spinner, params);
@@ -4216,28 +4249,28 @@ var singsong = {
 		return settings;
 	},
 	isStateMode: function () {
-		return false;//For Menu Button Color (green = enabled, black(alpha:210) = disabled)
+		return false; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
 		//Call hack.state = !hack.state; to toggle 
 	},
 	isToggleAble: function () {
-		return false;//MUST be true if isStateMode = true
+		return false; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
 	onTick: function () {
 		/*if(!this.state)
 			return*/
-			if(java.lang.System.currentTimeMillis() - this.lastTime > this.delay && this.selectedSong[1] > -1) {
-				let msg = this.songList[this.selectedSong[0]][1][this.selectedSong[1]];
-				this.selectedSong[1]++;
-				if(this.selectedSong[1] >= this.songList[this.selectedSong[0]][1].length){
-					this.selectedSong[1] = -1;
-					DragOP.cmsg("Stopped singing");
-				}
-					
-				Server.sendChat(msg);
-				this.lastTime = java.lang.System.currentTimeMillis();
+		if(java.lang.System.currentTimeMillis() - this.lastTime > this.delay && this.selectedSong[1] > -1) {
+			let msg = this.songList[this.selectedSong[0]][1][this.selectedSong[1]];
+			this.selectedSong[1]++;
+			if(this.selectedSong[1] >= this.songList[this.selectedSong[0]][1].length) {
+				this.selectedSong[1] = -1;
+				DragOP.cmsg("Stopped singing");
 			}
-			
+
+			Server.sendChat(msg);
+			this.lastTime = java.lang.System.currentTimeMillis();
+		}
+
 	},
 	onClick: function (btn) {
 		/*this.state = !this.state;
@@ -4247,15 +4280,15 @@ var singsong = {
 		}
 		*/
 		DragOP.showModDialog(this);
-			menu.dismiss();
+		menu.dismiss();
 	},
 	onRefresh: function (btn) {
-		if(btn != null)btn.setText(this.name);
+		if(btn != null) btn.setText(this.name);
 	}
 };
 DragOP.registerModule(singsong);
 var defaultDestroyTimes = [];
-for (var i = 0; i <= 256; i++) {
+for(var i = 0; i <= 256; i++) {
 	defaultDestroyTimes[i] = Block.getDestroyTime(i);
 }
 var fastbreak = {
@@ -4269,7 +4302,7 @@ var fastbreak = {
 		let settings = new android.widget.LinearLayout(ctx);
 		settings.setOrientation(1);
 		let breakTimeTxt = new android.widget.TextView(ctx);
-		breakTimeTxt.setText("BreakTime: "+(this.breakTime <= 0?"Instant":this.breakTime+"%"));
+		breakTimeTxt.setText("BreakTime: " + (this.breakTime <= 0 ? "Instant" : this.breakTime + "%"));
 		breakTimeTxt.setTypeface(Utils.font);
 		breakTimeTxt.setGravity(android.view.Gravity.CENTER);
 		breakTimeTxt.setTextColor(android.graphics.Color.BLACK);
@@ -4279,7 +4312,7 @@ var fastbreak = {
 		breakTimeSlider.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener({
 			onProgressChanged: function (seekBar, progress, fromUser) {
 				fastbreak.breakTime = progress;
-				breakTimeTxt.setText("BreakTime: "+(fastbreak.breakTime <= 0?"Instant":fastbreak.breakTime+"%"));
+				breakTimeTxt.setText("BreakTime: " + (fastbreak.breakTime <= 0 ? "Instant" : fastbreak.breakTime + "%"));
 			},
 			onStopTrackingTouch: function (seekbar) {
 				fastbreak.breakTime = seekbar.getProgress();
@@ -4298,15 +4331,17 @@ var fastbreak = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	refreshBreakTime: function(){
-		defaultDestroyTimes.forEach(function(entry, index){
+	refreshBreakTime: function () {
+		defaultDestroyTimes.forEach(function (entry, index) {
 			if(entry > 0)
 				Block.setDestroyTime(index, entry * fastbreak.breakTime / 100);
 		});
 	},
-	onClick: function (btn) {this.state = !this.state},
+	onClick: function (btn) {
+		this.state = !this.state
+	},
 	onRefresh: function (btn) {
-		if(btn != null)btn.setText(this.name);
+		if(btn != null) btn.setText(this.name);
 	}
 };
 DragOP.registerModule(fastbreak);
@@ -4329,12 +4364,12 @@ var safewalk = {
 	},
 	onClick: function (btn) {
 		this.state = !this.state;
-		
+
 		if(!this.state)
 			Entity.setSneaking(getPlayerEnt(), false);
 	},
 	onRefresh: function (btn) {
-		if(btn != null)btn.setText(this.name);
+		if(btn != null) btn.setText(this.name);
 	}
 };
 DragOP.registerModule(safewalk);
@@ -4344,9 +4379,9 @@ var leetspeak = {
 	type: ModuleType.mod,
 	category: ModCategory.MISC,
 	state: false,
-	onChatHook: function(text){
+	onChatHook: function (text) {
 		preventDefault();
-		
+
 		try {
 			com.mojang.minecraftpe.MainActivity.currentMainActivity.get()
 				.updateTextboxText("");
@@ -4357,8 +4392,8 @@ var leetspeak = {
 			//Not-BlockLauncher-Error
 		}
 		let end = text.toUpperCase();
-		let normal = new Array("FOR","TOO","TO","ONE","A","C", "D", "F", "H", "I", "K", "L", "M", "N", "O", "S", "V", "W");
-		let leet = new Array("4","2","2","1","α", "(", "[)", "ƒ","|-|","¡","|{","|_","|\\/|","|\\|","0","$","\\/","\\/\\/");
+		let normal = new Array("FOR", "TOO", "TO", "ONE", "A", "C", "D", "F", "H", "I", "K", "L", "M", "N", "O", "S", "V", "W");
+		let leet = new Array("4", "2", "2", "1", "α", "(", "[)", "ƒ", "|-|", "¡", "|{", "|_", "|\\/|", "|\\|", "0", "$", "\\/", "\\/\\/");
 		for(i = 0; i < normal.length; i++) {
 			end = end.replace(new RegExp(normal[i], 'g'), leet[i]);
 		}
@@ -4372,9 +4407,11 @@ var leetspeak = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onClick: function (btn) {this.state = !this.state},
+	onClick: function (btn) {
+		this.state = !this.state
+	},
 	onRefresh: function (btn) {
-		if(btn != null)btn.setText(this.name);
+		if(btn != null) btn.setText(this.name);
 	}
 };
 DragOP.registerModule(leetspeak);
@@ -4395,7 +4432,7 @@ var illuminati = {
 	},
 	onClick: function (btn) {
 		var t = new java.lang.Thread(new java.lang.Runnable({
-			run: function(){
+			run: function () {
 				Server.sendChat("      /\\");
 				java.lang.Thread.sleep(illuminati.delay);
 				Server.sendChat("     /  \\");
@@ -4410,7 +4447,7 @@ var illuminati = {
 		t.start();
 	},
 	onRefresh: function (btn) {
-		if(btn != null)btn.setText(this.name);
+		if(btn != null) btn.setText(this.name);
 	}
 };
 DragOP.registerModule(illuminati);
@@ -4421,17 +4458,17 @@ var pvpgroup = {
 	category: ModCategory.GROUP,
 	state: false,
 	modules: [
-	aimaura,
-	bowaimbot,
-	velocity,
-	autosword,
-	hitboxes,
-	
-	speed,
-	jesus,
-	//step,
-	
-	lifedisplay
+		aimaura,
+		bowaimbot,
+		velocity,
+		autosword,
+		hitboxes,
+
+		speed,
+		jesus,
+		//step,
+
+		lifedisplay
 	],
 	isStateMode: function () {
 		return true; //For Menu Button Color (green = enabled, black(alpha:210) = disabled)
@@ -4443,19 +4480,19 @@ var pvpgroup = {
 	},
 	onClick: function (btn) {
 		this.state = !this.state;
-		if(this.state){
-			this.modules.forEach(function(entry){
+		if(this.state) {
+			this.modules.forEach(function (entry) {
 				if(entry.isStateMode() && !entry.state) entry.onClick(null);
 			});
 			Level.setGameMode(1);
-		}else{
-			this.modules.forEach(function(entry){
+		} else {
+			this.modules.forEach(function (entry) {
 				if(entry.isStateMode() && entry.state) entry.onClick(null);
 			});
 		}
 	},
 	onRefresh: function (btn) {
-		if(btn != null)btn.setText(this.name);
+		if(btn != null) btn.setText(this.name);
 	}
 };
 DragOP.registerModule(pvpgroup);
@@ -4476,15 +4513,17 @@ var hitboxes = {
 	},
 	onTick: function () {
 		this.tick++;
-		if(this.tick >= 5){
+		if(this.tick >= 5) {
 			this.tick = 0;
 			let ent = Utils.Entity.getNearestEntity(10, true);
 			if(ent != null) Entity.setCollisionSize(ent, 10, 10);
 		}
 	},
-	onClick: function (btn) {this.state = !this.state},
+	onClick: function (btn) {
+		this.state = !this.state
+	},
 	onRefresh: function (btn) {
-		if(btn != null)btn.setText(this.name);
+		if(btn != null) btn.setText(this.name);
 	}
 };
 DragOP.registerModule(hitboxes);
@@ -4503,21 +4542,21 @@ var noclip = {
 		return true; //MUST be true if isStateMode = true
 		//Call hack.onClick() to toggle
 	},
-	onTick: function(){
-		tick++;
-		if(tick < 20)return;
-		tick = 0;
+	onTick: function () {
+		this.tick++;
+		if(this.tick < 20) return;
+		this.tick = 0;
 		Entity.setCollisionSize(getPlayerEnt(), 0, 0);
 	},
 	onClick: function (btn) {
 		this.state = !this.state;
 		if(this.state)
-		Entity.setCollisionSize(getPlayerEnt(), 0, 0);
+			Entity.setCollisionSize(getPlayerEnt(), 0, 0);
 		else
-		Entity.setCollisionSize(getPlayerEnt(), 0.6, 0.6);
+			Entity.setCollisionSize(getPlayerEnt(), 0.6, 0.6);
 	},
 	onRefresh: function (btn) {
-		if(btn != null)btn.setText(this.name);
+		if(btn != null) btn.setText(this.name);
 	}
 };
 DragOP.registerModule(noclip);
@@ -4740,16 +4779,16 @@ var debug = {
 		return false;
 	},
 	onCall: function (cmd) {
-		switch(cmd[0].toLowerCase()){
-			case "winfo":
-				let wInfo = "";
-				wInfo += "World Info:\n";
-				wInfo += Utils.Entity.getAll().length + " Entitys\n";
-				wInfo += Server.getAllPlayers().length + " Players";
-				DragOP.cmsg(wInfo);
-				break;
-			default:
-				DragOP.cmsg("Usage: debug <winfo>");
+		switch(cmd[0].toLowerCase()) {
+		case "winfo":
+			let wInfo = "";
+			wInfo += "World Info:\n";
+			wInfo += Utils.Entity.getAll().length + " Entitys\n";
+			wInfo += Server.getAllPlayers().length + " Players";
+			DragOP.cmsg(wInfo);
+			break;
+		default:
+			DragOP.cmsg("Usage: debug <winfo>");
 		}
 	}
 };
@@ -4897,45 +4936,46 @@ function showMenu() {
 	}
 
 }
-function getCaterList(category){
+
+function getCaterList(category) {
 	let list = new android.widget.LinearLayout(ctx);
 	list.setOrientation(1);
 	let bg = new android.graphics.drawable.GradientDrawable();
 	bg.setStroke(dip2px(1), android.graphics.Color.argb(255, 0, 0, 0));
 	list.setBackground(bg);
-	DragOP.mods.forEach(function(entry){
-		if(entry.type != ModuleType.cmd && entry.category == category || (category == ModCategory.SPECIAL && entry.type == ModuleType.special)){
+	DragOP.mods.forEach(function (entry) {
+		if(entry.type != ModuleType.cmd && entry.category == category || (category == ModCategory.SPECIAL && entry.type == ModuleType.special)) {
 			let btn = new android.widget.Button(ctx);
-						btn.setText(entry.name);
-						btn.setTextColor(android.graphics.Color.WHITE);
-						if(entry.isStateMode() && entry.state)
-							btn.setBackgroundColor(android.graphics.Color.argb(210, 0, 200, 0));
-						else if(entry.isStateMode())
-							btn.setBackgroundColor(android.graphics.Color.argb(80, 0, 0, 0));
-						else
-							btn.setBackgroundColor(android.graphics.Color.argb(210, 230, 150, 30));
-						btn.setOnClickListener(new android.view.View.OnClickListener({
-							onClick: function (viewarg) {
-								entry.onClick(btn);
-								entry.onRefresh(btn);
-								if(entry.isStateMode() && entry.state)
-									btn.setBackgroundColor(android.graphics.Color.argb(210, 0, 200, 0));
-								else if(entry.isStateMode())
-									btn.setBackgroundColor(android.graphics.Color.argb(80, 0, 0, 0));
-								else
-									btn.setBackgroundColor(android.graphics.Color.argb(210, 230, 150, 30));
-							}
-						}));
-						btn.setOnLongClickListener(new android.view.View.OnLongClickListener({
-							onLongClick: function (v, t) {
-								ctx.getSystemService(android.content.Context.VIBRATOR_SERVICE)
-									.vibrate(60);
-								DragOP.showModDialog(entry);
-								menu.dismiss();
-								return true;
-							}
-						}));
-						list.addView(btn);
+			btn.setText(entry.name);
+			btn.setTextColor(android.graphics.Color.WHITE);
+			if(entry.isStateMode() && entry.state)
+				btn.setBackgroundColor(android.graphics.Color.argb(210, 0, 200, 0));
+			else if(entry.isStateMode())
+				btn.setBackgroundColor(android.graphics.Color.argb(80, 0, 0, 0));
+			else
+				btn.setBackgroundColor(android.graphics.Color.argb(210, 230, 150, 30));
+			btn.setOnClickListener(new android.view.View.OnClickListener({
+				onClick: function (viewarg) {
+					entry.onClick(btn);
+					entry.onRefresh(btn);
+					if(entry.isStateMode() && entry.state)
+						btn.setBackgroundColor(android.graphics.Color.argb(210, 0, 200, 0));
+					else if(entry.isStateMode())
+						btn.setBackgroundColor(android.graphics.Color.argb(80, 0, 0, 0));
+					else
+						btn.setBackgroundColor(android.graphics.Color.argb(210, 230, 150, 30));
+				}
+			}));
+			btn.setOnLongClickListener(new android.view.View.OnLongClickListener({
+				onLongClick: function (v, t) {
+					ctx.getSystemService(android.content.Context.VIBRATOR_SERVICE)
+						.vibrate(60);
+					DragOP.showModDialog(entry);
+					menu.dismiss();
+					return true;
+				}
+			}));
+			list.addView(btn);
 		}
 	});
 	let scroll = new android.widget.ScrollView(ctx);
@@ -4943,6 +4983,7 @@ function getCaterList(category){
 	scroll.setId(438354);
 	return scroll;
 }
+
 function showCaterMenu() {
 	/*DragOP.ctoast("Still not done here!");
 	showAlternateMenu();
@@ -4954,17 +4995,17 @@ function showCaterMenu() {
 				categoryHolder.setId(492817);
 				let categoryParam = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1);
 				let currentCategory = ModCategory.GROUP;
-				
+
 				let cateGradient = new android.graphics.drawable.GradientDrawable();
 				cateGradient.setColor(android.graphics.Color.argb(190, 0, 0, 0));
 				cateGradient.setStroke(dip2px(1), android.graphics.Color.argb(200, 255, 255, 255));
 				categoryHolder.setBackground(cateGradient);
 				let enabGradient = new android.graphics.drawable.GradientDrawable();
 				enabGradient.setStroke(dip2px(2), android.graphics.Color.GREEN);
-				let categoryBtn = function(category){
-				let btn = new android.widget.TextView(ctx);
+				let categoryBtn = function (category) {
+					let btn = new android.widget.TextView(ctx);
 					btn.setText(ModCategory.toName(category));
-					
+
 					btn.setGravity(android.view.Gravity.CENTER);
 					btn.setTextColor(android.graphics.Color.WHITE);
 					btn.setTextSize(dip2px(8));
@@ -4973,29 +5014,29 @@ function showCaterMenu() {
 					btn.setSingleLine();
 					btn.setHorizontallyScrolling(true);
 					btn.setSelected(true);
-					btn.setBackground(currentCategory == category?enabGradient:null);
+					btn.setBackground(currentCategory == category ? enabGradient : null);
 					btn.setOnClickListener(new android.view.View.OnClickListener({
-						onClick: function(v){
+						onClick: function (v) {
 							currentCategory = category;
 							toplayout.removeView(categoryHolder);
 							categoryHolder.removeAllViews();
 							cateBtns = [
-				categoryBtn(ModCategory.GROUP),
-				categoryBtn(ModCategory.MOVEMENT),
-				categoryBtn(ModCategory.COMBAT),
-				categoryBtn(ModCategory.MISC),
-				categoryBtn(ModCategory.RENDER),
-				categoryBtn(ModCategory.PLAYER),
-				categoryBtn(ModCategory.SPECIAL)
-				];
-				cateBtns.forEach(function(entry){
-					categoryHolder.addView(entry, categoryParam);
-					categoryParam = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1);
-				});
-				lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, dip2px(50));
-				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
-				lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
-				toplayout.addView(categoryHolder, lparam);
+								categoryBtn(ModCategory.GROUP),
+								categoryBtn(ModCategory.MOVEMENT),
+								categoryBtn(ModCategory.COMBAT),
+								categoryBtn(ModCategory.MISC),
+								categoryBtn(ModCategory.RENDER),
+								categoryBtn(ModCategory.PLAYER),
+								categoryBtn(ModCategory.SPECIAL)
+							];
+							cateBtns.forEach(function (entry) {
+								categoryHolder.addView(entry, categoryParam);
+								categoryParam = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1);
+							});
+							lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, dip2px(50));
+							lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
+							lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
+							toplayout.addView(categoryHolder, lparam);
 							toplayout.removeView(caterList);
 							caterList = getCaterList(currentCategory);
 							lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -5003,30 +5044,30 @@ function showCaterMenu() {
 							lparam.addRule(android.widget.RelativeLayout.BELOW, categoryHolder.getId());
 							lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
 							toplayout.addView(caterList, lparam);
-							
+
 						}
 					}));
 					return btn;
 				};
 				let cateBtns = [
-				categoryBtn(ModCategory.GROUP),
-				categoryBtn(ModCategory.MOVEMENT),
-				categoryBtn(ModCategory.COMBAT),
-				categoryBtn(ModCategory.MISC),
-				categoryBtn(ModCategory.RENDER),
-				categoryBtn(ModCategory.PLAYER),
-				categoryBtn(ModCategory.SPECIAL)
+					categoryBtn(ModCategory.GROUP),
+					categoryBtn(ModCategory.MOVEMENT),
+					categoryBtn(ModCategory.COMBAT),
+					categoryBtn(ModCategory.MISC),
+					categoryBtn(ModCategory.RENDER),
+					categoryBtn(ModCategory.PLAYER),
+					categoryBtn(ModCategory.SPECIAL)
 				];
-				cateBtns.forEach(function(entry){
+				cateBtns.forEach(function (entry) {
 					categoryHolder.addView(entry, categoryParam);
 					categoryParam = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 1);
 				});
-				
-				
-				
+
+
+
 				let caterList = getCaterList(currentCategory);
-				
-				
+
+
 				let toplayout = new android.widget.RelativeLayout(ctx);
 				toplayout.setOnClickListener(new android.view.View.OnClickListener({
 					onClick: function (viewarg) {
@@ -5035,7 +5076,7 @@ function showCaterMenu() {
 						searchQ = "";
 					}
 				}));
-				
+
 				let dashBtn = new android.widget.Button(ctx);
 				dashBtn.setText(DragOP.getLString("special.more"));
 				dashBtn.setCompoundDrawablesWithIntrinsicBounds(0, android.R.drawable.ic_menu_more, 0, 0);
@@ -5048,7 +5089,7 @@ function showCaterMenu() {
 						menu.dismiss();
 					}
 				}));
-				
+
 				let lparam = new android.widget.RelativeLayout.LayoutParams(mwidth, dip2px(50));
 				lparam.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				lparam.addRule(android.widget.RelativeLayout.CENTER_HORIZONTAL);
@@ -5269,6 +5310,7 @@ function showNavigatorMenu() {
 var updatemgrDialog;
 var settingDialog;
 var aboutDialog;
+var colorSetDialog;
 var SettingMode = {
 	MODE_TOGGLE: 1,
 	MODE_LIST: 2
@@ -5387,7 +5429,7 @@ function openSettingScreen() {
 						DragOP.ctoast("Long hold a button to open its Settings menu!");
 						break;
 					case "Cater":
-						DragOP.ctoast("This Menu is not done yet!");
+						break;
 					}
 				});
 				content.addView(setMenu);
@@ -5476,48 +5518,48 @@ function openAboutScreen() {
 				title.setTextColor(android.graphics.Color.BLACK);
 				title.setTypeface(Utils.font);
 				title.setId(94771);
-				
-				let about = new android.widget.TextView (ctx);
+
+				let about = new android.widget.TextView(ctx);
 				about.setTextSize(dip2px(10));
-				about.setText ("DragOP was made by GodSoft029 and Peacestorm");
+				about.setText("DragOP was made by GodSoft029 and Peacestorm");
 				about.setGravity(android.view.Gravity.CENTER | android.view.Gravity.TOP);
 				about.setTextColor(android.graphics.Color.BLACK);
 				about.setTypeface(Utils.font);
 				about.setId(96751);
-				
-				let yt = new android.widget.Button (ctx);
-				yt.setText ("YouTube");
-				yt.setTypeface (Utils.font);
-				yt.setGravity (android.view.Gravity.CENTER);
-				yt.setTextColor (android.graphics.Color.BLACK);
-				yt.setId (63619);
-				yt.setOnClickListener (new android.view.View.OnClickListener ({
-					onClick: function (view){
-						ctx.startActivity (new android.content.Intent (android.content.Intent.ACTION_VIEW, android.net.Uri.parse ("https://youtube.com/c/godsoft029")));
+
+				let yt = new android.widget.Button(ctx);
+				yt.setText("YouTube");
+				yt.setTypeface(Utils.font);
+				yt.setGravity(android.view.Gravity.CENTER);
+				yt.setTextColor(android.graphics.Color.BLACK);
+				yt.setId(63619);
+				yt.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function (view) {
+						ctx.startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://youtube.com/c/godsoft029")));
 					}
 				}));
-				
-				let twitter = new android.widget.Button (ctx);
-				twitter.setText ("Twitter");
-				twitter.setTypeface (Utils.font);
-				twitter.setGravity (android.view.Gravity.CENTER);
-				twitter.setTextColor (android.graphics.Color.BLACK);
-				twitter.setId (13827);
-				twitter.setOnClickListener (new android.view.View.OnClickListener ({
-					onClick: function (view){
-						ctx.startActivity (new android.content.Intent (android.content.Intent.ACTION_VIEW, android.net.Uri.parse ("https://twitter.com/godsoft029")));
+
+				let twitter = new android.widget.Button(ctx);
+				twitter.setText("Twitter");
+				twitter.setTypeface(Utils.font);
+				twitter.setGravity(android.view.Gravity.CENTER);
+				twitter.setTextColor(android.graphics.Color.BLACK);
+				twitter.setId(13827);
+				twitter.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function (view) {
+						ctx.startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://twitter.com/godsoft029")));
 					}
 				}));
-				
+
 				let github = new android.widget.Button(ctx);
-				github.setText ("Github");
-				github.setTypeface (Utils.font);
-				github.setGravity (android.view.Gravity.CENTER);
-				github.setTextColor (android.graphics.Color.BLACK);
-				github.setId (28472);
-				github.setOnClickListener (new android.view.View.OnClickListener ({
-					onClick: function (view){
-						ctx.startActivity (new android.content.Intent (android.content.Intent.ACTION_VIEW, android.net.Uri.parse ("https://github.com/godsoft029")));
+				github.setText("Github");
+				github.setTypeface(Utils.font);
+				github.setGravity(android.view.Gravity.CENTER);
+				github.setTextColor(android.graphics.Color.BLACK);
+				github.setId(28472);
+				github.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function (view) {
+						ctx.startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/godsoft029")));
 					}
 				}));
 
@@ -5530,28 +5572,28 @@ function openAboutScreen() {
 				closeButton.setTextColor(android.graphics.Color.BLACK);
 				closeButton.setTypeface(Utils.font);
 				//layout alignement....
-				
+
 				let params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-				params.addRule (android.widget.RelativeLayout.BELOW, title.getId ());
-				params.addRule (android.widget.RelativeLayout.ABOVE, yt.getId ());
+				params.addRule(android.widget.RelativeLayout.BELOW, title.getId());
+				params.addRule(android.widget.RelativeLayout.ABOVE, yt.getId());
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
-				dialogLayout.addView (about, params);
+				dialogLayout.addView(about, params);
 				params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-				params.addRule (android.widget.RelativeLayout.ABOVE, closeButton.getId ());
+				params.addRule(android.widget.RelativeLayout.ABOVE, closeButton.getId());
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
-				params.addRule(android.widget.RelativeLayout.LEFT_OF, github.getId ());
-				dialogLayout.addView (yt, params);
+				params.addRule(android.widget.RelativeLayout.LEFT_OF, github.getId());
+				dialogLayout.addView(yt, params);
 				params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-				params.addRule (android.widget.RelativeLayout.ABOVE, closeButton.getId ());
+				params.addRule(android.widget.RelativeLayout.ABOVE, closeButton.getId());
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
-				params.addRule (android.widget.RelativeLayout.RIGHT_OF, github.getId ());
-				dialogLayout.addView (twitter, params);
+				params.addRule(android.widget.RelativeLayout.RIGHT_OF, github.getId());
+				dialogLayout.addView(twitter, params);
 				params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-				params.addRule (android.widget.RelativeLayout.ABOVE, closeButton.getId ());
-				params.addRule (android.widget.RelativeLayout.CENTER_IN_PARENT);
+				params.addRule(android.widget.RelativeLayout.ABOVE, closeButton.getId());
+				params.addRule(android.widget.RelativeLayout.CENTER_IN_PARENT);
 				dialogLayout.addView(github, params);
-				
+
 				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
@@ -5756,6 +5798,8 @@ function openUpdateMgrScreen() {
 	}));
 }
 
+
+
 function openABoard() {
 	ctx.runOnUiThread(new java.lang.Runnable({
 		run: function () {
@@ -5850,6 +5894,22 @@ function openABoard() {
 				}));
 				aboutBtn.setOnTouchListener(btnListener);
 				content.addView(aboutBtn);
+				
+				let feedbackBtn = new android.widget.Button(ctx);
+				feedbackBtn.setText("Send Feedback");
+				feedbackBtn.setTypeface(Utils.font);
+				feedbackBtn.setBackground(btnBg);
+				feedbackBtn.setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.stat_notify_chat, 0);
+				feedbackBtn.setOnClickListener(new android.view.View.OnClickListener({
+					onClick: function (v) {
+						aboard.dismiss();
+						ctx.startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://docs.google.com/forms/d/e/1FAIpQLSdWnyMzCq9XOZLlS5TQBlyj9MO2eK4yGi8IObOFi-twQKcwCg/viewform")));
+					}
+				}));
+				feedbackBtn.setOnTouchListener(btnListener);
+				content.addView(feedbackBtn);
+				
+				
 				//footer
 				let closeButton = new styledBtn();
 				closeButton.setText("Close");
@@ -5968,7 +6028,7 @@ function showMenuBtn() {
 				let bg = new android.graphics.drawable.GradientDrawable();
 				bg.setStroke(2, android.graphics.Color.argb(255, 0, 0, 0));
 				bg.setColor(android.graphics.Color.argb(130, 200, 202, 200));
-				bg.setShape( android.graphics.drawable.GradientDrawable.RECTANGLE);
+				bg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
 				menuBtn.setText("D");
 				menuBtn.setTextColor(android.graphics.Color.BLACK);
 				menuBtn.setTypeface(Utils.font);
@@ -6091,7 +6151,8 @@ function rptask() {
 				if(tick1 > 50) tick1 = 0;
 
 
-				if(tick1 % 25 == 0){Timings.startTiming("workaround");
+				if(tick1 % 25 == 0) {
+					Timings.startTiming("workaround");
 					ctx.runOnUiThread(new java.lang.Runnable({
 						run: function () {
 
@@ -6127,7 +6188,7 @@ function rptask() {
 						}
 					}));
 					Timings.stopTiming("workaround");
-					}
+				}
 				java.lang.Thread.sleep(20);
 			}
 		}
@@ -6153,7 +6214,7 @@ function chatHook(text) {
 			//Not-BlockLauncher-Error
 		}
 		CommandManager.onCommand(text.substring(1, text.length));
-	}else{
+	} else {
 		DragOP.mods.forEach(function (entry, index, array) {
 			try {
 				if(entry.hasOwnProperty("onChatHook") && (entry.state || entry.isStateMode() == false)) entry.onChatHook(text);
@@ -6231,14 +6292,14 @@ function entityHurtHook(att, vic, hearts) {
 function modTick() {
 	DragOP.mods.forEach(function (entry, index, array) {
 		try {
-			if(entry.hasOwnProperty("onModTick") && (entry.state || entry.isStateMode() == false))entry.onModTick();
+			if(entry.hasOwnProperty("onModTick") && (entry.state || entry.isStateMode() == false)) entry.onModTick();
 		} catch(e) {}
 
 	});
 }
 
 function screenChangeHook(screen) {
-	if(screen.toString().indexOf("progress_screen") > -1&& !Utils.Render.initted)
+	if(screen.toString().indexOf("progress_screen") > -1 && !Utils.Render.initted)
 		Utils.Render.init();
 	//DragOP.ctoast(screen);
 	Utils.currentScreen = screen;
