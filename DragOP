@@ -570,11 +570,11 @@ var Utils = {
 			//gl.glEnable(GL10.GL_LINE_SMOOTH);
 			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 			gl.glLineWidth(4);
-			gl.glColor4f(android.graphics.Color.red(Utils.Render.color),android.graphics.Color.green(Utils.Render.color), android.graphics.Color.blue(Utils.Render.color), 0.7);
+			gl.glColor4f(android.graphics.Color.red(Utils.Render.color) / 255,android.graphics.Color.green(Utils.Render.color) / 255, android.graphics.Color.blue(Utils.Render.color) / 255, 0.7);
 			gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 			gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
 			gl.glDrawElements(GL10.GL_LINES, lineIndices.length, GL10.GL_UNSIGNED_SHORT, lineBuffer);
-			gl.glColor4f(android.graphics.Color.red(Utils.Render.color),android.graphics.Color.green(Utils.Render.color), android.graphics.Color.blue(Utils.Render.color), 0.2);
+			gl.glColor4f(android.graphics.Color.red(Utils.Render.color) / 255, android.graphics.Color.green(Utils.Render.color) / 255, android.graphics.Color.blue(Utils.Render.color) / 255, 0.2);
 			gl.glDrawElements(GL10.GL_TRIANGLES, polyIndices.length, GL10.GL_UNSIGNED_SHORT, polyBuffer);
 			gl.glDisable(GL10.GL_LINE_SMOOTH);
 			gl.glTranslatef(-x, -y, -z);
@@ -599,7 +599,7 @@ var Utils = {
 			//gl.glEnable(GL10.GL_LINE_SMOOTH);
 			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 			gl.glLineWidth(4);
-			gl.glColor4f(android.graphics.Color.red(Utils.Render.color),android.graphics.Color.green(Utils.Render.color), android.graphics.Color.blue(Utils.Render.color), 0.7);
+			gl.glColor4f(android.graphics.Color.red(Utils.Render.color) / 255,android.graphics.Color.green(Utils.Render.color) / 255, android.graphics.Color.blue(Utils.Render.color) /255, 0.7);
 			gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 			gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
 			gl.glDrawElements(GL10.GL_LINES, indices.length, GL10.GL_UNSIGNED_SHORT, indexBuffer);
@@ -1131,6 +1131,7 @@ DragOP.addCode("state.off");
 DragOP.addCode("screen.settings");
 DragOP.addCode("screen.updatemgr");
 DragOP.addCode("screen.about");
+DragOP.addCode("screen.colorset");
 
 //DragOP.setLString(code, lc.en_US, value);
 DragOP.setLString("special.bypass", lc.en_US, "Bypass");
@@ -1169,6 +1170,7 @@ DragOP.setLString("state.off", lc.en_US, "Off");
 DragOP.setLString("screen.settings", lc.en_US, "Settings");
 DragOP.setLString("screen.updatemgr", lc.en_US, "Update Manager");
 DragOP.setLString("screen.about", lc.en_US, "About");
+DragOP.setLString("screen.colorset", lc.en_US, "Render Settings");
 
 DragOP.getL = function () {
 	return l[1];
@@ -4484,12 +4486,12 @@ var hitboxes = {
 		if(this.state){
 			Server.getAllPlayers().forEach(function(entry){
 				if(entry != getPlayerEnt())
-				Entity.setCollisionSize(ent, 10, 10);
+				Entity.setCollisionSize(entry, 10, 10);
 			});
 		}else{
 			Server.getAllPlayers().forEach(function(entry){
 				if(entry != getPlayerEnt())
-				Entity.setCollisionSize(ent, 0.6, 2);
+				Entity.setCollisionSize(entry, 0.6, 2);
 			});
 		}
 	},
@@ -5866,7 +5868,9 @@ function openColorSettings() {
 				let content = new android.widget.LinearLayout(ctx);
 				content.setOrientation(1);
 				let colV = new android.widget.ImageView(ctx);
-				let colDraw = new android.graphics.drawable.ColorDrawable(Utils.Render.color);
+				let colDraw = new android.graphics.drawable.GradientDrawable();
+				colDraw.setStroke(dip2px(1), android.graphics.Color.BLACK);
+				colDraw.setColor(Utils.Render.color);
 				colDraw.setAlpha(255);
 				colV.setImageDrawable(colDraw);
 				
@@ -5874,42 +5878,51 @@ function openColorSettings() {
 //				sliderLay.setOrientation(0);
 				let rt = new android.widget.TextView(ctx);
 				rt.setText("Red");
+				rt.setGravity(android.view.Gravity.CENTER);
+				rt.setTextColor(android.graphics.Color.BLACK);
 				let r = new android.widget.SeekBar(ctx);
 				r.setMax(100);
+				r.setProgress(android.graphics.Color.red(Utils.Render.color) / 2.5);
 				r.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener({
 					onProgressChanged: function (seekBar, progress, fromUser) {
 						colDraw.setColor(android.graphics.Color.rgb(r.getProgress() * 2.5, g.getProgress() * 2.5, b.getProgress() * 2.5));
 					},
 					onStopTrackingTouch: function (seekbar) {
-						Utils.Render.color = Color.argb(180, r.getProgress() * 2.5, g.getProgress() * 2.5, b.getProgress() * 2.5);
+						Utils.Render.color = android.graphics.Color.rgb( r.getProgress() * 2.5, g.getProgress() * 2.5, b.getProgress() * 2.5);
 					}
 				}));
 				let gt = new android.widget.TextView(ctx);
 				gt.setText("Green")
+				gt.setGravity(android.view.Gravity.CENTER);
+				gt.setTextColor(android.graphics.Color.BLACK);
 				let g = new android.widget.SeekBar(ctx);
 				g.setMax(100);
+			g.setProgress(android.graphics.Color.green(Utils.Render.color) / 2.5);
 				g.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener({
 					onProgressChanged: function (seekBar, progress, fromUser) {
 						colDraw.setColor(android.graphics.Color.rgb(r.getProgress() * 2.5, g.getProgress() * 2.5, b.getProgress() * 2.5));
 					},
 					onStopTrackingTouch: function (seekbar) {
-						Utils.Render.color = Color.argb(180, r.getProgress() * 2.5, g.getProgress() * 2.5, b.getProgress() * 2.5);
+						Utils.Render.color = android.graphics.Color.rgb(r.getProgress() * 2.5, g.getProgress() * 2.5, b.getProgress() * 2.5);
 					}
 				}));
 				let bt = new android.widget.TextView(ctx);
-				bt.setText("Blue")
+				bt.setText("Blue");
+				bt.setGravity(android.view.Gravity.CENTER);
+				bt.setTextColor(android.graphics.Color.BLACK);
 				let b = new android.widget.SeekBar(ctx);
 				b.setMax(100);
+				b.setProgress(android.graphics.Color.blue(Utils.Render.color) / 2.5);
 				b.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener({
 					onProgressChanged: function (seekBar, progress, fromUser) {
 						colDraw.setColor(android.graphics.Color.rgb(r.getProgress() * 2.5, g.getProgress() * 2.5, b.getProgress() * 2.5));
 					},
 					onStopTrackingTouch: function (seekbar) {
-						Utils.Render.color = Color.argb(180, r.getProgress() * 2.5, g.getProgress() * 2.5, b.getProgress() * 2.5);
+						Utils.Render.color = android.graphics.Color.rgb(r.getProgress() * 2.5, g.getProgress() * 2.5, b.getProgress() * 2.5);
 					}
 				}));
-				//let params = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1);
-				content.addView(colV);
+				params = new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, dip2px(20));
+				content.addView(colV, params);
 				content.addView(rt);
 				content.addView(r);
 				content.addView(gt);
@@ -5927,26 +5940,7 @@ function openColorSettings() {
 				closeButton.setTypeface(Utils.font);
 				//layout alignement....
 
-				let params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-				params.addRule(android.widget.RelativeLayout.BELOW, title.getId());
-				params.addRule(android.widget.RelativeLayout.ABOVE, yt.getId());
-				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
-				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
-				dialogLayout.addView(about, params);
-				params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-				params.addRule(android.widget.RelativeLayout.ABOVE, closeButton.getId());
-				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
-				params.addRule(android.widget.RelativeLayout.LEFT_OF, github.getId());
-				dialogLayout.addView(yt, params);
-				params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-				params.addRule(android.widget.RelativeLayout.ABOVE, closeButton.getId());
-				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
-				params.addRule(android.widget.RelativeLayout.RIGHT_OF, github.getId());
-				dialogLayout.addView(twitter, params);
-				params = new android.widget.RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
-				params.addRule(android.widget.RelativeLayout.ABOVE, closeButton.getId());
-				params.addRule(android.widget.RelativeLayout.CENTER_IN_PARENT);
-				dialogLayout.addView(github, params);
+				
 
 				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_TOP);
@@ -5956,6 +5950,12 @@ function openColorSettings() {
 				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
 				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM);
 				dialogLayout.addView(closeButton, params);
+				params = new android.widget.RelativeLayout.LayoutParams(mwidth, android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+				params.addRule(android.widget.RelativeLayout.BELOW, title.getId());
+				params.addRule(android.widget.RelativeLayout.ABOVE, closeButton.getId());
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_LEFT);
+				params.addRule(android.widget.RelativeLayout.ALIGN_PARENT_RIGHT);
+				dialogLayout.addView(content, params);
 				//Dialog Stuff
 				colorSetDialog = new android.app.Dialog(ctx);
 				colorSetDialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
@@ -5963,7 +5963,7 @@ function openColorSettings() {
 					.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 				colorSetDialog.setContentView(dialogLayout);
 				colorSetDialog.setCanceledOnTouchOutside(true);
-				colorSetDialog.setTitle(DragOP.getLString("special.colorset"));
+				colorSetDialog.setTitle(DragOP.getLString("screen.colorset"));
 				colorSetDialog.show();
 				let window = colorSetDialog.getWindow();
 				window.setLayout(mwidth, display.heightPixels);
