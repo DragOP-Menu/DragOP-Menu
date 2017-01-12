@@ -1,7 +1,7 @@
 # DragOP-Menu
 A Hacked Client / mod menu for MCPE inspired by many other mod menus and PC Hacked Clients, mainly Wurst.
 
-© 2016 - brought to you by the DragOP team: Godsoft029 (ServiceHack) and peacestorm (Vertex Client PE).
+© 2016-2017 - brought to you by the DragOP team: Godsoft029 (ServiceHack) and peacestorm (Vertex Client PE).
 
 ##Todo:
 - [x] New menu (Cater)
