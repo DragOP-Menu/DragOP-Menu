@@ -430,7 +430,7 @@ var Utils = {
 			this.renderer = new android.opengl.GLSurfaceView.Renderer({
 				onSurfaceCreated: function (gl, config) {
 					let GL10 = javax.microedition.khronos.opengles.GL10;
-					gl.glClearColor(0, 0, 0, 0);
+					gl.glClearColor(0, 0, 0, 0);https://github.com/DragOP-Menu/DragOP-Menu
 					gl.glShadeModel(GL10.GL_SMOOTH);
 					gl.glClearDepthf(1.0);
 					gl.glDisable(GL10.GL_DITHER);
